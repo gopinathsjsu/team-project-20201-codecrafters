@@ -6,4 +6,5 @@ Team members:
 Summary of Contributions
 
 Project Journal: 
+
 Google sheets:
