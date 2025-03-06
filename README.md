@@ -7,4 +7,4 @@ Summary of Contributions
 
 Project Journal: 
 
-Google sheets:https://docs.google.com/spreadsheets/d/1p5yep03jzcBVtX0pH_pUskAXJfax_GaAuijs4zX57pQ/edit?gid=164918779#gid=164918779
+Google sheets:https://docs.google.com/spreadsheets/d/1p5yep03jzcBVtX0pH_pUskAXJfax_GaAuijs4zX57pQ/edit?gid=164918779#gid=164918779 and https://docs.google.com/spreadsheets/d/1rcxc9aOSZslDA6nuz_PqEzfQ1YIeGudovM25tZafynM/edit?usp=sharing
