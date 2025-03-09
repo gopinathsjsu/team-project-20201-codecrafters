@@ -40,8 +40,10 @@ public class RestaurantController {
 
     @PostMapping
     @PreAuthorize("hasRole('RestaurantManager')")
-    public ResponseEntity<?> createRestaurant(@Valid @RequestBody RestaurantCreateDTO dto) {
+    public ResponseEntity<?> createRestaurant(@Valid @RequestBody RestaurantCreateDTO dto, Authentication authentication) {
         try {
+            String username = authentication.getName();
+            dto.setUsername(username);
             Restaurant createdRestaurant = restaurantService.createRestaurant(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdRestaurant);
         } catch (IllegalArgumentException e) {
