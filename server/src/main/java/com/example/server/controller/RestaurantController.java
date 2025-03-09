@@ -69,4 +69,11 @@ public class RestaurantController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('Admin')")
+    public ResponseEntity<?> deleteRestaurant(@PathVariable String id) {
+        restaurantService.deleteRestaurant(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }
