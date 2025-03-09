@@ -3,6 +3,7 @@ package com.example.server.controller;
 import com.example.server.dto.restaurant.RestaurantCreateDTO;
 import com.example.server.dto.restaurant.RestaurantUpdateDTO;
 import com.example.server.entity.Restaurant;
+import com.example.server.entity.UserInfo;
 import com.example.server.service.RestaurantService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -39,11 +40,11 @@ public class RestaurantController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('RestaurantManager')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     public ResponseEntity<?> createRestaurant(@Valid @RequestBody RestaurantCreateDTO dto, Authentication authentication) {
         try {
-            String username = authentication.getName();
-            dto.setUsername(username);
+            UserInfo user = (UserInfo) authentication.getPrincipal();
+            dto.setUserInfo(user);
             Restaurant createdRestaurant = restaurantService.createRestaurant(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdRestaurant);
         } catch (IllegalArgumentException e) {
@@ -52,15 +53,15 @@ public class RestaurantController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('RestaurantManager')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     public ResponseEntity<?> updateRestaurant(
             @PathVariable String id,
             @Valid @RequestBody RestaurantUpdateDTO dto,
             Authentication authentication
     ) {
         try {
-            String username = authentication.getName();
-            if (!username.equals(dto.getUsername())) {
+            UserInfo user = (UserInfo) authentication.getPrincipal();
+            if (!user.getId().equals(dto.getUserInfo().getId())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
             }
             Restaurant createdRestaurant = restaurantService.updateRestaurant(id, dto);
@@ -71,7 +72,7 @@ public class RestaurantController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteRestaurant(@PathVariable String id) {
         restaurantService.deleteRestaurant(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

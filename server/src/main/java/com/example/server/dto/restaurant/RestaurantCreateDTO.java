@@ -1,8 +1,10 @@
 package com.example.server.dto.restaurant;
 
+import com.example.server.entity.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.DayOfWeek;
 import java.util.List;
@@ -13,7 +15,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class RestaurantCreateDTO {
     private String name;
-    private String username;
+    @DBRef
+    private UserInfo userInfo;
     private String description;
     private String address;
     private String city;
