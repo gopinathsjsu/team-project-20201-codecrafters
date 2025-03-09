@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.DayOfWeek;
@@ -19,8 +20,8 @@ import java.util.Map;
 @AllArgsConstructor
 @Document
 public class Restaurant {
-    @NotNull
-    private String username;
+    @DBRef
+    private UserInfo userInfo;
     @Id
     private String id;
     @NotBlank(message = "The name cannot be blanked")
