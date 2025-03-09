@@ -25,6 +25,7 @@ public class RestaurantController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Restaurant> getAllRestaurants() {
         return restaurantService.getAllRestaurant();
     }

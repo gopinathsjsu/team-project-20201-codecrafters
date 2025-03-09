@@ -9,6 +9,7 @@ import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RestaurantService {
@@ -21,6 +22,13 @@ public class RestaurantService {
 
     public List<Restaurant> getAllRestaurant() {
         return restaurantRepository.findAll();
+    }
+
+    public List<Restaurant> getAllApprovedRestaurants() {
+        return restaurantRepository.findAll()
+                .stream()
+                .filter(Restaurant::isApproved)
+                .collect(Collectors.toList());
     }
 
     public Optional<Restaurant> getRestaurantById(String id) {
