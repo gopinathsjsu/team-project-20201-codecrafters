@@ -1,101 +1,109 @@
-/* :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
+/* CSS */
 body {
-  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f3f4f6;
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Container styling */
+.container {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* Heading */
+h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-} */
-
-.input-field {
-  width: 300px;
+/* Input fields and select*/
+input, select {
+  width: 100%;
+  max-width: 100%;
   padding: 12px;
   margin: 12px auto;
   display: block;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 16px;
-  
 }
-.input-field:focus {
-  border-color: #6200ea;
-  outline: none;
-  box-shadow: 0 0 5px rgba(98, 0, 234, 0.5);
+
+/* Checkbox */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 10px;
 }
-.btn {
-  width: 150px;
+
+.checkbox-container input[type="checkbox"] {
+  /* appearance: none; */
+  width: 15px;
+  height: 15px;
+  border: 2px solid #555;
+  border-radius: 5px;
+  cursor: pointer;
+  position: absolute;
+  transition: all 0.2s ease-in-out;
+}
+
+.checkbox-container input[type="checkbox"]:checked {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.checkbox-container input[type="checkbox"]:checked::after {
+  content: "✔";
+  font-size: 3px;
+  color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Buttons */
+button {
+  width: 100%;
   padding: 12px;
-  background: linear-gradient(45deg, #ff6600, #ff4500);
+  background-color: #0e2840;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: bold;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background 0.3s;
-  display: block;
-  margin: 0 auto;
+  font-size: 1rem;
+  margin-top: 10px;
 }
-.btn:hover {
-  background: linear-gradient(45deg, #e65c00, #cc3700);
+
+button:hover {
+  background-color: #0e2840;
+}
+
+/* Links */
+p {
+  text-align: center;
+  margin-top: 10px;
+}
+
+a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h2, p {
+  text-align: center;
 }
