@@ -1,0 +1,77 @@
+.sidebar {
+  background-color: #0e2840;
+  border-radius: 30px;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 356px;
+  height: 750px;
+  margin-bottom: -3;
+  display: flex;
+}
+
+.navContainer {
+  flex-direction: column;
+  gap: 40px;
+  padding: 40px;
+  display: flex;
+}
+
+.navList {
+  flex-direction: column;
+  gap: 40px;
+  display: flex;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.profileSection {
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding: 40px;
+  display: flex;
+}
+
+.adminProfile {
+  display: flex;
+}
+
+.adminAvatar {
+  max-width: 100%;
+  height: auto;
+}
+
+.logoutButton {
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  display: flex;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media (width<=991px) {
+  .sidebar {
+    width: 280px;
+  }
+}
+
+@media (width<=640px) {
+  .sidebar {
+    width: 70px;
+  }
+
+  .navContainer {
+    padding: 20px;
+  }
+
+  .profileSection {
+    padding: 20px;
+  }
+
+  .adminAvatar {
+    display: none;
+  }
+}
