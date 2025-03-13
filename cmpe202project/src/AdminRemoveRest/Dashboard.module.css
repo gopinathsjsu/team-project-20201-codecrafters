@@ -1,0 +1,6 @@
+.dashboardContainer {
+  min-height: screen;
+  background-color: #fff;
+  font-family: Inter;
+  display: flex;
+}
