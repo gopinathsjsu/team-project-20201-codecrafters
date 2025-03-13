@@ -17,7 +17,7 @@ function App() {
           <Route index element={<LoginPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<SignUpPage />} />
-          <Route path="dashboard" element={<Dashboard />} /> {/* Dashboard Route */}
+          {/* <Route path="dashboard" element={<Dashboard />} /> Dashboard Route */}
           <Route path="dashboard" element={<ApproveNewRestaurant />} /> {/* Dashboard Route */}
           <Route path="remove-restaurant" element={<RemoveRest />} /> {/* Dashboard Route */}
           <Route path="*" element={<NoPage />} />
