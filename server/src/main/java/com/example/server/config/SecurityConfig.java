@@ -37,7 +37,9 @@ public class SecurityConfig {
         return http
             .csrf(csrf -> csrf.disable())  // Disable CSRF for API
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/signUp", "/login", "/refreshToken").permitAll()  
+                .requestMatchers(
+                        "/signUp", "/login", "/refreshToken",
+                        "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated())  // All other requests require authentication
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))  
