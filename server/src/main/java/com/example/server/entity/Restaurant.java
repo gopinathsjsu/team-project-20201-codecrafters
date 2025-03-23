@@ -43,7 +43,7 @@ public class Restaurant {
     @Min(value = 0)
     @Max(value = 5)
     private double costRating;
-    private Map<DayOfWeek, List<String>> hours;
-    private Map<DayOfWeek, List<String>> bookingHours;
+    private Map<DayOfWeek, TimeInterval> hours;
+    private Map<DayOfWeek, TimeInterval> bookingHours;
     private boolean approved;
 }
