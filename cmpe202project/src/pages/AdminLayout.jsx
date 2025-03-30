@@ -1,5 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
-const CustomerLayout = () => {
+
+const AdminLayout = () => {
   return (
     <>
       <nav>
@@ -26,4 +27,4 @@ const CustomerLayout = () => {
   );
 };
 
-export default CustomerLayout;
+export default AdminLayout;
