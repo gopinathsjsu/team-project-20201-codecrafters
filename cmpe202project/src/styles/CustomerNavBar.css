@@ -1,6 +1,6 @@
 .customer-navbar{
     display: flex;
-    position: fixed;
+    position: sticky;
     justify-content: space-between;
     align-items: center;
     color: white;
