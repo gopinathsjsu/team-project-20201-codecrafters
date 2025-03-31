@@ -39,7 +39,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(
                         "/signUp", "/login", "/refreshToken",
-                        "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html","/api/restaurants").permitAll()
                 .anyRequest().authenticated())  // All other requests require authentication
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))  
