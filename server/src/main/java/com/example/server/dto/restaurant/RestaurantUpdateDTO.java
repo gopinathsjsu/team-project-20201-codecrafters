@@ -29,6 +29,6 @@ public class RestaurantUpdateDTO {
     private int capacity;
     private double costRating;
     private Map<DayOfWeek, List<String>> hours;
-    private Map<DayOfWeek, List<String>> bookingHours;
+    //private Map<DayOfWeek, List<String>> bookingHours;
 }
 

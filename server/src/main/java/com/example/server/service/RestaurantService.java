@@ -9,7 +9,6 @@ import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class RestaurantService {
@@ -25,10 +24,7 @@ public class RestaurantService {
     }
 
     public List<Restaurant> getAllApprovedRestaurants() {
-        return restaurantRepository.findAll()
-                .stream()
-                .filter(Restaurant::isApproved)
-                .collect(Collectors.toList());
+        return restaurantRepository.findByApprovedTrue();
     }
 
     public Optional<Restaurant> getRestaurantById(String id) {
@@ -39,23 +35,38 @@ public class RestaurantService {
         if (restaurantRepository.existsByName(dto.getName())) {
             throw new IllegalArgumentException("Restaurant with this name already exists.");
         }
-
+    
         Restaurant restaurant = new Restaurant();
-        BeanUtils.copyProperties(dto, restaurant);
-
+        
+        // Copy simple fields
+        BeanUtils.copyProperties(dto, restaurant, "hours");
+    
+        // Manually set hours and bookingHours
+        restaurant.setHours(dto.getHours());
+        //restaurant.setBookingHours(dto.getBookingHours());
+    
         return restaurantRepository.save(restaurant);
     }
 
     public Restaurant updateRestaurant(String id, RestaurantUpdateDTO dto) {
         return restaurantRepository.findById(id)
                 .map(restaurant -> {
-                        BeanUtils.copyProperties(dto, restaurant);
-                        return restaurantRepository.save(restaurant);
-                    })
+                    BeanUtils.copyProperties(dto, restaurant);
+                    return restaurantRepository.save(restaurant);
+                })
                 .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
     }
 
     public void deleteRestaurant(String id) {
         restaurantRepository.deleteById(id);
     }
+
+    public Restaurant approveRestaurant(String restaurantId, boolean approved) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
+        restaurant.setApproved(approved);
+        return restaurantRepository.save(restaurant);
+    }
+    
+    
 }
