@@ -68,7 +68,7 @@ public class AuthController {
     }
 
     @GetMapping("/data")
-    @PreAuthorize("hasRole('USER')  or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')  or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
     public String getAdminData() {
         return "This is data only for admins!";
     }
