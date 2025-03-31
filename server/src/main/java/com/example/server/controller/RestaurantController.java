@@ -1,5 +1,6 @@
 package com.example.server.controller;
 
+import com.example.server.config.UserInfoUserDetails;
 import com.example.server.dto.restaurant.RestaurantCreateDTO;
 import com.example.server.dto.restaurant.RestaurantUpdateDTO;
 import com.example.server.entity.Restaurant;
@@ -9,7 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,9 +42,10 @@ public class RestaurantController {
 
     @PostMapping
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<?> createRestaurant(@Valid @RequestBody RestaurantCreateDTO dto, Authentication authentication) {
+    public ResponseEntity<?> createRestaurant(@Valid @RequestBody RestaurantCreateDTO dto,
+            @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         try {
-            UserInfo user = (UserInfo) authentication.getPrincipal();
+            UserInfo user = userDetails.getUserInfo();
             dto.setUserInfo(user);
             Restaurant createdRestaurant = restaurantService.createRestaurant(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdRestaurant);
@@ -57,10 +59,9 @@ public class RestaurantController {
     public ResponseEntity<?> updateRestaurant(
             @PathVariable String id,
             @Valid @RequestBody RestaurantUpdateDTO dto,
-            Authentication authentication
-    ) {
+            @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         try {
-            UserInfo user = (UserInfo) authentication.getPrincipal();
+            UserInfo user = userDetails.getUserInfo();
             if (!user.getId().equals(dto.getUserInfo().getId())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
             }
@@ -71,10 +72,6 @@ public class RestaurantController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteRestaurant(@PathVariable String id) {
-        restaurantService.deleteRestaurant(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
+   
+
 }

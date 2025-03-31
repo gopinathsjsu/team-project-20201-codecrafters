@@ -9,13 +9,12 @@ import com.example.server.entity.UserInfo;
 
 public class UserInfoUserDetails implements UserDetails {
 
-    private String username;
-    private String password;
+    private UserInfo userInfo; 
+
     private Collection<? extends GrantedAuthority> authorities;
 
     public UserInfoUserDetails(UserInfo userInfo) {
-        this.username = userInfo.getUsername();
-        this.password = userInfo.getPassword();
+        this.userInfo = userInfo; 
         this.authorities = userInfo.getRoles().stream()
             .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
             .collect(Collectors.toSet());
@@ -26,14 +25,17 @@ public class UserInfoUserDetails implements UserDetails {
         return authorities;
     }
 
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
     @Override
     public String getPassword() {
-        return password;
+        return userInfo.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return userInfo.getUsername();
     }
 
     @Override

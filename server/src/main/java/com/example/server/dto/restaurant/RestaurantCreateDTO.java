@@ -1,5 +1,6 @@
 package com.example.server.dto.restaurant;
 
+import com.example.server.entity.TimeInterval;
 import com.example.server.entity.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +8,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.DayOfWeek;
-import java.util.List;
 import java.util.Map;
 
 @Data
@@ -27,6 +27,8 @@ public class RestaurantCreateDTO {
     private String cuisine;
     private int capacity;
     private double costRating;
-    private Map<DayOfWeek, List<String>> hours;
-    private Map<DayOfWeek, List<String>> bookingHours;
+    private Map<DayOfWeek, TimeInterval> hours; // open hours
+
+    //private Map<DayOfWeek, List<TimeInterval>> bookingHours; // multiple booking slots
+
 }

@@ -1,6 +1,8 @@
 package com.example.server.entity;
 
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -8,6 +10,8 @@ import java.time.LocalTime;
 
 @Setter
 @Getter
+@Data
+@NoArgsConstructor
 public class TimeInterval {
 
     private LocalTime start;
