@@ -21,11 +21,9 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<SignUpPage />} />
-          <Route path="dashboard" element={<Dashboard />} /> {/*Dashboard Route */}
-          <Route path="dashboard" element={<ApproveNewRestaurant />} /> {/* Dashboard Route */}
-          <Route path="remove-restaurant" element={<RemoveRest />} /> {/* Dashboard Route */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard" element={<ApproveNewRestaurant />} />
+          <Route path="remove-restaurant" element={<RemoveRest />} />
         </Route>
         <Route path="*" element={<NoPage />} />
       </Routes>
