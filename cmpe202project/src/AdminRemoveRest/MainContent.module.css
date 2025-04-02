@@ -1,0 +1,43 @@
+.mainContent {
+  flex: 1;
+  padding: 40px;
+}
+
+.header {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  display: flex;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.profileContainer {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatarGroup {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar {
+  display: flex;
+}
+
+.adminInfo {
+  display: flex;
+}
+
+@media (width<=640px) {
+  .mainContent {
+    padding: 20px;
+  }
+}
