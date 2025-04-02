@@ -1,0 +1,83 @@
+.homePage{
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  justify-content: center;
+  font-family: inter, sans-serif;
+}
+
+.reservation-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 95%;
+    min-height: 280px;
+    border-radius: 20px;
+    margin: 3rem 0 3rem 0;
+    background-image: url(../assets/make-a-reservation-bg.png);
+    background-position: center;
+}
+
+.reservation-form{
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.reservation-input-group{
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}
+
+.reservation-input-group input{
+    height: 35px;
+    width: 170px;
+    border-radius: 5px;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+.search-and-submit{
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-and-submit input, .search-and-submit button{
+    height: 35px;
+    border-radius: 5px;
+    border: none;
+}
+
+.search-and-submit input{
+    padding: 0 10px;
+}
+
+.reservation-button{
+    margin: auto;
+    background-color: #D33223;
+    color: white;
+    padding: 10px 20px;
+    align-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+}
+
+.reservation-button:hover{
+    background-color: white;
+    color: #D33223;
+}
+
+.top-rated-restaurants h1{
+    color: black;
+    font-weight: bold;
+}

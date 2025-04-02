@@ -30,6 +30,9 @@ h2 {
 input, select {
   width: 100%;
   max-width: 100%;
+
+.input-field {
+  width: 300px;
   padding: 12px;
   margin: 12px auto;
   display: block;
