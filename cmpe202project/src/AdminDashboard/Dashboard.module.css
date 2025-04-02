@@ -1,0 +1,511 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f5f5f5;
+}
+
+.dashboard {
+  background-color: #fff;
+  border-radius: 31px;
+  padding-right: 58px;
+  overflow: visible;
+  max-width: 1400px;
+  width: 100%;
+  margin: 40px auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+@media (width<=991px) {
+  .dashboard {
+    padding-right: 20px;
+    margin: 20px auto;
+  }
+}
+.div {
+  gap: 20px;
+  display: flex;
+}
+@media (width<=991px) {
+  .div {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+}
+.column {
+  flex-direction: column;
+  align-items: stretch;
+  width: 26%;
+  margin-left: 0;
+  line-height: normal;
+  display: flex;
+}
+@media (width<=991px) {
+  .column {
+    width: 100%;
+  }
+}
+.taskbar {
+  background-color: #0e2840;
+  border-radius: 30px;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 80px 40px 47px;
+  display: flex;
+  overflow: hidden;
+  height: 100%;
+}
+@media (width<=991px) {
+  .taskbar {
+    margin-top: 22px;
+    padding-top: 60px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+.dashboard2 {
+  color: #fff;
+  white-space: nowrap;
+  text-align: center;
+  align-self: stretch;
+  gap: 28px;
+  font-family:
+    Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+@media (width<=991px) {
+  .dashboard2 {
+    white-space: initial;
+  }
+}
+.restaurant {
+  color: #fff;
+  white-space: nowrap;
+  text-align: center;
+  align-self: stretch;
+  gap: 28px;
+  margin-top: 39px;
+  font-family:
+    Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+@media (width<=991px) {
+  .restaurant {
+    white-space: initial;
+  }
+}
+.approveNewRestaurant {
+  color: #fff;
+  text-align: center;
+  align-self: stretch;
+  gap: 27px;
+  margin-top: 39px;
+  font-family:
+    Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+.div2 {
+  justify-content: space-between;
+  align-self: stretch;
+  align-items: start;
+  gap: 20px;
+  width: 100%;
+  margin-top: 300px;
+  display: flex;
+}
+@media (width<=991px) {
+  .div2 {
+    margin-top: 40px;
+  }
+}
+.div3 {
+  white-space: nowrap;
+  justify-content: start;
+  align-items: center;
+  gap: 27px;
+  font-family:
+    Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-weight: 600;
+  display: flex;
+}
+@media (width<=991px) {
+  .div3 {
+    white-space: initial;
+  }
+}
+.img {
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: stretch;
+  width: 59px;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.div4 {
+  flex-direction: column;
+  justify-content: start;
+  align-self: stretch;
+  align-items: stretch;
+  width: 115px;
+  margin-top: auto;
+  margin-bottom: auto;
+  display: flex;
+}
+@media (width<=991px) {
+  .div4 {
+    white-space: initial;
+  }
+}
+.admin {
+  color: #fff;
+  text-align: center;
+  align-self: start;
+  font-size: 22px;
+}
+.logout {
+  color: #c8c8c8;
+  font-size: 19px;
+}
+.div5 {
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+  margin-top: 5px;
+  padding: 10px;
+  display: flex;
+}
+.img2 {
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center;
+  align-self: stretch;
+  width: 39px;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.column2 {
+  flex-direction: column;
+  align-items: stretch;
+  width: 74%;
+  margin-left: 20px;
+  line-height: normal;
+  display: flex;
+}
+@media (width<=991px) {
+  .column2 {
+    width: 100%;
+  }
+}
+.div6 {
+  flex-direction: column;
+  width: 100%;
+  margin-top: 40px;
+  padding-top: 20px;
+  display: flex;
+}
+@media (width<=991px) {
+  .div6 {
+    max-width: 100%;
+    padding-top: 10px;
+  }
+}
+.div7 {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-self: end;
+  align-items: start;
+  gap: 20px;
+  width: 944px;
+  max-width: 100%;
+  font-family:
+    Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  display: flex;
+}
+.dashboard3 {
+  flex-direction: column;
+  justify-content: start;
+  align-items: stretch;
+  display: flex;
+}
+.dashboard4 {
+  color: #000;
+  text-align: center;
+  align-self: start;
+  font-size: 36px;
+  font-weight: 700;
+  position: relative;
+  right: -45px; /* Adjust the value as needed */
+}
+.june2024 {
+  color: #c8c8c8;
+  font-size: 14px;
+  font-weight: 600;
+}
+.div8 {
+  white-space: nowrap;
+  align-items: stretch;
+  gap: 21px;
+  margin-top: 4px;
+  font-weight: 600;
+  display: flex;
+}
+@media (width<=991px) {
+  .div8 {
+    white-space: initial;
+  }
+}
+.img3,
+.img4 {
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center;
+  background-color: #e8ebec;
+  border-radius: 50%;
+  flex-shrink: 0;
+  width: 59px;
+  height: 59px;
+}
+.div9 {
+  justify-content: start;
+  align-items: center;
+  gap: 27px;
+  display: flex;
+}
+@media (width<=991px) {
+  .div9 {
+    white-space: initial;
+  }
+}
+.div10 {
+  flex-direction: column;
+  justify-content: start;
+  align-self: stretch;
+  align-items: stretch;
+  width: 115px;
+  margin-top: auto;
+  margin-bottom: auto;
+  display: flex;
+}
+@media (width<=991px) {
+  .div10 {
+    white-space: initial;
+  }
+}
+.admin2 {
+  color: #000;
+  text-align: center;
+  align-self: start;
+  font-size: 22px;
+}
+.admin3 {
+  color: #c8c8c8;
+  font-size: 19px;
+}
+.topStore {
+  background-color: #fff;
+  border: 1px solid #fff;
+  border-radius: 20px;
+  width: 647px;
+  max-width: 100%;
+  min-height: 330px;
+  margin-top: 64px;
+  padding: 7px 15px 27px;
+  box-shadow: 0 4px 4px #00000040;
+}
+@media (width<=991px) {
+  .topStore {
+    margin-top: 40px;
+  }
+}
+.div11 {
+  width: 100%;
+  padding: 7px 3px 40px;
+  overflow: visible;
+}
+@media (width<=991px) {
+  .div11 {
+    max-width: 100%;
+    padding-bottom: 40px;
+    padding-right: 20px;
+  }
+}
+.column3 {
+  flex-direction: column;
+  align-items: stretch;
+  width: 34%;
+  margin-left: 0;
+  line-height: normal;
+  display: flex;
+}
+@media (width<=991px) {
+  .column3 {
+    width: 100%;
+  }
+}
+.div12 {
+  color: #000;
+  text-align: center;
+  flex-grow: 1;
+  margin-top: 5px;
+  font-family:
+    Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-weight: 700;
+}
+@media (width<=991px) {
+  .div12 {
+    margin-top: 40px;
+  }
+}
+.reservation {
+  font-size: 20px;
+}
+.restaurantname {
+  margin-top: 23px;
+  font-size: 14px;
+}
+@media (width<=991px) {
+  .restaurantname {
+    margin-right: 2px;
+  }
+}
+.column4 {
+  flex-direction: column;
+  align-items: stretch;
+  width: 16%;
+  margin-left: 20px;
+  line-height: normal;
+  display: flex;
+}
+@media (width<=991px) {
+  .column4 {
+    width: 100%;
+  }
+}
+.address {
+  color: #000;
+  text-align: center;
+  margin-top: 52px;
+  font-family:
+    Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+@media (width<=991px) {
+  .address {
+    margin-top: 40px;
+  }
+}
+.column5 {
+  flex-direction: column;
+  align-items: stretch;
+  width: 50%;
+  margin-left: 20px;
+  line-height: normal;
+  display: flex;
+}
+@media (width<=991px) {
+  .column5 {
+    width: 100%;
+  }
+}
+.div13 {
+  color: #000;
+  white-space: nowrap;
+  text-align: center;
+  flex-grow: 1;
+  align-items: stretch;
+  gap: 28px;
+  font-family:
+    Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  font-weight: 700;
+  display: flex;
+}
+@media (width<=991px) {
+  .div13 {
+    white-space: initial;
+    margin-top: 40px;
+  }
+}
+.customer {
+  align-self: end;
+  margin-top: 52px;
+  font-size: 14px;
+}
+@media (width<=991px) {
+  .customer {
+    margin-top: 40px;
+  }
+}
+.div14 {
+  flex-direction: column;
+  flex: 1;
+  align-items: stretch;
+  display: flex;
+}
+@media (width<=991px) {
+  .div14 {
+    white-space: initial;
+  }
+}
+.share {
+  background-color: #9575cd;
+  border-radius: 14px;
+  align-self: stretch;
+  gap: 10px;
+  padding: 8px 17px;
+  font-size: 16px;
+}
+@media (width<=991px) {
+  .share {
+    white-space: initial;
+  }
+}
+.date {
+  align-self: center;
+  margin-top: 17px;
+  font-size: 14px;
+}
