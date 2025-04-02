@@ -1,68 +1,92 @@
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-export default function SignupForm() {
-  const [userType, setUserType] = useState("customer");
+function SignupForm() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignUp = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    alert("SignUp functionality not implemented yet.");
+    console.log("Signing up with", { fullName, email, password, role });
   };
 
   return (
-    <div className="text-center">
-      <h2 className="text-xl font-semibold">Sign Up</h2>
-      <form onSubmit={handleSignUp} className="mt-4">
-        <input
-          type="text"
-          placeholder="Full Name"
-          required
-          className="input-field"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          required
-          className="input-field"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          required
-          className="input-field"
-        />
-        <button type="submit" className="btn">
-          Sign Up
-        </button>
-        <select
-          className="input-field"
-          value={userType}
-          onChange={(e) => setUserType(e.target.value)}
-        >
-          <option value="customer">Customer</option>
-          <option value="restaurant">Restaurant Owner</option>
-        </select>
-        {userType === "restaurant" && (
-          <div>
+    <div className="auth">
+      {" "}
+      {/* Added auth class for consistency with LoginForm */}
+      <div className="container">
+        <h2>Account Signup</h2>
+        <p>Become a member and enjoy exclusive promotions.</p>
+
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="input-field"
+            required
+          />
+
+          <input
+            type="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input-field"
+            required
+          />
+
+          {/* Password Field with Eye Icon */}
+          <div className="password-container">
             <input
-              type="text"
-              placeholder="Restaurant Name"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="input-field"
+              required
             />
-            <input
-              type="text"
-              placeholder="Business License Number"
-              className="input-field"
-            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="toggle-password"
+              aria-label="Toggle password visibility"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
-        )}
-        <p className="text-sm mt-2">
+
+          {/* Role Selection */}
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="input-field"
+            required
+          >
+            <option value="">Select Role</option>
+            <option value="customer">Customer</option>
+            <option value="restaurant">Restaurant Owner</option>
+          </select>
+
+          <button type="submit" className="btn">
+            Continue
+          </button>
+        </form>
+
+        <p>
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 cursor-pointer">
-            Login
+          <Link to="/" className="link">
+            Login here
           </Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }
+
+export default SignupForm;
