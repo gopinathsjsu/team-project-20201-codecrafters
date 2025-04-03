@@ -6,6 +6,7 @@ import com.example.server.repository.ReservationRepository;
 import com.example.server.repository.RestaurantRepository;
 import com.example.server.repository.UserInfoRepository;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,23 +27,21 @@ public class ReservationService {
     @Autowired
     private UserInfoRepository userInfoRepository;
 
-    public Reservation createReservation(@NotNull ReservationCreateDTO reservationCreateDTO) {
-        if (!isAvailable(reservationCreateDTO)) {
-            throw new RuntimeException("Exceeded maximum number of available reservations");
-        }
-
-        UserInfo user = userInfoRepository.findById(reservationCreateDTO.getUserId())
+    public Reservation createReservation(String userId, String restaurantId, ReservationCreateDTO reservationCreateDTO) {
+        UserInfo user = userInfoRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Restaurant restaurant = restaurantRepository.findById(reservationCreateDTO.getRestaurantId())
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+
+        if (!isAvailable(user, restaurant, reservationCreateDTO)) {
+            throw new RuntimeException("Exceeded maximum number of available reservations");
+        }
 
         Reservation reservation = new Reservation();
         reservation.setUser(user);
         reservation.setRestaurant(restaurant);
-        reservation.setDate(reservationCreateDTO.getDate());
-        reservation.setTime(reservationCreateDTO.getTime());
-        reservation.setPartySize(reservationCreateDTO.getPartySize());
+        BeanUtils.copyProperties(reservationCreateDTO, reservation);
 
         return reservationRepository.save(reservation);
     }
@@ -55,9 +54,11 @@ public class ReservationService {
         return reservationRepository.findById(id);
     }
 
-    public Optional<Reservation> findByIdAndUserId(String id, String userId) {
-        UserInfo user = userInfoRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        return reservationRepository.findByIdAndUser(id, user);
+    public Reservation findByIdAndUserId(String id, String userId) {
+        UserInfo user = userInfoRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return reservationRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new RuntimeException("The reservation does not exist"));
     }
 
     public Optional<Reservation> findByIdAndRestaurantId(String id, String restaurantId) {
@@ -88,23 +89,21 @@ public class ReservationService {
         return reservationRepository.findAllByTimeBetween(startTime, startTime);
     }
 
-    public boolean isAvailable(ReservationCreateDTO reservationCreateDTO) {
-        Restaurant restaurant = restaurantRepository.findById(reservationCreateDTO.getRestaurantId())
-                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
-
+    public boolean isAvailable(UserInfo user, Restaurant restaurant, ReservationCreateDTO reservationCreateDTO) {
         // User can only book once for the same time and date
         Optional<Reservation> reservationOptional = reservationRepository.findByUser_IdAndRestaurant_IdAndDateAndTime(
-                reservationCreateDTO.getUserId(),
-                reservationCreateDTO.getRestaurantId(),
+                user.getId(),
+                restaurant.getId(),
                 reservationCreateDTO.getDate(),
                 reservationCreateDTO.getTime()
         );
+
         if (reservationOptional.isPresent()) {
             throw new RuntimeException("User can only book reservation once for the same time and date");
         }
 
         List<Reservation> reservations = reservationRepository.findAllByRestaurant_IdAndDateAndTime(
-                reservationCreateDTO.getRestaurantId(),
+                restaurant.getId(),
                 reservationCreateDTO.getDate(),
                 reservationCreateDTO.getTime()
         );
