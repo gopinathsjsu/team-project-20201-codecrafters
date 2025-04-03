@@ -29,5 +29,10 @@ public class UserService {
         repository.save(userInfo);
         return "User added to the system";
     }
+
+    public UserInfo findById(String id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User does not exist"));
+    }
     
 }
