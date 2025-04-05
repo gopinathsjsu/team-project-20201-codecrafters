@@ -34,7 +34,8 @@
     align-items: center;
 }
 
-.reservation-input-group input{
+.reservation-input{
+    font-size: large;
     height: 35px;
     width: 170px;
     border-radius: 5px;
