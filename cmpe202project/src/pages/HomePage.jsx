@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../styles/HomePage.css";
-import { use } from "react";
+import RestaurantBox from "../components/RestaurantBox";
 
 const HomePage = () => {
   const [today, setToday] = useState("");
@@ -66,7 +66,9 @@ const HomePage = () => {
       </div>
       <div className="top-rated-restaurants">
         <h1>Top-Rated Restaurants</h1>
-        <div>container with restaurants</div>
+        <div>
+          <RestaurantBox />
+        </div>
       </div>
     </main>
   );

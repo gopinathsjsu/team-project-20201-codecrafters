@@ -1,0 +1,76 @@
+.restaurant-box{
+    display: flex;
+    flex-direction: column;
+    width: 310px;
+    height: 380px;
+    border-radius: 30px;
+    overflow: hidden;
+    border: black 1px solid;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-container{
+    width: 100%;
+    height: 50%;
+}
+
+.restaurant-image{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.restaurant-info{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    color: black;
+}
+
+.restaurant-name{
+    margin: 0;
+}
+
+.rating-container{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.restaurant-cuisine{
+    margin: 0;
+    padding: 0;
+    text-align: left;
+}
+
+.booked-times{
+    margin: 5px 0;
+    padding: 0;
+    text-align: left;
+}
+
+.availability{
+    display: flex;
+    flex: 1;
+    gap: 10px;
+}
+
+.time-slot{
+    margin: auto;
+    background-color: #D33223;
+    color: white;
+    padding: 10px;
+    align-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+.time-slot:hover{
+    background-color: white;
+    color: #D33223;
+}
