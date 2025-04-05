@@ -1,0 +1,40 @@
+.header {
+  margin-bottom: 40px;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.date {
+  font-size: 14px;
+  color: #C8C8C8;
+  margin: 5px 0 0;
+}
+
+.controls {
+  display: flex;
+  gap: 20px;
+}
+
+.controlButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+@media (width <= 640px) {
+  .title {
+    font-size: 28px;
+  }
+}
