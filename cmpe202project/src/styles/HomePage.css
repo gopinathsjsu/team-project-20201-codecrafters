@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   font-family: inter, sans-serif;
+  margin-bottom: 20px;
 }
 
 .reservation-container{
@@ -34,7 +35,8 @@
     align-items: center;
 }
 
-.reservation-input-group input{
+.reservation-input{
+    font-size: large;
     height: 35px;
     width: 170px;
     border-radius: 5px;
@@ -77,7 +79,68 @@
     color: #D33223;
 }
 
+.top-rated-restaurants{
+    position: relative;
+    padding: 20px; /* Add padding to ensure content is not cut off */
+    text-align: center; /* Center-align the heading */
+    width: 100%; /* Ensure it doesn't exceed the viewport width */
+    box-sizing: border-box; /* Include padding in the width calculation */
+}
+
 .top-rated-restaurants h1{
     color: black;
     font-weight: bold;
+}
+
+.restaurant-carousel {
+    display: flex;
+    align-items: center;
+    overflow: hidden; /* Hide overflowing content */
+    padding: 10px 0;
+    position: relative;
+    width: 100%; /* Ensure it fits within the parent container */
+    box-sizing: border-box;
+}
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.carousel-button.left {
+    left: 10px;
+}
+
+.carousel-button.right {
+    right: 10px;
+}
+
+.carousel-button:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.restaurant-list {
+    display: flex;
+    gap: 2.5rem; /* Space between items */
+    overflow: hidden; /* Hide items that don't fit in the visible area */
+    scroll-behavior: smooth; /* Smooth scrolling for better UX */
+    padding: 10px 0;
+    width: 100%; /* Ensure it fits within the carousel */
+    box-sizing: border-box;
+}
+
+.restaurant-list > * {
+    flex: 0 0 auto; /* Prevent shrinking and ensure items stay inline */
+    width: 310px; /* Match the width defined in RestaurantBox.css */
+    height: 400px; /* Match the height defined in RestaurantBox.css */
+    box-sizing: border-box;
 }

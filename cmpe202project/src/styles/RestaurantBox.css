@@ -1,0 +1,97 @@
+.restaurant-box{
+    display: flex;
+    flex-direction: column;
+    width: 310px;
+    height: 410px;
+    border-radius: 30px;
+    overflow: hidden;
+    border: black 1px solid;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-container{
+    width: 100%;
+    height: 50%;
+}
+
+.restaurant-image{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.restaurant-info{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    text-align: left;
+    color: black;
+}
+
+.restaurant-name{
+    margin: 0;
+}
+
+.rating-container{
+    display: flex;
+    font-size: large;
+    align-items: center;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.star{
+    font-size: larger;
+    color: #D33223;
+}
+
+.reviews{
+    align-self: flex-end;
+}
+
+.restaurant-cuisine{
+    margin: 0;
+    padding: 0;
+    text-align: left;
+}
+
+.booked-times{
+    margin: 5px 0;
+    padding: 0;
+    text-align: left;
+    display: flex;
+    gap: 10px;
+}
+
+.trend-icon{
+    /* This is used to show the trend icon for the restaurant */
+    width: 20px;
+    height: 20px;
+}
+
+.availability{
+    margin-top: 2px;
+    display: flex;
+    flex: 1;
+    gap: 10px;
+}
+
+.time-slot{
+    font-size: small;
+    margin: auto;
+    background-color: #D33223;
+    color: white;
+    padding: 10px 15px;
+    align-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+.time-slot:hover{
+    background-color: white;
+    color: #D33223;
+}
