@@ -31,6 +31,16 @@ public class RestaurantController {
         return restaurantService.getAllApprovedRestaurants();
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchRestaurants(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String cuisine) {
+        List<Restaurant> result = restaurantService.search(name, state, city, cuisine);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getRestaurant(@PathVariable String id) {
         Optional<Restaurant> restaurantOptional = restaurantService.getRestaurantById(id);
@@ -72,6 +82,6 @@ public class RestaurantController {
         }
     }
 
-   
+
 
 }
