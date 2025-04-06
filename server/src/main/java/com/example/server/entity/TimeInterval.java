@@ -20,19 +20,20 @@ public class TimeInterval {
     private String end;
     @JsonIgnore
     public LocalTime getStartAsLocalTime() {
-        return LocalTime.parse(start);
+        return (start != null) ? LocalTime.parse(start) : null;
     }
     @JsonIgnore
     public LocalTime getEndAsLocalTime() {
-        return LocalTime.parse(end);
+        return (end != null) ? LocalTime.parse(end) : null;
     }
 
 
     public boolean contains(LocalTime time) {
-        return !getStartAsLocalTime().isAfter(time) && !getEndAsLocalTime().isBefore(time);
-    }
-
-    public boolean contains(LocalDateTime dateTime) {
-        return contains(dateTime.toLocalTime());
+        LocalTime startTime = getStartAsLocalTime();
+        LocalTime endTime = getEndAsLocalTime();
+    
+        if (startTime == null || endTime == null || time == null) return false;
+    
+        return !startTime.isAfter(time) && !endTime.isBefore(time);
     }
 }
