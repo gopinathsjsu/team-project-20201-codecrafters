@@ -21,6 +21,7 @@ public class UserInfo {
     private String id;
     private String username;
     private String password;
+    private String phone;
     private Set<String> roles; 
 
     @CreatedDate
