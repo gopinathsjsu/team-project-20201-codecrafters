@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
     width: 310px;
-    height: 380px;
+    height: 410px;
     border-radius: 30px;
     overflow: hidden;
     border: black 1px solid;
@@ -25,6 +25,7 @@
     display: flex;
     flex-direction: column;
     padding: 15px;
+    text-align: left;
     color: black;
 }
 
@@ -34,9 +35,19 @@
 
 .rating-container{
     display: flex;
+    font-size: large;
     align-items: center;
     gap: 5px;
     margin: 10px 0;
+}
+
+.star{
+    font-size: larger;
+    color: #D33223;
+}
+
+.reviews{
+    align-self: flex-end;
 }
 
 .restaurant-cuisine{
@@ -49,19 +60,29 @@
     margin: 5px 0;
     padding: 0;
     text-align: left;
+    display: flex;
+    gap: 10px;
+}
+
+.trend-icon{
+    /* This is used to show the trend icon for the restaurant */
+    width: 20px;
+    height: 20px;
 }
 
 .availability{
+    margin-top: 2px;
     display: flex;
     flex: 1;
     gap: 10px;
 }
 
 .time-slot{
+    font-size: small;
     margin: auto;
     background-color: #D33223;
     color: white;
-    padding: 10px;
+    padding: 10px 15px;
     align-content: center;
     text-align: center;
     cursor: pointer;
