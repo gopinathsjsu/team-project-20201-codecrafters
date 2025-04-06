@@ -1,11 +1,26 @@
+"use client";
 import React from "react";
-import styles from "./SidebarNavItem.module.css";
+import { useNavigate, useLocation } from "react-router-dom";
+import styles from "./SidebarNavItem.module.css"; // or your styling
 
-function SidebarNavItem({ icon, text, isActive }) {
+function SidebarNavItem({ icon, text, path }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = location.pathname === path;
+
+  const handleClick = () => {
+    navigate(path);
+  };
+
   return (
-    <li className={`${styles.navItem} ${isActive ? styles.active : ""}`}>
-      <div className={styles.iconContainer}>{icon}</div>
-      <span className={styles.navText}>{text}</span>
+    <li
+      className={`${styles.navItem} ${isActive ? styles.active : ""}`}
+      onClick={handleClick}
+      style={{ cursor: "pointer" }}
+    >
+      <div className={styles.icon}>{icon}</div>
+      <span className={styles.text}>{text}</span>
     </li>
   );
 }
