@@ -1,6 +1,7 @@
 package com.example.server.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +32,8 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+ 
 
     @PostMapping("/signUp")
     public String addNewUser(@RequestBody UserInfo userInfo) {
@@ -72,5 +75,7 @@ public class AuthController {
     public String getAdminData() {
         return "This is data only for admins!";
     }
+
+   
 
 }
