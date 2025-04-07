@@ -13,6 +13,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -22,7 +24,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Document(collection = "restaurants")
 public class Restaurant {
-    @DBRef
+    @DBRef @JsonIgnore
     private UserInfo userInfo;
     @Id
     private String id;
@@ -55,4 +57,10 @@ public class Restaurant {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    public boolean isOpenAt(LocalDateTime dateTime) {
+        DayOfWeek day = dateTime.getDayOfWeek();
+        TimeInterval interval = this.hours.get(day);
+        return interval != null && interval.contains(dateTime.toLocalTime());
+    }
 }

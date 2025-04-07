@@ -9,6 +9,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -28,13 +30,11 @@ public class Reservation {
     @DBRef
     private Restaurant restaurant;
 
-    private LocalDate date;
-
-    private LocalTime time;
-
+    private LocalDateTime dateTime; // formatted as "yyyy-MM-dd'T'HH:mm:ss"
+    
     private int partySize;
 
-    ReservationStatus status = ReservationStatus.PENDING;
+    ReservationStatus status;
 
     @CreatedDate
     private LocalDateTime createdAt;

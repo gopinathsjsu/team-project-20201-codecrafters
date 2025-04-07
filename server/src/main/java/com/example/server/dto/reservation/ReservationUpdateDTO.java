@@ -5,15 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservationUpdateDTO {
-    private LocalDate date;
-    private LocalTime time;
+    private LocalDateTime dateTime; // formatted as "yyyy-MM-dd'T'HH:mm:ss"
+
     private int partySize;
     private ReservationStatus status;
 }

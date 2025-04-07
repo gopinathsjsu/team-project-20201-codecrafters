@@ -35,16 +35,16 @@ public class RestaurantService {
         if (restaurantRepository.existsByName(dto.getName())) {
             throw new IllegalArgumentException("Restaurant with this name already exists.");
         }
-    
+
         Restaurant restaurant = new Restaurant();
-        
+
         // Copy simple fields
         BeanUtils.copyProperties(dto, restaurant, "hours");
-    
+
         // Manually set hours and bookingHours
         restaurant.setHours(dto.getHours());
-        //restaurant.setBookingHours(dto.getBookingHours());
-    
+        // restaurant.setBookingHours(dto.getBookingHours());
+
         return restaurantRepository.save(restaurant);
     }
 
@@ -67,6 +67,14 @@ public class RestaurantService {
         restaurant.setApproved(approved);
         return restaurantRepository.save(restaurant);
     }
-    
-    
+
+    public List<Restaurant> search(String name, String state, String city, String cuisine) {
+        return restaurantRepository
+                .findByNameContainingIgnoreCaseAndStateContainingIgnoreCaseAndCityContainingIgnoreCaseAndCuisineContainingIgnoreCase(
+                        name != null ? name : "",
+                        state != null ? state : "",
+                        city != null ? city : "",
+                        cuisine != null ? cuisine : "");
+    }
+
 }
