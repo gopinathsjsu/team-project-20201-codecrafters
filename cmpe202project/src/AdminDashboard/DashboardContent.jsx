@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./Dashboard.module.css";
+import styles from "../styles/Dashboard.module.css";
 import DashboardHeader from "./DashboardHeader";
 import ReservationTable from "./ReservationTable";
 

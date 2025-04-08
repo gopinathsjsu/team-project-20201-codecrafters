@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from "./Dashboard.module.css";
+import styles from "../styles/Dashboard.module.css";
 import Sidebar from "./Sidebar";
 import DashboardContent from "./DashboardContent";
 
