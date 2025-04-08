@@ -1,9 +1,18 @@
 "use client";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../styles/Sidebar.module.css";
 import SidebarNavItem from "./SidebarNavItem";
 
 function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Add any logout logic here (e.g., clearing tokens, cookies)
+    // Then navigate to the home page
+    navigate("/home");
+  };
+
   return (
     <nav className={styles.sidebar}>
       <div className={styles.navContainer}>
@@ -12,16 +21,13 @@ function Sidebar() {
             text="Dashboard"
             isActive={false}
             path="/admin/dashboard"
-            
           />
           <SidebarNavItem
-           
             text="Restaurant"
             isActive={true}
             path="/admin/restaurants"
           />
           <SidebarNavItem
-          
             text="Approve New Restaurant"
             isActive={false}
             path="/admin/approve"
@@ -72,7 +78,11 @@ function Sidebar() {
             </text>
           </svg>
         </div>
-        <button className={styles.logoutButton} aria-label="Logout">
+        <button 
+          className={styles.logoutButton} 
+          aria-label="Logout"
+          onClick={handleLogout}
+        >
           <svg
             width="39"
             height="39"
