@@ -270,8 +270,8 @@
   position: relative;
   right: -45px; /* Adjust the value as needed */
 }
-.june2024 {
-  color: #c8c8c8;
+.date {
+  color: #000000;
   font-size: 14px;
   font-weight: 600;
 }
