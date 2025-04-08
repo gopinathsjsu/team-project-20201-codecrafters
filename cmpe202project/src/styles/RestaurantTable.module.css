@@ -14,11 +14,19 @@
   display: flex;
 }
 
+
+
 .tableTitle {
   color: black;
   font-size: 20px;
   font-weight: 700;
   margin: 0;
+}
+
+
+.buttonContainer {
+  display: flex;
+  gap: 10px; /* You can change this to any spacing you want */
 }
 
 .deleteButton {
@@ -31,6 +39,29 @@
   border: none;
   cursor: pointer;
 }
+
+.approveButton {
+  width: 100px;
+  color: #fff;
+  background-color: #142ff7;
+  border-radius: 14px;
+  padding: 8px 17px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.disapproveButton {
+  width: 100px;
+  color: #fff;
+  background-color: #f71414;
+  border-radius: 14px;
+  padding: 8px 17px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
 
 .columnHeaders {
   justify-content: space-between;
