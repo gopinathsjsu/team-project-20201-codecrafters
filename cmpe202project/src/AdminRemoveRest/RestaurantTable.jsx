@@ -29,7 +29,7 @@ function RestaurantTable() {
   return (
     <section className={styles.tableContainer}>
       <div className={styles.tableHeader}>
-        <h2 className={styles.tableTitle}>Restaurant</h2>
+        <h2 className={styles.tableTitle}>Restaurants</h2>
         <button className={styles.deleteButton} onClick={handleDelete}>
           Delete
         </button>
