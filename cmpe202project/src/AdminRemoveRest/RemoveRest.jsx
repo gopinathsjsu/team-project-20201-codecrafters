@@ -2,11 +2,11 @@
 import React from "react";
 import Sidebar from "./Sidebar";
 import MainContent from "./MainContent";
-import styles from "./Dashboard.module.css";
+import styles from "../styles/Dashboard.module.css";
 
 function RemoveRest() {
   return (
-    <div className={styles.dashboardContainer}>
+    <div className={styles.container}>
       <Sidebar />
       <MainContent />
     </div>

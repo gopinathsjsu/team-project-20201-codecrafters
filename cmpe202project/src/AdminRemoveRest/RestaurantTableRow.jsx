@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./RestaurantTableRow.module.css";
+import styles from "../styles/RestaurantTableRow.module.css";
 
 function RestaurantTableRow({ name, location, quantity, selected }) {
   return (

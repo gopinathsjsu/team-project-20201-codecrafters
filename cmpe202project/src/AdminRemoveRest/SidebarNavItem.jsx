@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import styles from "./SidebarNavItem.module.css"; // or your styling
+import styles from "../styles/SidebarNavItem.module.css"; 
 
 function SidebarNavItem({ icon, text, path }) {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from "./RestaurantTable.module.css";
+import styles from "../styles/RestaurantTable.module.css";
 import RestaurantTableRow from "./RestaurantTableRow";
 
 function RestaurantTable() {
@@ -66,7 +66,7 @@ function RestaurantTable() {
       <div className={styles.columnHeaders}>
         <div>Restaurant name</div>
         <div>Location</div>
-        <div>Selt</div>
+        <div>Seat</div>
         <div>Select</div>
       </div>
 
