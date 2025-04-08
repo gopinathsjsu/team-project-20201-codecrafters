@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from "./ApproveNewRestaurant.module.css";
+import styles from "../styles/ApproveNewRestaurant.module.css";
 import RestaurantList from "./RestaurantList";
 
 function RestaurantTable() {
@@ -73,7 +73,7 @@ function RestaurantTable() {
         <div className={styles.div14}>
           <div className={styles.restaurantname}>Restaurant name</div>
           <div className={styles.location}>Location</div>
-          <div className={styles.selt}>Selt</div>
+          <div className={styles.seat}>Seat</div>
           <div className={styles.select}>Select</div>
         </div>
 

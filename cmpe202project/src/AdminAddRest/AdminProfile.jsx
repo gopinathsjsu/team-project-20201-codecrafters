@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./ApproveNewRestaurant.module.css";
+import styles from "../styles/ApproveNewRestaurant.module.css";
 
 function AdminProfile({
   imgSrc,

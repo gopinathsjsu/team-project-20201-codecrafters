@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from "./ApproveNewRestaurant.module.css";
+import styles from "../styles/ApproveNewRestaurant.module.css";
 import Sidebar from "./Sidebar";
 import RestaurantTable from "./RestaurantTable";
 import AdminHeader from "./AdminHeader";
