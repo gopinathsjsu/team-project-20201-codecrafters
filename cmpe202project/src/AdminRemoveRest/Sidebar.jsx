@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from "./Sidebar.module.css";
+import styles from "../styles/Sidebar.module.css";
 import SidebarNavItem from "./SidebarNavItem";
 
 function Sidebar() {
@@ -12,6 +12,7 @@ function Sidebar() {
             text="Dashboard"
             isActive={false}
             path="/admin/dashboard"
+            
           />
           <SidebarNavItem
            
