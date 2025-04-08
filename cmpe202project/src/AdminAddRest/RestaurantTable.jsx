@@ -1,83 +1,59 @@
 "use client";
-import React from "react";
-import styles from "../styles/ApproveNewRestaurant.module.css";
-import RestaurantList from "./RestaurantList";
+import React, { useState } from "react";
+import styles from "../styles/RestaurantTable.module.css";
+import RestaurantTableRow from "./RestaurantTableRow";
 
 function RestaurantTable() {
-  // This could be fetched from an API in a real application
-  const restaurants = [
-    {
-      name: "ArtisanWonders",
-      location: "Washington,California",
-      quantity: "102 Quantity",
-    },
-    {
-      name: "SereneHarbor",
-      location: "Washington,Georgia",
-      quantity: "204 Quantity",
-    },
-    { name: "UrbanNest", location: "Franklin,Lowa", quantity: "304 Quantity" },
-    {
-      name: "VelvetBoutique",
-      location: "Clinton,Indiana",
-      quantity: "163 Quantity",
-    },
-    {
-      name: "MystiKraft",
-      location: "Centerville,Montana",
-      quantity: "143 Quantity",
-    },
-    {
-      name: "PoshPalette",
-      location: "Washington,California",
-      quantity: "170 Quantity",
-    },
-    {
-      name: "VintageVista",
-      location: "Greenville,Lowa",
-      quantity: "160 Quantity",
-    },
-  ];
+  const [restaurants, setRestaurants] = useState([
+    { id: 1, name: "ArtisanWonders", location: "Washington,California", quantity: 102, selected: true },
+    { id: 2, name: "SereneHarbor", location: "Washington,Georgia", quantity: 204, selected: true },
+    { id: 3, name: "UrbanNest", location: "Franklin,Lowa", quantity: 304, selected: false },
+    { id: 4, name: "VelvetBoutique", location: "Clinton,Indiana", quantity: 163, selected: false },
+    { id: 5, name: "MystiKraft", location: "Centerville,Montana", quantity: 143, selected: false },
+    { id: 6, name: "PoshPalette", location: "Washington,California", quantity: 170, selected: false },
+    { id: 7, name: "VintageVista", location: "Greenville,Lowa", quantity: 160, selected: false },
+  ]);
 
-  const handleApprove = (restaurantName) => {
-    console.log(`Approved: ${restaurantName}`);
-    // Implementation would handle the approval logic
+  const handleSelectChange = (id) => {
+    const updated = restaurants.map((r) =>
+      r.id === id ? { ...r, selected: !r.selected } : r
+    );
+    setRestaurants(updated);
   };
 
-  const handleDisapprove = (restaurantName) => {
-    console.log(`Disapproved: ${restaurantName}`);
-    // Implementation would handle the disapproval logic
-  };
+
 
   return (
-    <section className={styles.topStore}>
-      <div className={styles.div11}>
-        <div className={styles.div12}>
-          <h2 className={styles.restaurant2}>Restaurant</h2>
-          <div className={styles.div13}>
-            <button
-              className={styles.approve}
-              onClick={() => handleApprove("all")}
-            >
-              Approve
-            </button>
-            <button
-              className={styles.dispprove}
-              onClick={() => handleDisapprove("all")}
-            >
-              Dispprove
-            </button>
-          </div>
-        </div>
+    <section className={styles.tableContainer}>
+ <div className={styles.tableHeader}>
+  <h2 className={styles.tableTitle}>Restaurants</h2>
 
-        <div className={styles.div14}>
-          <div className={styles.restaurantname}>Restaurant name</div>
-          <div className={styles.location}>Location</div>
-          <div className={styles.seat}>Seat</div>
-          <div className={styles.select}>Select</div>
-        </div>
+  <div className={styles.buttonContainer}>
+    <button className={styles.approveButton}>Approve</button>
+    <button className={styles.disapproveButton}>Disapprove</button>
+  </div>
+</div>
 
-        <RestaurantList restaurants={restaurants} />
+
+      <div className={styles.columnHeaders}>
+        <div>Restaurant name</div>
+        <div>Location</div>
+        <div>Seat</div>
+        <div>Select</div>
+      </div>
+
+      <div className={styles.tableBody}>
+        {restaurants.map((restaurant) => (
+          <RestaurantTableRow
+            key={restaurant.id}
+            id={restaurant.id}
+            name={restaurant.name}
+            location={restaurant.location}
+            quantity={restaurant.quantity}
+            selected={restaurant.selected}
+            onSelectChange={handleSelectChange}
+          />
+        ))}
       </div>
     </section>
   );

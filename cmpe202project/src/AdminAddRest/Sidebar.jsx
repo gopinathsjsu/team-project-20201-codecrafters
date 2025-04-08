@@ -24,12 +24,12 @@ function Sidebar() {
           />
           <SidebarNavItem
             text="Restaurant"
-            isActive={false}
+            isActive={true}
             path="/admin/restaurants"
           />
           <SidebarNavItem
             text="Approve New Restaurant"
-            isActive={true}
+            isActive={false}
             path="/admin/approve"
           />
         </ul>
