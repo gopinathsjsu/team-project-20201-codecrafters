@@ -19,6 +19,8 @@ function App() {
           <Route index path="/" element={<HomePage />} />
         </Route>
         <Route path="/" element={<Layout />}>
+        {/* Go to the home (HomePage) after admin hit logout button */}
+          <Route path="home" element={<HomePage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<SignUpPage />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
@@ -26,8 +28,7 @@ function App() {
           <Route path="/admin/restaurants" element={<RemoveRest />} />
         </Route>
         <Route path="*" element={<NoPage />} />
-      </Routes>
-    </BrowserRouter>
+      </Routes>    </BrowserRouter>
   );
 }
 
