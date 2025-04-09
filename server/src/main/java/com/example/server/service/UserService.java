@@ -20,9 +20,9 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public String addUser(UserInfo userInfo) {
-        Optional<UserInfo> existingUser = repository.findByUsername(userInfo.getUsername());
+        Optional<UserInfo> existingUser = repository.findByEmail(userInfo.getEmail());
         if (existingUser.isPresent()) {
-            return existingUser.get().getUsername() + " already exists!";
+            return existingUser.get().getEmail() + " already exists!";
         }
 
         userInfo.setPassword(passwordEncoder.encode(userInfo.getPassword()));
