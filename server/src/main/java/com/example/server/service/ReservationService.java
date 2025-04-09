@@ -143,7 +143,7 @@ public class ReservationService {
 
         String message = String.format(
                 "Hi %s, your reservation on %s at %s for %d people is created.",
-                reservation.getUser().getUsername(), formattedDate, formattedTime, reservation.getPartySize());
+                reservation.getUser().getEmail(), formattedDate, formattedTime, reservation.getPartySize());
 
         Message.creator(
                 new PhoneNumber(toPhoneNumber),

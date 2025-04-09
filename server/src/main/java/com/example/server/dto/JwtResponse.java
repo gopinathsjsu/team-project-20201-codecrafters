@@ -1,5 +1,7 @@
 package com.example.server.dto;
 
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JwtResponse {
 
-    private String username;
+    private String email;
     private String accessToken;  
     private String refreshToken; 
+    private Set<String> role;
 }
