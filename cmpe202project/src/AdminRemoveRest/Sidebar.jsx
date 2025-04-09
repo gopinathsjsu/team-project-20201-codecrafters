@@ -10,7 +10,7 @@ function Sidebar() {
   const handleLogout = () => {
     // Add any logout logic here (e.g., clearing tokens, cookies)
     // Then navigate to the home page
-    navigate("/home");
+    navigate("/");
   };
 
   return (
@@ -78,8 +78,8 @@ function Sidebar() {
             </text>
           </svg>
         </div>
-        <button 
-          className={styles.logoutButton} 
+        <button
+          className={styles.logoutButton}
           aria-label="Logout"
           onClick={handleLogout}
         >
