@@ -44,12 +44,12 @@ public class AuthController {
     public JwtResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
+                    new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
 
             if (authentication.isAuthenticated()) {
-                RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.getUsername());
-                String accessToken = jwtService.generateToken(authRequest.getUsername());
-                return new JwtResponse(authRequest.getUsername(), accessToken, refreshToken.getToken());
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.getEmail());
+                String accessToken = jwtService.generateToken(authRequest.getEmail());
+                return new JwtResponse(authRequest.getEmail(), accessToken, refreshToken.getToken(), refreshToken.getUserInfo().getRoles());
             } else {
                 throw new UsernameNotFoundException("Invalid user credentials!");
             }
@@ -65,9 +65,9 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token!"));
 
         refreshTokenService.verifyExpiration(refreshToken);
-        String accessToken = jwtService.generateToken(refreshToken.getUserInfo().getUsername());
+        String accessToken = jwtService.generateToken(refreshToken.getUserInfo().getEmail());
 
-        return new JwtResponse(refreshToken.getUserInfo().getUsername(), accessToken, refreshToken.getToken());
+        return new JwtResponse(refreshToken.getUserInfo().getEmail(), accessToken, refreshToken.getToken(), refreshToken.getUserInfo().getRoles());
     }
 
     @GetMapping("/data")
