@@ -1,3 +1,61 @@
+.search-container{
+    display: flex;
+    flex-direction: column;
+    font-family: Inter, 'Times New Roman', Times, serif;
+}
+
 .search-component-container{
     margin: 20px 15px;
 }
+
+.search-results-container{
+    display: flex;
+    flex-direction: row;
+    color: black;
+
+}
+
+.filters-container{
+    display: flex;
+    flex-direction: column;
+    margin: 20px 15px;
+    margin-top: 0;
+    width: 20%;
+}
+
+.results-container{
+    display: flex;
+    flex-direction: column;
+    margin: 20px 15px;
+    width: 75%;
+}
+
+.filter-item{
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: left;
+    margin: 10px 0;
+    list-style: none;
+    padding: 0px;
+    padding-left: 20px;
+}
+
+.filter-item label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.filter-item label input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.filter-type{
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
