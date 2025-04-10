@@ -28,6 +28,11 @@
     flex-direction: column;
 }
 
+.reservation-form-horizontal{
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 .reservation-input-group{
     display: flex;
     gap: 5px;
