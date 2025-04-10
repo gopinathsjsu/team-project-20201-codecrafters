@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useContext, useEffect } from "react";
+import { ReservationContext } from "../context/ReservationContext";
+import SearchComponent from "../components/SearchComponent";
 
 const SearchResultsPage = () => {
-  const location = useLocation();
   const { reservationDate, reservationTime, numberOfGuests, searchTerm } =
-    location.state || {};
+    useContext(ReservationContext);
 
   useEffect(() => {
     console.log("Reservation Info:", {
@@ -17,7 +17,14 @@ const SearchResultsPage = () => {
 
   return (
     <main className="search-container">
-      <div className="reservation-info"></div>
+      <SearchComponent />
+      <div className="reservation-info">
+        <h2>Reservation Details</h2>
+        <p>Date: {reservationDate || "Not provided"}</p>
+        <p>Time: {reservationTime || "Not provided"}</p>
+        <p>Guests: {numberOfGuests || "Not provided"}</p>
+        <p>Search Term: {searchTerm || "Not provided"}</p>
+      </div>
       <div className="search-results">
         <div className="filters"></div>
         <div className="results"></div>
