@@ -75,7 +75,4 @@ public class AuthController {
     public String getAdminData() {
         return "This is data only for admins!";
     }
-
-   
-
 }
