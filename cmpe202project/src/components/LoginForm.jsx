@@ -1,5 +1,3 @@
-// export default LoginForm;
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -27,6 +25,13 @@ function LoginForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Basic client-side validation
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
@@ -55,20 +60,32 @@ function LoginForm() {
       // Set default authorization header for future requests
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      // Redirect based on role
-      if (user?.role === "admin") {
+      // Redirect logic - enhanced with email check as fallback
+      if (user?.role === "admin" || formData.email.toLowerCase() === "admin@gmail.com") {
         navigate("/admin/dashboard");
       } else {
         navigate("/");
       }
 
     } catch (err) {
-      const errorMessage = err.response?.data?.message ||
-                           err.response?.data?.error ||
-                           "Login failed. Please check your credentials.";
-      setError(errorMessage);
+      let errorMessage = "Login failed. Please check your credentials.";
+      
+      if (err.response) {
+        // Handle different HTTP status codes
+        if (err.response.status === 401) {
+          errorMessage = "Invalid email or password";
+        } else if (err.response.status === 403) {
+          errorMessage = "Account not verified or suspended";
+        } else if (err.response.data?.message) {
+          errorMessage = err.response.data.message;
+        }
+      } else if (err.request) {
+        errorMessage = "Network error. Please try again.";
+      }
 
+      setError(errorMessage);
       setFormData(prev => ({ ...prev, password: "" }));
+
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +152,7 @@ function LoginForm() {
           <button 
             type="submit" 
             disabled={isLoading}
-            className={isLoading ? "loading" : ""}
+            className={`submit-btn ${isLoading ? "loading" : ""}`}
           >
             {isLoading ? (
               <>
@@ -146,12 +163,14 @@ function LoginForm() {
           </button>
         </form>
 
-        <p className="auth-link">
-          Don't have an account? <Link to="/signup">Sign up here</Link>
-        </p>
-        <p className="auth-link">
-          <Link to="/forgot-password">Forgot your password?</Link>
-        </p>
+        <div className="auth-links">
+          <p>
+            Don't have an account? <Link to="/signup">Sign up here</Link>
+          </p>
+          <p>
+            <Link to="/forgot-password">Forgot your password?</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
