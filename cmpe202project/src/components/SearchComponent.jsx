@@ -1,7 +1,9 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ReservationContext } from "../context/ReservationContext";
 
-const SearchComponent = ({ handleMakeReservation }) => {
+const SearchComponent = ({ horizontal = "" }) => {
+  const navigate = useNavigate();
   const {
     reservationDate,
     setReservationDate,
@@ -13,8 +15,48 @@ const SearchComponent = ({ handleMakeReservation }) => {
     setSearchTerm,
   } = useContext(ReservationContext);
 
+  useEffect(() => {
+    if (reservationDate && reservationTime) return;
+    const date = new Date();
+
+    // Format the date as YYYY-MM-DD in the local timezone
+    const localDate =
+      date.getFullYear() +
+      "-" +
+      String(date.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(date.getDate()).padStart(2, "0");
+
+    // Format the time as HH:MM in the local timezone
+    const localTime =
+      String(date.getHours()).padStart(2, "0") +
+      ":" +
+      String(date.getMinutes()).padStart(2, "0");
+
+    setReservationDate(localDate);
+    setReservationTime(localTime);
+  }, []);
+
+  const handleMakeReservation = (e) => {
+    e.preventDefault();
+    console.log("show results for reservation");
+    navigate("/search", {
+      state: {
+        reservationDate,
+        reservationTime,
+        numberOfGuests,
+        searchTerm,
+      },
+    });
+  };
+
   return (
-    <form className="reservation-form" onSubmit={handleMakeReservation}>
+    <form
+      className={`reservation-form ${
+        horizontal ? "reservation-form-horizontal" : ""
+      }`}
+      onSubmit={handleMakeReservation}
+    >
       <div className="reservation-input-group">
         <input
           type="date"
