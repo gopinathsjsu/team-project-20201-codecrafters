@@ -1,5 +1,7 @@
 package com.example.server.config;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 import com.example.server.filter.JwtAuthFilter;
 
@@ -35,34 +38,44 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-            .csrf(csrf -> csrf.disable())  // Disable CSRF for API
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers(
-                        "/signUp", "/login", "/refreshToken",
-                        "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html","/api/restaurants").permitAll()
-                .anyRequest().authenticated())  // All other requests require authentication
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))  
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)  
-            .build();
+                .cors(cors -> cors
+                        .configurationSource(request -> {
+                            var config = new CorsConfiguration();
+                            config.setAllowedOrigins(List.of("*")); 
+                            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                            config.setAllowedHeaders(List.of("*"));
+                            config.setAllowCredentials(false); 
+                            return config;
+                        }))
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for API
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(
+                                "/signUp", "/login", "/refreshToken",
+                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/restaurants")
+                        .permitAll()
+                        .anyRequest().authenticated()) // All other requests require authentication
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); 
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
-        authenticationProvider.setPasswordEncoder(passwordEncoder());  
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();  
+        return config.getAuthenticationManager();
     }
 }
