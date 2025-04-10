@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from "react";
-import "../styles/HomePage.css";
+import { useNavigate } from "react-router-dom";
 import RestaurantBox from "../components/RestaurantBox";
+import SearchComponent from "../components/SearchComponent";
+import "../styles/HomePage.css";
 
 const HomePage = () => {
-  const [today, setToday] = useState("");
-  const [currentTime, setCurrentTime] = useState("");
+  const navigate = useNavigate();
+
+  const [reservationDate, setReservationDate] = useState("");
+  const [reservationTime, setReservationTime] = useState("");
+  const [numberOfGuests, setNumberOfGuests] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Simulate fetching top-rated restaurants
   const getTopRatedRestaurants = () => {
@@ -109,46 +115,36 @@ const HomePage = () => {
       ":" +
       String(date.getMinutes()).padStart(2, "0");
 
-    setToday(localDate);
-    setCurrentTime(localTime);
+    setReservationDate(localDate);
+    setReservationTime(localTime);
   }, []);
+
+  const handleMakeReservation = (e) => {
+    e.preventDefault();
+    console.log("show results for reservation");
+    navigate("/search", {
+      state: {
+        reservationDate,
+        reservationTime,
+        numberOfGuests,
+        searchTerm,
+      },
+    });
+  };
 
   return (
     <main className="homePage">
       <div className="reservation-container">
         <h1>Make a reservation</h1>
-        <form className="reservation-form">
-          <div className="reservation-input-group">
-            <input
-              type="date"
-              className="reservation-input"
-              value={today}
-              min={today}
-            />
-            <input
-              type="time"
-              className="reservation-input"
-              value={currentTime}
-              min={currentTime}
-            />
-            <input
-              type="number"
-              placeholder="Number of Guests"
-              className="reservation-input"
-              min="1"
-            />
-          </div>
-          <div className="search-and-submit">
-            <input
-              type="text"
-              placeholder="Search restaurant"
-              className="reservation-input"
-            />
-            <button type="submit" className="reservation-button">
-              Search
-            </button>
-          </div>
-        </form>
+        <SearchComponent
+          reservationDate={reservationDate}
+          reservationTime={reservationTime}
+          setReservationDate={setReservationDate}
+          setReservationTime={setReservationTime}
+          setNumberOfGuests={setNumberOfGuests}
+          setSearchTerm={setSearchTerm}
+          handleMakeReservation={handleMakeReservation}
+        />
       </div>
       <div className="top-rated-restaurants">
         <h1>Top-Rated Restaurants</h1>
