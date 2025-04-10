@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
+import { ReservationContext } from "../context/ReservationContext";
 
-const SearchComponent = ({
-  reservationDate,
-  reservationTime,
-  setReservationDate,
-  setReservationTime,
-  setNumberOfGuests,
-  setSearchTerm,
-  handleMakeReservation,
-}) => {
+const SearchComponent = ({ handleMakeReservation }) => {
+  const {
+    reservationDate,
+    setReservationDate,
+    reservationTime,
+    setReservationTime,
+    numberOfGuests,
+    setNumberOfGuests,
+    searchTerm,
+    setSearchTerm,
+  } = useContext(ReservationContext);
+
   return (
     <form className="reservation-form" onSubmit={handleMakeReservation}>
       <div className="reservation-input-group">
@@ -30,6 +34,7 @@ const SearchComponent = ({
           type="number"
           placeholder="Number of Guests"
           className="reservation-input"
+          value={numberOfGuests}
           min="1"
           onChange={(e) => setNumberOfGuests(e.target.value)}
         />
@@ -39,6 +44,7 @@ const SearchComponent = ({
           type="text"
           placeholder="Search restaurant"
           className="reservation-input"
+          value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <button type="submit" className="reservation-button">
