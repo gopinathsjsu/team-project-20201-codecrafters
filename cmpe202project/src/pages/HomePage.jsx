@@ -1,16 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import RestaurantBox from "../components/RestaurantBox";
 import SearchComponent from "../components/SearchComponent";
+import { ReservationContext } from "../context/ReservationContext";
 import "../styles/HomePage.css";
 
 const HomePage = () => {
   const navigate = useNavigate();
-
-  const [reservationDate, setReservationDate] = useState("");
-  const [reservationTime, setReservationTime] = useState("");
-  const [numberOfGuests, setNumberOfGuests] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const {
+    reservationDate,
+    setReservationDate,
+    reservationTime,
+    setReservationTime,
+    numberOfGuests,
+    setNumberOfGuests,
+    searchTerm,
+    setSearchTerm,
+  } = useContext(ReservationContext);
 
   // Simulate fetching top-rated restaurants
   const getTopRatedRestaurants = () => {
@@ -136,15 +142,7 @@ const HomePage = () => {
     <main className="homePage">
       <div className="reservation-container">
         <h1>Make a reservation</h1>
-        <SearchComponent
-          reservationDate={reservationDate}
-          reservationTime={reservationTime}
-          setReservationDate={setReservationDate}
-          setReservationTime={setReservationTime}
-          setNumberOfGuests={setNumberOfGuests}
-          setSearchTerm={setSearchTerm}
-          handleMakeReservation={handleMakeReservation}
-        />
+        <SearchComponent handleMakeReservation={handleMakeReservation} />
       </div>
       <div className="top-rated-restaurants">
         <h1>Top-Rated Restaurants</h1>
