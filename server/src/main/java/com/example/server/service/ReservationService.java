@@ -73,7 +73,6 @@ public class ReservationService {
         BeanUtils.copyProperties(reservationCreateDTO, reservation);
         reservation.setStatus(ReservationStatus.PENDING);
         reservationRepository.save(reservation);
-
         // Send reservation message to RabbitMQ
         sendConfirmationSms("+18777804236", reservation);
         return reservation;
