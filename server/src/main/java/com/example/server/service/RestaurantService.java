@@ -72,12 +72,17 @@ public class RestaurantService {
         restaurantRepository.deleteAllById(restaurantIds);
     }
 
-    public Restaurant approveRestaurant(String restaurantId, boolean approved) {
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
-        restaurant.setApproved(approved);
-        return restaurantRepository.save(restaurant);
+    public List<Restaurant> approveRestaurants(List<String> restaurantIds, boolean approved) {
+        List<Restaurant> restaurants = restaurantRepository.findAllById(restaurantIds);
+        if (restaurants.isEmpty()) {
+            throw new IllegalArgumentException("Restaurants not found");
+        }
+        for (Restaurant restaurant : restaurants) {
+            restaurant.setApproved(approved);
+        }
+        return restaurantRepository.saveAll(restaurants);
     }
+    
 
     public List<Restaurant> search(String name, String state, String city, String cuisine) {
         return restaurantRepository

@@ -38,11 +38,11 @@ public class AdminController {
         }
     }
 
-    @PutMapping("/{id}/approve")
+    @PutMapping("/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> approveRestaurant(@PathVariable String id, @RequestParam boolean approved) {
+    public ResponseEntity<?> approveRestaurant(@RequestBody List<String> ids, @RequestParam boolean approved) {
         try {
-            Restaurant restaurant = restaurantService.approveRestaurant(id, approved);
+            List<Restaurant> restaurant = restaurantService.approveRestaurants(ids, approved);
             return ResponseEntity.ok(restaurant);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
