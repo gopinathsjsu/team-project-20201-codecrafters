@@ -3,7 +3,9 @@ package com.example.server.filter;
 import com.example.server.config.UserInfoUserDetailsService;
 import com.example.server.service.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
@@ -28,12 +30,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
-        if (path.startsWith("/login") || path.startsWith("/signUp") || path.startsWith("/refreshToken") || path.startsWith("/api/restaurants/search")) {
+        if (path.startsWith("/login") || path.startsWith("/signUp") || path.startsWith("/refreshToken")
+                || path.startsWith("/api/restaurants/search")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -65,18 +68,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (ExpiredJwtException ex) {
-            handleExpiredToken(response, "Token has expired. Please login again.");
+            handleJwtError(response, "Token has expired. Please login again.", HttpServletResponse.SC_UNAUTHORIZED);
         } catch (MalformedJwtException ex) {
-            handleExpiredToken(response, "Invalid JWT format.");
+            handleJwtError(response, "Invalid JWT format.", HttpServletResponse.SC_BAD_REQUEST);
+        } catch (SignatureException ex) {
+            handleJwtError(response, "Invalid JWT signature.", HttpServletResponse.SC_UNAUTHORIZED);
+        } catch (IllegalArgumentException ex) {
+            handleJwtError(response, "Token is missing required claims.", HttpServletResponse.SC_BAD_REQUEST);
+        } catch (JwtException ex) {
+            handleJwtError(response, "Invalid token: " + ex.getMessage(), HttpServletResponse.SC_UNAUTHORIZED);
         } catch (Exception ex) {
-            handleExpiredToken(response, "Invalid token.");
+            ex.printStackTrace();
+            handleJwtError(response, ex.getMessage(),
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+
     }
 
-    private void handleExpiredToken(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    private void handleJwtError(HttpServletResponse response, String message, int statusCode) throws IOException {
+        response.setStatus(statusCode);
         response.setContentType("application/json");
         response.getWriter().write("{\"error\": \"" + message + "\"}");
         response.getWriter().flush();
     }
+    
 }
