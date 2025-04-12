@@ -1,11 +1,97 @@
 import React, { useContext, useEffect } from "react";
 import { ReservationContext } from "../context/ReservationContext";
 import SearchComponent from "../components/SearchComponent";
+import RestaurantBox from "../components/RestaurantBox";
 import "../styles/SearchResultsPage.css";
 
 const SearchResultsPage = () => {
   const { reservationDate, reservationTime, numberOfGuests, searchTerm } =
     useContext(ReservationContext);
+
+  const getTopRatedRestaurants = () => {
+    return [
+      {
+        name: "Fina Ristorante",
+        rating: 4.5,
+        reviews: 2100,
+        cuisine: "Italian • Seafood • Mediterranean",
+        bookedTimes: 15,
+        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
+      },
+      {
+        name: "Sushi Palace",
+        rating: 4.7,
+        reviews: 2100,
+        cuisine: "Japanese • Sushi",
+        bookedTimes: 20,
+        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
+      },
+      {
+        name: "Taco Haven",
+        rating: 4.2,
+        reviews: 2100,
+        cuisine: "Mexican • Tacos",
+        bookedTimes: 10,
+        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
+      },
+      {
+        name: "Fina Ristorante",
+        rating: 4.5,
+        reviews: 2100,
+        cuisine: "Italian • Seafood • Mediterranean",
+        bookedTimes: 15,
+        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
+      },
+      {
+        name: "Sushi Palace",
+        rating: 4.7,
+        reviews: 2100,
+        cuisine: "Japanese • Sushi",
+        bookedTimes: 20,
+        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
+      },
+      {
+        name: "Taco Haven",
+        rating: 4.2,
+        reviews: 2100,
+        cuisine: "Mexican • Tacos",
+        bookedTimes: 10,
+        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
+      },
+      {
+        name: "Fina Ristorante",
+        rating: 4.5,
+        reviews: 2100,
+        cuisine: "Italian • Seafood • Mediterranean",
+        bookedTimes: 15,
+        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
+      },
+      {
+        name: "Sushi Palace",
+        rating: 4.7,
+        reviews: 2100,
+        cuisine: "Japanese • Sushi",
+        bookedTimes: 20,
+        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
+      },
+      {
+        name: "Taco Haven",
+        rating: 4.2,
+        reviews: 2100,
+        cuisine: "Mexican • Tacos",
+        bookedTimes: 10,
+        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
+      },
+      {
+        name: "Fina Ristorante",
+        rating: 4.5,
+        reviews: 2100,
+        cuisine: "Italian • Seafood • Mediterranean",
+        bookedTimes: 15,
+        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
+      },
+    ];
+  };
 
   return (
     <main className="search-container">
@@ -86,7 +172,23 @@ const SearchResultsPage = () => {
             </label>
           </div>
         </div>
-        <div className="results-container">Results</div>
+        <div className="results-container">
+          <h2>{`Results for "${searchTerm}"`}</h2>
+          <div className="restaurant-list">
+            {getTopRatedRestaurants().map((restaurant, index) => (
+              <RestaurantBox
+                horizontal={true}
+                key={index}
+                name={restaurant.name}
+                rating={restaurant.rating}
+                reviews={restaurant.reviews}
+                cuisine={restaurant.cuisine}
+                bookedTimes={restaurant.bookedTimes}
+                timeSlots={restaurant.timeSlots}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </main>
   );
