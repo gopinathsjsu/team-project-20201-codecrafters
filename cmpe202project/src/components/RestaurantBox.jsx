@@ -2,6 +2,7 @@ import React from "react";
 import "../styles/RestaurantBox.css";
 import RestaurantImage from "../assets/restaurant-example.png";
 import TrendUp from "../assets/trend-up.svg";
+import { useNavigate } from "react-router-dom";
 
 const RestaurantBox = ({
   name,
@@ -12,11 +13,27 @@ const RestaurantBox = ({
   timeSlots,
   horizontal = false,
 }) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/restaurant/${name}`, {
+      state: {
+        name,
+        rating,
+        reviews,
+        cuisine,
+        bookedTimes,
+        timeSlots,
+      },
+    });
+  };
+
   return (
     <div
       className={`restaurant-box ${
         horizontal ? "restaurant-box-horizontal" : "restaurant-box"
       }`}
+      onClick={handleClick}
     >
       <div className="image-container">
         <img
