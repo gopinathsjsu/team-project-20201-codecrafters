@@ -1,7 +1,10 @@
 package com.example.server.service;
 
+import com.example.server.dto.restaurant.RestaurantAndAvailableSeatDTO;
+import com.example.server.dto.restaurant.RestaurantAndAvailableSeatDTO.ReservationTime;
 import com.example.server.dto.restaurant.RestaurantCreateDTO;
 import com.example.server.dto.restaurant.RestaurantUpdateDTO;
+import com.example.server.entity.Reservation;
 import com.example.server.entity.Restaurant;
 import com.example.server.repository.ReservationRepository;
 import com.example.server.repository.RestaurantRepository;
@@ -12,8 +15,13 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RestaurantService {
@@ -86,11 +94,39 @@ public class RestaurantService {
 
     public List<Restaurant> search(String name, String state, String city, String cuisine) {
         return restaurantRepository
-                .findByNameContainingIgnoreCaseAndStateContainingIgnoreCaseAndCityContainingIgnoreCaseAndCuisineContainingIgnoreCase(
+                .findByNameContainingIgnoreCaseAndStateContainingIgnoreCaseAndCityContainingIgnoreCaseAndCuisineContainingIgnoreCaseAndApproved(
                         name != null ? name : "",
                         state != null ? state : "",
                         city != null ? city : "",
-                        cuisine != null ? cuisine : "");
+                        cuisine != null ? cuisine : "", true);
+    }
+
+    public RestaurantAndAvailableSeatDTO getAvailableSeatsByTime(String restaurantId) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Reservation> reservations =
+                reservationRepository.findAllByRestaurant_IdAndDateTimeAfterOrderByDateTimeAsc(restaurantId, now);
+
+        Map<LocalDateTime, List<Reservation>> groupedByTime =
+                reservations.stream().collect(Collectors.groupingBy(Reservation::getDateTime));
+
+        List<ReservationTime> reservationTimes = new ArrayList<>();
+
+        for (Map.Entry<LocalDateTime, List<Reservation>> entry : groupedByTime.entrySet()) {
+            int totalReserved = entry.getValue().stream()
+                    .mapToInt(Reservation::getPartySize)
+                    .sum();
+            int available = restaurant.getCapacity() - totalReserved;
+            reservationTimes.add(new ReservationTime(
+                    Math.max(available, 0), 
+                    entry.getKey() 
+            ));
+        }
+        reservationTimes.sort(Comparator.comparing(ReservationTime::getDateTime));
+        return new RestaurantAndAvailableSeatDTO(restaurant, reservationTimes);
     }
 
 }

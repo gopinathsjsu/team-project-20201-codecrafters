@@ -119,6 +119,11 @@ public class ReservationService {
         return reservationRepository.findAllByDateTimeBetween(startDate, endDate);
     }
 
+    public List<Reservation> getUpcomingReservations(String restaurantId) {
+        LocalDateTime now = LocalDateTime.now();
+        return reservationRepository.findAllByRestaurant_IdAndDateTimeAfterOrderByDateTimeAsc(restaurantId, now);
+    }
+
     public boolean isAvailable(UserInfo user, Restaurant restaurant, ReservationCreateDTO reservationCreateDTO) {
         boolean hasPending = reservationRepository.existsByUser_IdAndRestaurant_IdAndStatus(
                 user.getId(),

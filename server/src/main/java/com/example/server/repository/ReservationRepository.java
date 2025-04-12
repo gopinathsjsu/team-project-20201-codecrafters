@@ -22,6 +22,8 @@ public interface ReservationRepository extends MongoRepository<Reservation, Stri
 
     List<Reservation> findAllByRestaurant_IdAndDateTime(String restaurantId, LocalDateTime dateTime);
 
+    List<Reservation> findAllByRestaurant_IdAndDateTimeAfterOrderByDateTimeAsc(String restaurantId, LocalDateTime now);
+
     boolean existsByUser_IdAndRestaurant_IdAndStatus(String userId, String restaurantId, ReservationStatus status);
 
     Optional<Reservation> findByIdAndUser(String id, UserInfo user);
