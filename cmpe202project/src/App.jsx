@@ -8,6 +8,7 @@ import CustomerLayout from "./pages/CustomerLayout";
 import SearchResultsPage from "./pages/SearchResultsPage";
 import NoPage from "./pages/NoPage";
 import HomePage from "./pages/HomePage";
+import RestaurantPage from "./pages/RestaurantPage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ReservationProvider } from "./context/ReservationContext";
 import "./App.css";
@@ -26,6 +27,7 @@ function App() {
         >
           <Route index path="/" element={<HomePage />} />
           <Route path="search" element={<SearchResultsPage />} />
+          <Route path="restaurant/:name" element={<RestaurantPage />} />
         </Route>
         <Route path="/" element={<Layout />}>
           <Route path="login" element={<LoginPage />} />
