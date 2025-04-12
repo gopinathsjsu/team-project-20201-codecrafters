@@ -10,9 +10,14 @@ const RestaurantBox = ({
   cuisine,
   bookedTimes,
   timeSlots,
+  horizontal = false,
 }) => {
   return (
-    <div className="restaurant-box">
+    <div
+      className={`restaurant-box ${
+        horizontal ? "restaurant-box-horizontal" : "restaurant-box"
+      }`}
+    >
       <div className="image-container">
         <img
           src={RestaurantImage}
