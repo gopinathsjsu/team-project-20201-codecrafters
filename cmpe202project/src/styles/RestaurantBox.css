@@ -5,6 +5,7 @@
     height: 450px;
     border-radius: 30px;
     overflow: hidden;
+    cursor: pointer;
     /* border: black 1px solid; */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
