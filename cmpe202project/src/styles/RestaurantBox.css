@@ -5,7 +5,7 @@
     height: 450px;
     border-radius: 30px;
     overflow: hidden;
-    border: black 1px solid;
+    /* border: black 1px solid; */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -67,15 +67,13 @@
 }
 
 .trend-icon{
-    /* This is used to show the trend icon for the restaurant */
     width: 20px;
     height: 20px;
 }
 
 .availability{
-    margin-top: 2px;
+    margin: 5px 0;
     display: flex;
-    flex: 1;
     gap: 10px;
 }
 
@@ -96,4 +94,28 @@
 .time-slot:hover{
     background-color: white;
     color: #D33223;
+}
+
+.restaurant-list .restaurant-box-horizontal{
+    flex-direction: row;
+    width: 100%;
+    height: fit-content;
+    gap: 10px;
+}
+
+.restaurant-list .restaurant-box-horizontal .restaurant-info{
+    justify-content: center;
+}
+
+.restaurant-box-horizontal .image-container{
+    width: 30%;
+    height: 220px;
+}
+
+.restaurant-box-horizontal .availability{
+    width: fit-content;
+}
+
+.restaurant-box-horizontal .restaurant-name{
+    margin: 0;
 }
