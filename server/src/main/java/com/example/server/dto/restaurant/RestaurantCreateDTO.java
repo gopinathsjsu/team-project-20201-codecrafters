@@ -26,7 +26,6 @@ public class RestaurantCreateDTO {
     private String email;
     private String cuisine;
     private int capacity;
-    private double costRating;
     private Map<DayOfWeek, TimeInterval> hours; // open hours
 
     //private Map<DayOfWeek, List<TimeInterval>> bookingHours; // multiple booking slots
