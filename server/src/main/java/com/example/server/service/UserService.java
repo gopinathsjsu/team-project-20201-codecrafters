@@ -2,14 +2,11 @@ package com.example.server.service;
 
 import com.example.server.dto.UserCreateDTO;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.server.entity.UserInfo;
 import com.example.server.repository.UserInfoRepository;
-
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -39,5 +36,4 @@ public class UserService {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User does not exist"));
     }
-    
 }
