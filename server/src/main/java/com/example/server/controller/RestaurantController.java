@@ -1,6 +1,7 @@
 package com.example.server.controller;
 
 import com.example.server.config.UserInfoUserDetails;
+import com.example.server.dto.restaurant.RestaurantAndAvailableSeatDTO;
 import com.example.server.dto.restaurant.RestaurantCreateDTO;
 import com.example.server.dto.restaurant.RestaurantUpdateDTO;
 import com.example.server.entity.Restaurant;
@@ -50,6 +51,16 @@ public class RestaurantController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @GetMapping("/{id}/availability")
+    public ResponseEntity<?> getRestaurantWithAvailability(@PathVariable String id) {
+        try {
+            RestaurantAndAvailableSeatDTO dto = restaurantService.getAvailableSeatsByTime(id);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     public ResponseEntity<?> createRestaurant(@Valid @RequestBody RestaurantCreateDTO dto,
@@ -81,7 +92,5 @@ public class RestaurantController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
-
 
 }
