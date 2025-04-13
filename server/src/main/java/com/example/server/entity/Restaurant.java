@@ -57,4 +57,10 @@ public class Restaurant {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    public boolean isOpenAt(LocalDateTime dateTime) {
+        DayOfWeek day = dateTime.getDayOfWeek();
+        TimeInterval interval = this.hours.get(day);
+        return interval != null && interval.contains(dateTime.toLocalTime());
+    }
 }

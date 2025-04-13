@@ -1,20 +1,20 @@
 package com.example.server.controller;
 
-import java.time.DayOfWeek;
-import java.time.LocalTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.server.config.UserInfoUserDetails;
 import com.example.server.entity.Restaurant;
 import com.example.server.service.RestaurantService;
 
@@ -24,18 +24,24 @@ public class AdminController {
     @Autowired
     private RestaurantService restaurantService;
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteRestaurant(@PathVariable String id) {
-        restaurantService.deleteRestaurant(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        public ResponseEntity<?> deleteRestaurants(
+            @RequestBody List<String> ids,
+            @AuthenticationPrincipal UserInfoUserDetails userDetails) {
+        try {
+            restaurantService.deleteRestaurantsAndRelatedData(ids);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
-    @PutMapping("/{id}/approve")
+    @PutMapping("/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> approveRestaurant(@PathVariable String id, @RequestParam boolean approved) {
+    public ResponseEntity<?> approveRestaurant(@RequestBody List<String> ids, @RequestParam boolean approved) {
         try {
-            Restaurant restaurant = restaurantService.approveRestaurant(id, approved);
+            List<Restaurant> restaurant = restaurantService.approveRestaurants(ids, approved);
             return ResponseEntity.ok(restaurant);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -43,10 +49,5 @@ public class AdminController {
     }
 
     
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('USER')  or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
-    public void getAdminData(@PathVariable String id) {
-        System.out.println(restaurantService.getRestaurantById(id).get().getHours().get(DayOfWeek.MONDAY).getStart());
-        System.out.println(restaurantService.getRestaurantById(id).get().getHours().get(DayOfWeek.MONDAY).getEnd()); 
-    }
+
 }
