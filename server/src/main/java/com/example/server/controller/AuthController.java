@@ -2,20 +2,14 @@ package com.example.server.controller;
 
 import com.example.server.dto.UserCreateDTO;
 import com.example.server.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.server.dto.AuthRequest;
 import com.example.server.dto.JwtResponse;
 import com.example.server.dto.RefreshTokenRequest;
 import com.example.server.entity.RefreshToken;
-import com.example.server.entity.UserInfo;
 import com.example.server.service.JwtService;
 import com.example.server.service.RefreshTokenService;
 import com.example.server.service.UserService;
