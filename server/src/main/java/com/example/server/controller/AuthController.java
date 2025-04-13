@@ -1,5 +1,7 @@
 package com.example.server.controller;
 
+import com.example.server.dto.UserCreateDTO;
+import com.example.server.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,41 +24,31 @@ import com.example.server.service.UserService;
 @RequestMapping("/")
 public class AuthController {
 
-    @Autowired
-    private UserService service;
-    @Autowired
-    private JwtService jwtService;
+    private final UserService service;
+    private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
+    private final AuthService authService;
 
-    @Autowired
-    private RefreshTokenService refreshTokenService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
- 
+    public AuthController(UserService service,
+                          JwtService jwtService,
+                          RefreshTokenService refreshTokenService,
+                          AuthService authService) {
+        this.service = service;
+        this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
+        this.authService = authService;
+    }
 
     @PostMapping("/signUp")
-    public String addNewUser(@RequestBody UserInfo userInfo) {
-        return service.addUser(userInfo);
+    public ResponseEntity<?> addNewUser(@RequestBody UserCreateDTO user) {
+        System.out.println("user: " + user);
+        return ResponseEntity.ok(service.addUser(user));
     }
 
     @PostMapping("/login")
-    public JwtResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
-
-            if (authentication.isAuthenticated()) {
-                RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.getUsername());
-                String accessToken = jwtService.generateToken(authRequest.getUsername());
-                return new JwtResponse(authRequest.getUsername(), accessToken, refreshToken.getToken());
-            } else {
-                throw new UsernameNotFoundException("Invalid user credentials!");
-            }
-        } catch (Exception e) {
-            System.out.println("Authentication exception: " + e.getMessage());
-            throw new UsernameNotFoundException("Invalid user credentials!", e);
-        }
+    public ResponseEntity<?> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+        JwtResponse token = authService.authenticate(authRequest);
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/refreshToken")
@@ -75,7 +67,4 @@ public class AuthController {
     public String getAdminData() {
         return "This is data only for admins!";
     }
-
-   
-
 }
