@@ -4,7 +4,6 @@ import com.example.server.config.UserInfoUserDetails;
 import com.example.server.dto.restaurant.RestaurantCreateDTO;
 import com.example.server.dto.restaurant.RestaurantUpdateDTO;
 import com.example.server.entity.Restaurant;
-import com.example.server.entity.UserInfo;
 import com.example.server.service.RestaurantService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
