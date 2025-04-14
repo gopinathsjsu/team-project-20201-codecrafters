@@ -41,6 +41,9 @@ public class RestaurantService {
         return restaurantRepository.findByApprovedTrue();
     }
 
+    public List<Restaurant> getAllNotApprovedRestaurants() {
+        return restaurantRepository.findByApprovedFalse();
+    }
     public Optional<Restaurant> getRestaurantById(String id) {
         return restaurantRepository.findById(id);
     }
