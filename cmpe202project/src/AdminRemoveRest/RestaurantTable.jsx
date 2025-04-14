@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import styles from "../styles/RestaurantTable.module.css";
 import RestaurantTableRow from "./RestaurantTableRow";
 
@@ -15,6 +16,7 @@ function RestaurantTable() {
   const fetchRestaurants = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch(
         "http://humble-tenderness-production.up.railway.app/api/restaurants"
       );
@@ -43,51 +45,55 @@ function RestaurantTable() {
     );
     setRestaurants(updated);
   };
-
+  
   const handleDelete = async () => {
+    const selectedIds = restaurants
+      .filter((r) => r.selected)
+      .map((r) => r.id);
+    
+    if (selectedIds.length === 0) {
+      setError("Please select at least one restaurant to delete");
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete ${selectedIds.length} restaurant(s)?`)) {
+      return;
+    }
+
     try {
       setLoading(true);
-      // Get all selected restaurant IDs
-      const selectedIds = restaurants
-        .filter((r) => r.selected)
-        .map((r) => r.id);
+      setError(null);
+      const token = localStorage.getItem('token');
       
-      // Delete each selected restaurant from the server
-      const deletePromises = selectedIds.map(id =>
-        fetch(`http://humble-tenderness-production.up.railway.app/api/admin/restaurants/${restaurant.id}`, {
-          method: 'DELETE',
-          // Add headers if your API requires authentication
-          headers: {
-            'Content-Type': 'application/json',
-            // 'Authorization': 'Bearer your-token-here' // if needed
-          }
-        })
-      );
-
-      // Wait for all delete operations to complete
-      const responses = await Promise.all(deletePromises);
-      
-      // Check if any deletion failed
-      const failedDeletions = responses.some(response => !response.ok);
-      if (failedDeletions) {
-        throw new Error("Some deletions failed");
+      if (!token) {
+        throw new Error("Authorization token not found");
       }
 
-      // Refresh the restaurant list after successful deletion
+      await axios.delete(
+        'http://humble-tenderness-production.up.railway.app/api/admin/restaurants',
+        {
+          data: selectedIds,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
       await fetchRestaurants();
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || "Failed to delete restaurants");
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return <div className={styles.loading}>Loading restaurants...</div>;
-  }
+  const clearError = () => {
+    setError(null);
+  };
 
-  if (error) {
-    return <div className={styles.error}>Error: {error}</div>;
+  if (loading && restaurants.length === 0) {
+    return <div className={styles.loading}>Loading restaurants...</div>;
   }
 
   return (
@@ -95,11 +101,22 @@ function RestaurantTable() {
       <div className={styles.tableHeader}>
         <h2 className={styles.tableTitle}>Restaurants</h2>
         {restaurants.length > 0 && (
-          <button className={styles.deleteButton} onClick={handleDelete}>
-            Delete
+          <button 
+            className={styles.deleteButton} 
+            onClick={handleDelete}
+            disabled={loading}
+          >
+            {loading ? "Deleting..." : "Delete"}
           </button>
         )}
       </div>
+
+      {error && (
+        <div className={styles.errorBanner}>
+          <span>Error: {error}</span>
+          <button onClick={clearError} className={styles.closeError}>×</button>
+        </div>
+      )}
 
       <div className={styles.columnHeaders}>
         <div>Restaurant name</div>
@@ -108,7 +125,9 @@ function RestaurantTable() {
       </div>
 
       <div className={styles.tableBody}>
-        {restaurants.length > 0 ? (
+        {loading && restaurants.length > 0 ? (
+          <div className={styles.loading}>Updating restaurants...</div>
+        ) : restaurants.length > 0 ? (
           restaurants.map((restaurant) => (
             <RestaurantTableRow
               key={restaurant.id}
@@ -129,3 +148,4 @@ function RestaurantTable() {
 }
 
 export default RestaurantTable;
+
