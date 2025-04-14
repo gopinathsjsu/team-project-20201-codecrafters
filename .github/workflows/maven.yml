@@ -27,11 +27,6 @@ jobs:
       CLUSTER_ZONE: us-west1
       SPRING_PROFILES_ACTIVE: production
 
-      MONGODB_URI: ${{ secrets.MONGODB_URI }}
-      TWILIO_SID: ${{ secrets.TWILIO_SID }}
-      TWILIO_TOKEN: ${{ secrets.TWILIO_TOKEN }}
-      TWILIO_PHONE: ${{ secrets.TWILIO_PHONE }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -79,6 +74,12 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
+      - name: Install gke-gcloud-auth-plugin
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        run: |
+          gcloud components install gke-gcloud-auth-plugin --quiet
+
+
       - name: Configure kubectl
         if: github.event_name == 'release'
         run: |
@@ -86,6 +87,16 @@ jobs:
             --zone $CLUSTER_ZONE \
             --project $PROJECT_ID
 
+      - name: Create app-secret in Kubernetes
+        if: github.event_name == 'release'
+        run: |
+          kubectl delete secret app-secret --ignore-not-found
+          kubectl create secret generic app-secret \
+            --from-literal=MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+            --from-literal=TWILIO_SID="${{ secrets.TWILIO_SID }}" \
+            --from-literal=TWILIO_TOKEN="${{ secrets.TWILIO_TOKEN }}" \
+            --from-literal=TWILIO_PHONE="${{ secrets.TWILIO_PHONE }}"
+            
       - name: Update Deployment Image on GKE
         if: github.event_name == 'release'
         run: |
