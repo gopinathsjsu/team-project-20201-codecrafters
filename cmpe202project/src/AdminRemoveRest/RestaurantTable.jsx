@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "../styles/RestaurantTable.module.css";
 import RestaurantTableRow from "./RestaurantTableRow";
+import { BASE_URL } from "../config/api"; 
 
 function RestaurantTable() {
   const [restaurants, setRestaurants] = useState([]);
@@ -18,7 +19,7 @@ function RestaurantTable() {
       setLoading(true);
       setError(null);
       const response = await fetch(
-        "http://humble-tenderness-production.up.railway.app/api/restaurants"
+        `${BASE_URL}/api/restaurants`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch restaurants");
@@ -72,7 +73,7 @@ function RestaurantTable() {
         throw new Error("Authorization token not found");
       }
       await axios.delete(
-        "https://team-project-20201-codecrafters-production.up.railway.app/api/admin/restaurants",
+        `${BASE_URL}/api/admin/restaurants`,
         {
           data: selectedIds,
           headers: {
