@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "../styles/Dashboard.module.css";
+import { BASE_URL } from "../config/api"; // Adjust the import path as necessary
 
 function ReservationTable() {
   const [restaurants, setRestaurants] = useState([]);
@@ -10,7 +11,7 @@ function ReservationTable() {
     const fetchRestaurants = async () => {
       try {
         const response = await fetch(
-          "http://humble-tenderness-production.up.railway.app/api/restaurants"
+          `${BASE_URL}/api/restaurants`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch restaurants");
