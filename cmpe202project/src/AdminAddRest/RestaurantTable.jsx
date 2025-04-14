@@ -1,18 +1,54 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import styles from "../styles/RestaurantTable.module.css";
 import RestaurantTableRow from "./RestaurantTableRow";
+import { BASE_URL } from "../config/api";
 
-function RestaurantTable() {
-  const [restaurants, setRestaurants] = useState([
-    { id: 1, name: "ArtisanWonders", location: "Washington,California", quantity: 102, selected: true },
-    { id: 2, name: "SereneHarbor", location: "Washington,Georgia", quantity: 204, selected: true },
-    { id: 3, name: "UrbanNest", location: "Franklin,Lowa", quantity: 304, selected: false },
-    { id: 4, name: "VelvetBoutique", location: "Clinton,Indiana", quantity: 163, selected: false },
-    { id: 5, name: "MystiKraft", location: "Centerville,Montana", quantity: 143, selected: false },
-    { id: 6, name: "PoshPalette", location: "Washington,California", quantity: 170, selected: false },
-    { id: 7, name: "VintageVista", location: "Greenville,Lowa", quantity: 160, selected: false },
-  ]);
+function RestaurantApprovalTable() {
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchUnapprovedRestaurants();
+  }, []);
+
+  const fetchUnapprovedRestaurants = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      
+      if (!token) {
+        throw new Error("Authorization token not found");
+      }
+
+      const response = await axios.get(
+        `${BASE_URL}/api/admin/restaurants`,
+        {
+          params: { unapprovedOnly: true },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const formattedData = response.data.map((restaurant) => ({
+        id: restaurant.id,
+        name: restaurant.name || "Unnamed Restaurant",
+        location: restaurant.address || "Location not specified",
+        capacity: restaurant.capacity || 0,
+        selected: false,
+      }));
+      
+      setRestaurants(formattedData);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || "Failed to fetch restaurants");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSelectChange = (id) => {
     const updated = restaurants.map((r) =>
@@ -21,42 +57,114 @@ function RestaurantTable() {
     setRestaurants(updated);
   };
 
+  const handleApproval = async (shouldApprove) => {
+    const selectedIds = restaurants.filter((r) => r.selected).map((r) => r.id);
 
+    if (selectedIds.length === 0) {
+      setError(`Please select at least one restaurant to ${shouldApprove ? "approve" : "reject"}`);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+
+      if (!token) {
+        throw new Error("Authorization token not found");
+      }
+
+      await axios.post(
+        `${BASE_URL}/api/admin/restaurants/approve?approved=${shouldApprove}`,
+        { restaurantIds: selectedIds },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      await fetchUnapprovedRestaurants();
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        `Failed to ${shouldApprove ? "approve" : "reject"} restaurants`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearError = () => {
+    setError(null);
+  };
+
+  if (loading && restaurants.length === 0) {
+    return <div className={styles.loading}>Loading restaurants...</div>;
+  }
 
   return (
     <section className={styles.tableContainer}>
- <div className={styles.tableHeader}>
-  <h2 className={styles.tableTitle}>Restaurants</h2>
+      <div className={styles.tableHeader}>
+        <h2 className={styles.tableTitle}>Restaurant Approvals</h2>
+        {restaurants.length > 0 && (
+          <div className={styles.buttonContainer}>
+            <button
+              className={styles.approveButton}
+              onClick={() => handleApproval(true)}
+              disabled={loading}
+            >
+              {loading ? "Processing..." : "Approve"}
+            </button>
+            <button
+              className={styles.disapproveButton}
+              onClick={() => handleApproval(false)}
+              disabled={loading}
+            >
+              {loading ? "Processing..." : "Disapprove"}
+            </button>
+          </div>
+        )}
+      </div>
 
-  <div className={styles.buttonContainer}>
-    <button className={styles.approveButton}>Approve</button>
-    <button className={styles.disapproveButton}>Disapprove</button>
-  </div>
-</div>
-
+      {error && (
+        <div className={styles.errorBanner}>
+          <span>Error: {error}</span>
+          <button onClick={clearError} className={styles.closeError}>
+            ×
+          </button>
+        </div>
+      )}
 
       <div className={styles.columnHeaders}>
-        <div>Restaurant name</div>
-        <div>Location</div>
-        <div>Seat</div>
+        <div>Restaurant Name</div>
+        <div>Address</div>
         <div>Select</div>
       </div>
 
       <div className={styles.tableBody}>
-        {restaurants.map((restaurant) => (
-          <RestaurantTableRow
-            key={restaurant.id}
-            id={restaurant.id}
-            name={restaurant.name}
-            location={restaurant.location}
-            quantity={restaurant.quantity}
-            selected={restaurant.selected}
-            onSelectChange={handleSelectChange}
-          />
-        ))}
+        {loading && restaurants.length > 0 ? (
+          <div className={styles.loading}>Updating list...</div>
+        ) : restaurants.length > 0 ? (
+          restaurants.map((restaurant) => (
+            <RestaurantTableRow
+              key={restaurant.id}
+              id={restaurant.id}
+              name={restaurant.name}
+              location={restaurant.location}
+              quantity={restaurant.capacity}
+              selected={restaurant.selected}
+              onSelectChange={handleSelectChange}
+            />
+          ))
+        ) : (
+          <div className={styles.noResults}>No restaurants requiring approval</div>
+        )}
       </div>
     </section>
   );
 }
 
-export default RestaurantTable;
+export default RestaurantApprovalTable;
