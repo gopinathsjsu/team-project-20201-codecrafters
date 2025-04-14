@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ReservationContext } from "../context/ReservationContext";
 
-const SearchComponent = ({ horizontal = "" }) => {
+const SearchComponent = ({ horizontal = false, showSearch = true }) => {
   const navigate = useNavigate();
   const {
     reservationDate,
@@ -81,18 +81,20 @@ const SearchComponent = ({ horizontal = "" }) => {
           onChange={(e) => setNumberOfGuests(e.target.value)}
         />
       </div>
-      <div className="search-and-submit">
-        <input
-          type="text"
-          placeholder="Search restaurant"
-          className="reservation-input"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button type="submit" className="reservation-button">
-          Search
-        </button>
-      </div>
+      {showSearch && (
+        <div className="search-and-submit">
+          <input
+            type="text"
+            placeholder="Search restaurant"
+            className="reservation-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button type="submit" className="reservation-button">
+            Search
+          </button>
+        </div>
+      )}
     </form>
   );
 };
