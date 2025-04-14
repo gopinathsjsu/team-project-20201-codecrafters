@@ -7,6 +7,8 @@
   box-shadow: 0 4px 4px #00000040;
 }
 
+
+
 .tableHeader {
   justify-content: space-between;
   align-items: center;
@@ -38,6 +40,37 @@
   font-weight: 700;
   border: none;
   cursor: pointer;
+}
+
+.errorBanner {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 12px 20px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 4px solid #c62828;
+}
+
+.closeError {
+  background: none;
+  border: none;
+  color: #c62828;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.closeError:hover {
+  opacity: 0.8;
+}
+
+.loading {
+  padding: 20px;
+  text-align: center;
+  color: #666;
 }
 
 .approveButton {
