@@ -1,18 +1,41 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../styles/RestaurantTable.module.css";
 import RestaurantTableRow from "./RestaurantTableRow";
 
 function RestaurantTable() {
-  const [restaurants, setRestaurants] = useState([
-    { id: 1, name: "ArtisanWonders", location: "Washington,California", quantity: 102, selected: true },
-    { id: 2, name: "SereneHarbor", location: "Washington,Georgia", quantity: 204, selected: true },
-    { id: 3, name: "UrbanNest", location: "Franklin,Lowa", quantity: 304, selected: false },
-    { id: 4, name: "VelvetBoutique", location: "Clinton,Indiana", quantity: 163, selected: false },
-    { id: 5, name: "MystiKraft", location: "Centerville,Montana", quantity: 143, selected: false },
-    { id: 6, name: "PoshPalette", location: "Washington,California", quantity: 170, selected: false },
-    { id: 7, name: "VintageVista", location: "Greenville,Lowa", quantity: 160, selected: false },
-  ]);
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const response = await fetch(
+          "http://humble-tenderness-production.up.railway.app/api/restaurants"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch restaurants");
+        }
+        const data = await response.json();
+        // Transform API data to match your expected structure
+        const formattedData = data.map((restaurant, index) => ({
+          id: restaurant.id || index + 1,
+          name: restaurant.name || "Unnamed Restaurant",
+          location: restaurant.address || "Location not specified",
+          phone: restaurant.phone || "No phone provided",
+          selected: false,
+        }));
+        setRestaurants(formattedData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
 
   const handleSelectChange = (id) => {
     const updated = restaurants.map((r) =>
@@ -26,34 +49,47 @@ function RestaurantTable() {
     setRestaurants(filtered);
   };
 
+  if (loading) {
+    return <div className={styles.loading}>Loading restaurants...</div>;
+  }
+
+  if (error) {
+    return <div className={styles.error}>Error: {error}</div>;
+  }
+
   return (
     <section className={styles.tableContainer}>
       <div className={styles.tableHeader}>
         <h2 className={styles.tableTitle}>Restaurants</h2>
-        <button className={styles.deleteButton} onClick={handleDelete}>
-          Delete
-        </button>
+        {restaurants.length > 0 && (
+          <button className={styles.deleteButton} onClick={handleDelete}>
+            Delete
+          </button>
+        )}
       </div>
 
       <div className={styles.columnHeaders}>
         <div>Restaurant name</div>
-        <div>Location</div>
-        <div>Seat</div>
+        <div>Address</div>
         <div>Select</div>
       </div>
 
       <div className={styles.tableBody}>
-        {restaurants.map((restaurant) => (
-          <RestaurantTableRow
-            key={restaurant.id}
-            id={restaurant.id}
-            name={restaurant.name}
-            location={restaurant.location}
-            quantity={restaurant.quantity}
-            selected={restaurant.selected}
-            onSelectChange={handleSelectChange}
-          />
-        ))}
+        {restaurants.length > 0 ? (
+          restaurants.map((restaurant) => (
+            <RestaurantTableRow
+              key={restaurant.id}
+              id={restaurant.id}
+              name={restaurant.name}
+              location={restaurant.location}
+              phone={restaurant.phone}
+              selected={restaurant.selected}
+              onSelectChange={handleSelectChange}
+            />
+          ))
+        ) : (
+          <div className={styles.noResults}>No restaurants found</div>
+        )}
       </div>
     </section>
   );
