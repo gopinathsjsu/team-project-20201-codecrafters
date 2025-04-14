@@ -67,11 +67,11 @@ function LoginForm() {
       axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
       // Redirect logic - enhanced with email check as fallback
-      if (user?.role === "admin" || formData.email.toLowerCase() === "admin@gmail.com") {
+      if (user?.role?.includes("ADMIN"))  {
         navigate("/admin/dashboard");
       } else {
         navigate("/");
-      }
+      } 
 
     } catch (err) {
       let errorMessage = "Login failed. Please check your credentials.";
