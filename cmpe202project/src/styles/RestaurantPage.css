@@ -1,0 +1,164 @@
+.restaurant-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: black;
+}
+
+.restaurant-image-container{
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    position: relative;
+}
+
+.restaurant-image-container img{
+    width: 100%;
+    height: 100%;
+    object-fit:cover;
+}
+
+.see-all-photos-btn{
+    position: absolute;
+    bottom: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+}
+
+.see-all-photos-btn:hover{
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid white;
+}
+
+.restaurant-info{
+    width: 95%;
+}
+
+.restaurant-info h1{
+    font-size: 2.3rem;
+    margin: 0;
+    margin-top: 20px;
+}
+
+.restaurant-details{
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.restaurant-details .cuisine{
+    margin: 10px;
+}
+
+.restaurant-details .rating-container{
+    font-size: larger;
+}
+
+.description-and-reservation{
+    display: flex;
+    margin-top: 30px;
+    justify-content: center;
+    width: 100%;
+}
+
+.description-and-reservation .description{
+    width: 55%;
+    font-size: xx-large;
+    padding: 20px;
+    padding-left: 0;
+}
+
+.description-and-reservation .reservation{
+    width: max-content;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: max-content;
+    text-align: center;
+    border: 1px solid #0E2840;
+    border-radius: 10px;
+}
+
+.description-and-reservation .reservation .reservation-input-group{
+    flex-direction: column;
+}
+
+.restaurant-page .photos-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 500px;
+    width: 100%;
+    flex-direction: column;
+}
+
+.photos-container h2{
+    width: 95%;
+    font-size: xx-large;
+}
+
+.photos-grid{
+    display: flex;
+    width: 95%;
+    height: 350px;
+    gap: 10px;
+}
+
+.photos-grid > :first-child{
+    width: 55%;
+    min-width: 500px;
+    height: 350px;
+    overflow: hidden;
+}
+
+.photos-grid > :first-child img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 25px;
+}
+
+.photos-grid .right-photos{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    overflow: hidden;
+    height: 100%;
+}
+
+.right-photos .photo-thumbnail{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.right-photos img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 25px;
+}
+
+.right-photos .see-all-photos-btn{
+    position: absolute;
+    border-radius: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    top: 0;
+    transform: none;
+    border-radius: 25px;
+    font-size: x-large;
+}
