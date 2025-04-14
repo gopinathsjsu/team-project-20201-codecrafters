@@ -45,44 +45,50 @@ function RestaurantTable() {
     );
     setRestaurants(updated);
   };
-  
+
   const handleDelete = async () => {
-    const selectedIds = restaurants
-      .filter((r) => r.selected)
-      .map((r) => r.id);
-    
+    const selectedIds = restaurants.filter((r) => r.selected).map((r) => r.id);
+
     if (selectedIds.length === 0) {
       setError("Please select at least one restaurant to delete");
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to delete ${selectedIds.length} restaurant(s)?`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedIds.length} restaurant(s)?`
+      )
+    ) {
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      console.log("Retrieved token:", token);
+
       if (!token) {
         throw new Error("Authorization token not found");
       }
-
       await axios.delete(
-        'http://humble-tenderness-production.up.railway.app/api/admin/restaurants',
+        "https://team-project-20201-codecrafters-production.up.railway.app/api/admin/restaurants",
         {
           data: selectedIds,
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
       await fetchRestaurants();
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Failed to delete restaurants");
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to delete restaurants"
+      );
     } finally {
       setLoading(false);
     }
@@ -101,8 +107,8 @@ function RestaurantTable() {
       <div className={styles.tableHeader}>
         <h2 className={styles.tableTitle}>Restaurants</h2>
         {restaurants.length > 0 && (
-          <button 
-            className={styles.deleteButton} 
+          <button
+            className={styles.deleteButton}
             onClick={handleDelete}
             disabled={loading}
           >
@@ -114,7 +120,9 @@ function RestaurantTable() {
       {error && (
         <div className={styles.errorBanner}>
           <span>Error: {error}</span>
-          <button onClick={clearError} className={styles.closeError}>×</button>
+          <button onClick={clearError} className={styles.closeError}>
+            ×
+          </button>
         </div>
       )}
 
@@ -148,4 +156,3 @@ function RestaurantTable() {
 }
 
 export default RestaurantTable;
-

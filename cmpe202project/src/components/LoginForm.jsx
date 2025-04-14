@@ -37,7 +37,7 @@ function LoginForm() {
 
     try {
       const response = await axios.post(
-        "https://humble-tenderness-production.up.railway.app/login",
+        "https://team-project-20201-codecrafters-production.up.railway.app/login",
         {
           email: formData.email,
           password: formData.password
@@ -50,15 +50,21 @@ function LoginForm() {
         }
       );
 
-      const { token, user } = response.data;
-
+      const { email, accessToken, refreshToken, role } = response.data;
+      const user = {
+        email,
+        accessToken,
+        refreshToken,
+        role
+      };
       // Store token and user info based on rememberMe preference
       const storage = rememberMe ? localStorage : sessionStorage;
-      storage.setItem("authToken", token);
+      storage.setItem("authToken", user.accessToken);
       storage.setItem("user", JSON.stringify(user));
-
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      console.log("Retrieved token:", token);
       // Set default authorization header for future requests
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
       // Redirect logic - enhanced with email check as fallback
       if (user?.role === "admin" || formData.email.toLowerCase() === "admin@gmail.com") {
