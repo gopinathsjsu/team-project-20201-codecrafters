@@ -8,10 +8,7 @@ import com.example.server.exception.BadRequestException;
 import com.example.server.exception.ResourceNotFoundException;
 import com.example.server.exception.UnauthorizedAccessException;
 import com.example.server.repository.RestaurantRepository;
-import com.example.server.repository.UserInfoRepository;
-import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 
