@@ -1,11 +1,10 @@
 package com.example.server.dto.restaurant;
 
 import com.example.server.entity.TimeInterval;
-import com.example.server.entity.UserInfo;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.DayOfWeek;
 import java.util.Map;
@@ -14,21 +13,43 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RestaurantCreateDTO {
+    @NotBlank(message = "The name cannot be blanked")
     private String name;
-    @DBRef
-    private UserInfo userInfo;
+
+    @Size(max = 500)
     private String description;
+
+    @NotBlank(message = "The address cannot be blanked")
     private String address;
+
+    @NotBlank(message = "The city cannot be blanked")
     private String city;
+
+    @NotBlank(message = "The state cannot be blanked")
     private String state;
+
+    @NotBlank(message = "The zipcode cannot be blanked")
     private String zip;
+
+    @NotBlank(message = "The phone number cannot be blanked")
     private String phone;
+
+    @Email
     private String email;
+
+    @NotBlank(message = "The cuisine cannot be blanked")
     private String cuisine;
+
+    @Min(value = 1)
     private int capacity;
-    private double costRating;
-    private Map<DayOfWeek, TimeInterval> hours; // open hours
 
-    //private Map<DayOfWeek, List<TimeInterval>> bookingHours; // multiple booking slots
+    @DecimalMin("0.0")
+    @DecimalMax("5.0")
+    private double averageRating;
 
+    @Min(value = 0)
+    @Max(value = 5)
+    private int costRating;
+
+    private Map<DayOfWeek, TimeInterval> hours;
 }

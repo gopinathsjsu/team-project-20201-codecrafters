@@ -14,7 +14,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/restaurants")
@@ -43,45 +42,26 @@ public class RestaurantController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getRestaurant(@PathVariable String id) {
-        Optional<Restaurant> restaurantOptional = restaurantService.getRestaurantById(id);
-        if (restaurantOptional.isPresent()) {
-            return new ResponseEntity<>(restaurantOptional.get(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        Restaurant restaurant = restaurantService.getRestaurantById(id);
+        return ResponseEntity.ok(restaurant);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<?> createRestaurant(@Valid @RequestBody RestaurantCreateDTO dto,
+    public ResponseEntity<?> createRestaurant(
+            @Valid @RequestBody RestaurantCreateDTO dto,
             @AuthenticationPrincipal UserInfoUserDetails userDetails) {
-        try {
-            UserInfo user = userDetails.getUserInfo();
-            dto.setUserInfo(user);
-            Restaurant createdRestaurant = restaurantService.createRestaurant(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdRestaurant);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        Restaurant createdRestaurant = restaurantService.createRestaurant(dto, userDetails.getUserInfo());
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdRestaurant);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<?> updateRestaurant(
-            @PathVariable String id,
-            @Valid @RequestBody RestaurantUpdateDTO dto,
-            @AuthenticationPrincipal UserInfoUserDetails userDetails) {
-        try {
-            UserInfo user = userDetails.getUserInfo();
-            if (!user.getId().equals(dto.getUserInfo().getId())) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-            }
-            Restaurant createdRestaurant = restaurantService.updateRestaurant(id, dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdRestaurant);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<?> updateRestaurant(@PathVariable String id,
+                                              @Valid @RequestBody RestaurantUpdateDTO dto,
+                                              @AuthenticationPrincipal UserInfoUserDetails userDetails) {
+        Restaurant updatedRestaurant = restaurantService
+                .updateRestaurant(id, dto, userDetails.getUserInfo());
+        return ResponseEntity.status(HttpStatus.OK).body(updatedRestaurant);
     }
-
-
-
 }
