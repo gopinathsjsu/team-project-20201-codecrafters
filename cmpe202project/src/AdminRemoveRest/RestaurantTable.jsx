@@ -9,33 +9,33 @@ function RestaurantTable() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        const response = await fetch(
-          "http://humble-tenderness-production.up.railway.app/api/restaurants"
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch restaurants");
-        }
-        const data = await response.json();
-        // Transform API data to match your expected structure
-        const formattedData = data.map((restaurant, index) => ({
-          id: restaurant.id || index + 1,
-          name: restaurant.name || "Unnamed Restaurant",
-          location: restaurant.address || "Location not specified",
-          phone: restaurant.phone || "No phone provided",
-          selected: false,
-        }));
-        setRestaurants(formattedData);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRestaurants();
   }, []);
+
+  const fetchRestaurants = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        "http://humble-tenderness-production.up.railway.app/api/restaurants"
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch restaurants");
+      }
+      const data = await response.json();
+      const formattedData = data.map((restaurant, index) => ({
+        id: restaurant.id || index + 1,
+        name: restaurant.name || "Unnamed Restaurant",
+        location: restaurant.address || "Location not specified",
+        phone: restaurant.phone || "No phone provided",
+        selected: false,
+      }));
+      setRestaurants(formattedData);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSelectChange = (id) => {
     const updated = restaurants.map((r) =>
@@ -44,9 +44,42 @@ function RestaurantTable() {
     setRestaurants(updated);
   };
 
-  const handleDelete = () => {
-    const filtered = restaurants.filter((r) => !r.selected);
-    setRestaurants(filtered);
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      // Get all selected restaurant IDs
+      const selectedIds = restaurants
+        .filter((r) => r.selected)
+        .map((r) => r.id);
+      
+      // Delete each selected restaurant from the server
+      const deletePromises = selectedIds.map(id =>
+        fetch(`http://humble-tenderness-production.up.railway.app/api/admin/restaurants/${restaurant.id}`, {
+          method: 'DELETE',
+          // Add headers if your API requires authentication
+          headers: {
+            'Content-Type': 'application/json',
+            // 'Authorization': 'Bearer your-token-here' // if needed
+          }
+        })
+      );
+
+      // Wait for all delete operations to complete
+      const responses = await Promise.all(deletePromises);
+      
+      // Check if any deletion failed
+      const failedDeletions = responses.some(response => !response.ok);
+      if (failedDeletions) {
+        throw new Error("Some deletions failed");
+      }
+
+      // Refresh the restaurant list after successful deletion
+      await fetchRestaurants();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
