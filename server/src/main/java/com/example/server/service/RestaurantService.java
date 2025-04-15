@@ -1,5 +1,7 @@
 package com.example.server.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.server.dto.restaurant.RestaurantAndAvailableSeatDTO;
 import com.example.server.dto.restaurant.RestaurantAndAvailableSeatDTO.ReservationTime;
 import com.example.server.dto.restaurant.RestaurantCreateDTO;
@@ -15,10 +17,11 @@ import com.example.server.repository.RestaurantRepository;
 import com.example.server.repository.ReviewRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.bson.types.ObjectId;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,18 +29,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 @Service
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final ReviewRepository reviewRepository;
     private final ReservationRepository reservationRepository;
+    private final Cloudinary cloudinary;
 
-    public RestaurantService(RestaurantRepository restaurantRepository, ReviewRepository reviewRepository, ReservationRepository reservationRepository) {
+    public RestaurantService(RestaurantRepository restaurantRepository, ReviewRepository reviewRepository,
+            ReservationRepository reservationRepository, Cloudinary cloudinary) {
         this.restaurantRepository = restaurantRepository;
         this.reviewRepository = reviewRepository;
         this.reservationRepository = reservationRepository;
+        this.cloudinary = cloudinary;
     }
 
     public List<Restaurant> getAllRestaurant() {
@@ -67,7 +72,10 @@ public class RestaurantService {
         }
 
         Restaurant restaurant = getRestaurant(dto, userInfo);
-
+        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+            List<String> imageUrls = uploadImages(dto.getImages());
+            restaurant.setImageUrls(imageUrls);
+        }
         return restaurantRepository.save(restaurant);
     }
 
@@ -113,16 +121,31 @@ public class RestaurantService {
         restaurant.setHours(dto.getHours());
         restaurant.setTotalReviews(dto.getTotalReviews());
 
-        return restaurantRepository.save(restaurant);
-    }
+        // Handle deleted images
+        if (dto.getDeletedImages() != null) {
+            for (String url : dto.getDeletedImages()) {
+                try {
+                    String publicId = extractPublicIdFromUrl(url);
+                    cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+                    if (restaurant.getImageUrls() != null) {
+                        restaurant.getImageUrls().remove(url);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to delete image", e);
+                }
+            }
+        }
 
-    public Restaurant updateRestaurant(String id, RestaurantUpdateDTO dto) {
-        return restaurantRepository.findById(id)
-                .map(restaurant -> {
-                    BeanUtils.copyProperties(dto, restaurant);
-                    return restaurantRepository.save(restaurant);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
+        // Handle new images
+        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+            List<String> newUrls = uploadImages(dto.getImages());
+            List<String> currentUrls = restaurant.getImageUrls() != null ? restaurant.getImageUrls()
+                    : new ArrayList<>();
+            currentUrls.addAll(newUrls);
+            restaurant.setImageUrls(currentUrls);
+        }
+
+        return restaurantRepository.save(restaurant);
     }
 
     public void deleteRestaurantsAndRelatedData(List<String> restaurantIds) {
@@ -145,7 +168,6 @@ public class RestaurantService {
         }
         return restaurantRepository.saveAll(restaurants);
     }
-    
 
     public List<Restaurant> search(String name, String state, String city, String cuisine) {
         return restaurantRepository
@@ -162,11 +184,11 @@ public class RestaurantService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        List<Reservation> reservations =
-                reservationRepository.findAllByRestaurant_IdAndDateTimeAfterOrderByDateTimeAsc(restaurantId, now);
+        List<Reservation> reservations = reservationRepository
+                .findAllByRestaurant_IdAndDateTimeAfterOrderByDateTimeAsc(restaurantId, now);
 
-        Map<LocalDateTime, List<Reservation>> groupedByTime =
-                reservations.stream().collect(Collectors.groupingBy(Reservation::getDateTime));
+        Map<LocalDateTime, List<Reservation>> groupedByTime = reservations.stream()
+                .collect(Collectors.groupingBy(Reservation::getDateTime));
 
         List<ReservationTime> reservationTimes = new ArrayList<>();
 
@@ -176,12 +198,31 @@ public class RestaurantService {
                     .sum();
             int available = restaurant.getCapacity() - totalReserved;
             reservationTimes.add(new ReservationTime(
-                    Math.max(available, 0), 
-                    entry.getKey() 
-            ));
+                    Math.max(available, 0),
+                    entry.getKey()));
         }
         reservationTimes.sort(Comparator.comparing(ReservationTime::getDateTime));
         return new RestaurantAndAvailableSeatDTO(restaurant, reservationTimes);
     }
 
+    private List<String> uploadImages(List<MultipartFile> images) {
+        return images.stream()
+                .map(file -> {
+                    try {
+                        Map<String, Object> uploadResult = cloudinary.uploader().upload(
+                                file.getBytes(),
+                                ObjectUtils.asMap("angle", "auto"));
+                        return uploadResult.get("secure_url").toString();
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to upload image", e);
+                    }
+                })
+                .toList();
+    }
+
+    private String extractPublicIdFromUrl(String url) {
+        String[] parts = url.split("/");
+        String fileName = parts[parts.length - 1];
+        return fileName.substring(0, fileName.lastIndexOf("."));
+    }
 }
