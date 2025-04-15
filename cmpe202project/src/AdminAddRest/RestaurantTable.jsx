@@ -81,18 +81,31 @@ function RestaurantApprovalTable() {
         throw new Error("Authorization token not found");
       }
   
-      await axios.put(
-        `${BASE_URL}/api/admin/restaurants/approve?approved=${shouldApprove}`,
-        selectedIds,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      if (shouldApprove) {
+        await axios.put(
+          `${BASE_URL}/api/admin/restaurants/approve?approved=true`,
+          selectedIds,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      } else {
+        await axios.delete(
+          `${BASE_URL}/api/admin/restaurants`,
+          {
+            data: selectedIds,
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
   
-      // Remove disapproved restaurants from local state immediately
+      // Remove processed restaurants from local state immediately
       setRestaurants(prev => prev.filter(restaurant => !selectedIds.includes(restaurant.id)));
   
     } catch (err) {
