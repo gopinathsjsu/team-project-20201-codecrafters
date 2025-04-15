@@ -27,39 +27,26 @@ public class AdminController {
 
     @DeleteMapping
     @PreAuthorize("hasRole('ADMIN')")
-        public ResponseEntity<?> deleteRestaurants(
+    public ResponseEntity<String> deleteRestaurants(
             @RequestBody List<String> ids,
             @AuthenticationPrincipal UserInfoUserDetails userDetails) {
-        try {
-            restaurantService.deleteRestaurantsAndRelatedData(ids);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        restaurantService.deleteRestaurantsAndRelatedData(ids);
+        return ResponseEntity.ok("Deleted successfully " + ids.size() + " restaurant(s).");
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getRestaurant() {
-        try {
-            List<Restaurant> restaurant = restaurantService.getAllNotApprovedRestaurants();
-            return ResponseEntity.ok(restaurant);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<List<Restaurant>> getRestaurants() {
+        List<Restaurant> restaurants = restaurantService.getAllNotApprovedRestaurants();
+        return ResponseEntity.ok(restaurants);
     }
 
     @PutMapping("/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> approveRestaurant(@RequestBody List<String> ids, @RequestParam boolean approved) {
-        try {
-            List<Restaurant> restaurant = restaurantService.approveRestaurants(ids, approved);
-            return ResponseEntity.ok(restaurant);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<List<Restaurant>> approveRestaurant(@RequestBody List<String> ids,
+            @RequestParam boolean approved) {
+        List<Restaurant> restaurant = restaurantService.approveRestaurants(ids, approved);
+        return ResponseEntity.ok(restaurant);
     }
-
-    
 
 }
