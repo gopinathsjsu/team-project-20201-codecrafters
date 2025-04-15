@@ -95,7 +95,10 @@ jobs:
             --from-literal=MONGODB_URI="${{ secrets.MONGODB_URI }}" \
             --from-literal=TWILIO_SID="${{ secrets.TWILIO_SID }}" \
             --from-literal=TWILIO_TOKEN="${{ secrets.TWILIO_TOKEN }}" \
-            --from-literal=TWILIO_PHONE="${{ secrets.TWILIO_PHONE }}"
+            --from-literal=TWILIO_PHONE="${{ secrets.TWILIO_PHONE }}" \
+            --from-literal=CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+            --from-literal=CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}" \
+            --from-literal=CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}"
             
       - name: Update Deployment Image on GKE
         if: github.event_name == 'release'

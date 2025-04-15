@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -68,7 +69,9 @@ public class Restaurant {
     private Map<DayOfWeek, TimeInterval> hours;
 
     private boolean approved;
-    
+
+    private List<String> imageUrls;
+
     @CreatedDate
     private LocalDateTime createdAt;
 
