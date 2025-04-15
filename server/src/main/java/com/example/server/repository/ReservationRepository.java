@@ -4,7 +4,10 @@ import com.example.server.entity.Reservation;
 import com.example.server.entity.ReservationStatus;
 import com.example.server.entity.Restaurant;
 import com.example.server.entity.UserInfo;
+
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,11 +22,15 @@ public interface ReservationRepository extends MongoRepository<Reservation, Stri
 
     List<Reservation> findAllByRestaurant_IdAndDateTime(String restaurantId, LocalDateTime dateTime);
 
-    boolean existsByUser_IdAndRestaurant_IdAndStatus(String userId,String restaurantId, ReservationStatus status);
+    List<Reservation> findAllByRestaurant_IdAndDateTimeAfterOrderByDateTimeAsc(String restaurantId, LocalDateTime now);
+
+    boolean existsByUser_IdAndRestaurant_IdAndStatus(String userId, String restaurantId, ReservationStatus status);
 
     Optional<Reservation> findByIdAndUser(String id, UserInfo user);
 
     Optional<Reservation> findByIdAndRestaurant(String id, Restaurant restaurant);
 
-    void deleteByRestaurant_Id(String restaurantId);
+    @Query(value = "{ 'restaurant.$id': { $in: ?0 } }", delete = true)
+    long deleteAllByRestaurantIds(List<ObjectId> restaurantIds);
+    List<Reservation> findAllByStatusAndDateTimeBefore(ReservationStatus status, LocalDateTime dateTime);
 }

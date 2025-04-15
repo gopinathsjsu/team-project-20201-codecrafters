@@ -15,8 +15,8 @@ public interface RestaurantRepository extends MongoRepository<Restaurant, String
     List<Restaurant> findRestaurantsByUserInfo(UserInfo userinfo);
     List<Restaurant> findByApprovedFalse();
     List<Restaurant> findByApprovedTrue();
-    List<Restaurant> findByNameContainingIgnoreCaseAndStateContainingIgnoreCaseAndCityContainingIgnoreCaseAndCuisineContainingIgnoreCase(
-    String name, String state, String city, String cuisine
-);
+    List<Restaurant> findByNameContainingIgnoreCaseAndStateContainingIgnoreCaseAndCityContainingIgnoreCaseAndCuisineContainingIgnoreCaseAndApproved(
+    String name, String state, String city, String cuisine, boolean approved
+    );
 
 }

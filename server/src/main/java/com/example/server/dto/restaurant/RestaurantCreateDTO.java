@@ -47,9 +47,5 @@ public class RestaurantCreateDTO {
     @DecimalMax("5.0")
     private double averageRating;
 
-    @Min(value = 0)
-    @Max(value = 5)
-    private int costRating;
-
     private Map<DayOfWeek, TimeInterval> hours;
 }

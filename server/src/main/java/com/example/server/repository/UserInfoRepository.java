@@ -10,5 +10,5 @@ import com.example.server.entity.UserInfo;
 @Repository
 public interface UserInfoRepository extends MongoRepository<UserInfo, String> {
 
-    Optional<UserInfo> findByUsername(String username);
+    Optional<UserInfo> findByEmail(String email);
 }

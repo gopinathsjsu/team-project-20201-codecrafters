@@ -1,4 +1,6 @@
-FROM openjdk:23
+# ./server/Dockerfile
+FROM openjdk:21
+WORKDIR /app
+COPY target/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
 EXPOSE 8080
-ADD target/server-0.1.jar /srv/server-0.1.jar
-CMD ["java", "-jar", "/srv/server-0.1.jar"]
