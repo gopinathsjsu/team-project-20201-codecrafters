@@ -19,7 +19,6 @@ import com.example.server.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.bson.types.ObjectId;
-import org.springframework.beans.BeanUtils;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -106,7 +105,9 @@ public class RestaurantService {
         if (!restaurant.getUserInfo().getId().equals(userInfo.getId())) {
             throw new UnauthorizedAccessException("You are not authorized to update this restaurant");
         }
-
+        if (restaurantRepository.existsByName(dto.getName())) {
+            throw new BadRequestException("Restaurant with this name already exists.");
+        }
         restaurant.setName(dto.getName());
         restaurant.setDescription(dto.getDescription());
         restaurant.setAddress(dto.getAddress());
