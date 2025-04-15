@@ -47,7 +47,7 @@ public class RestaurantController {
     }
 
     @GetMapping("/{id}/availability")
-    public ResponseEntity<?> getRestaurantWithAvailability(@PathVariable String id) {
+    public ResponseEntity<RestaurantAndAvailableSeatDTO> getRestaurantWithAvailability(@PathVariable String id) {
         try {
             RestaurantAndAvailableSeatDTO dto = restaurantService.getAvailableSeatsByTime(id);
             return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -58,8 +58,8 @@ public class RestaurantController {
 
     @PostMapping
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<?> createRestaurant(
-            @Valid @RequestBody RestaurantCreateDTO dto,
+    public ResponseEntity<Restaurant> createRestaurant(
+            @Valid @ModelAttribute RestaurantCreateDTO dto,
             @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         Restaurant createdRestaurant = restaurantService.createRestaurant(dto, userDetails.getUserInfo());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRestaurant);
@@ -67,8 +67,8 @@ public class RestaurantController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<?> updateRestaurant(@PathVariable String id,
-                                              @Valid @RequestBody RestaurantUpdateDTO dto,
+    public ResponseEntity<Restaurant> updateRestaurant(@PathVariable String id,
+                                              @Valid @ModelAttribute RestaurantUpdateDTO dto,
                                               @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         Restaurant updatedRestaurant = restaurantService
                 .updateRestaurant(id, dto, userDetails.getUserInfo());
