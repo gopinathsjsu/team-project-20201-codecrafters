@@ -7,7 +7,9 @@ import com.example.server.entity.UserInfo;
 import com.example.server.exception.BadRequestException;
 import com.example.server.exception.ResourceNotFoundException;
 import com.example.server.exception.UnauthorizedAccessException;
+import com.example.server.repository.ReservationRepository;
 import com.example.server.repository.RestaurantRepository;
+import com.example.server.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,9 +18,13 @@ import java.util.List;
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
+    private final ReviewRepository reviewRepository;
+    private final ReservationRepository reservationRepository;
 
-    public RestaurantService(RestaurantRepository restaurantRepository) {
+    public RestaurantService(RestaurantRepository restaurantRepository, ReviewRepository reviewRepository, ReservationRepository reservationRepository) {
         this.restaurantRepository = restaurantRepository;
+        this.reviewRepository = reviewRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<Restaurant> getAllRestaurant() {
@@ -97,6 +103,8 @@ public class RestaurantService {
 
     public void deleteRestaurant(String id) {
         restaurantRepository.deleteById(id);
+        reviewRepository.deleteByRestaurant_Id(id);
+        reservationRepository.deleteByRestaurant_Id(id);
     }
 
     public Restaurant approveRestaurant(String restaurantId, boolean approved) {

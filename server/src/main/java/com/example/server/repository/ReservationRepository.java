@@ -25,5 +25,5 @@ public interface ReservationRepository extends MongoRepository<Reservation, Stri
 
     Optional<Reservation> findByIdAndRestaurant(String id, Restaurant restaurant);
 
-
+    void deleteByRestaurant_Id(String restaurantId);
 }
