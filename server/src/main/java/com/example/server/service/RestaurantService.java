@@ -105,7 +105,7 @@ public class RestaurantService {
         if (!restaurant.getUserInfo().getId().equals(userInfo.getId())) {
             throw new UnauthorizedAccessException("You are not authorized to update this restaurant");
         }
-        if (restaurantRepository.existsByName(dto.getName())) {
+        if (restaurantRepository.existsByNameAndIdNot(dto.getName(), id)) {
             throw new BadRequestException("Restaurant with this name already exists.");
         }
         restaurant.setName(dto.getName());

@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface RestaurantRepository extends MongoRepository<Restaurant, String> {
     boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, String id);
     Optional<Restaurant> findByName(String name);
     List<Restaurant> findRestaurantsByUserInfo(UserInfo userinfo);
     List<Restaurant> findByApprovedFalse();
