@@ -40,25 +40,19 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<JwtResponse> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         JwtResponse token = authService.authenticate(authRequest);
         return ResponseEntity.ok(token);
     }
 
     @PostMapping("/refreshToken")
-    public JwtResponse refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+    public ResponseEntity<JwtResponse> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
         RefreshToken refreshToken = refreshTokenService.findByToken(refreshTokenRequest.getToken())
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token!"));
 
         refreshTokenService.verifyExpiration(refreshToken);
         String accessToken = jwtService.generateToken(refreshToken.getUserInfo().getEmail());
-
-        return new JwtResponse(refreshToken.getUserInfo().getEmail(), accessToken, refreshToken.getToken(), refreshToken.getUserInfo().getRoles());
+        return  ResponseEntity.ok(new JwtResponse(refreshToken.getUserInfo().getEmail(), accessToken, refreshToken.getToken(), refreshToken.getUserInfo().getRoles()));
     }
 
-    @GetMapping("/data")
-    @PreAuthorize("hasRole('USER')  or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
-    public String getAdminData() {
-        return "This is data only for admins!";
-    }
 }

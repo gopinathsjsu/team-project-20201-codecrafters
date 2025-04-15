@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -28,7 +29,7 @@ public class ReservationController {
     // User book a reservation
     @PostMapping("/restaurants/{restaurantId}/reservations")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> createReservation(@AuthenticationPrincipal UserInfoUserDetails userDetails,
+    public ResponseEntity<String> createReservation(@AuthenticationPrincipal UserInfoUserDetails userDetails,
                                                @PathVariable String restaurantId,
                                                @RequestBody ReservationCreateDTO dto) {
         UserInfo user = userDetails.getUserInfo();
@@ -40,14 +41,14 @@ public class ReservationController {
     // Managers get their reservations from a restaurant
     @GetMapping("/restaurants/{restaurantId}/reservations")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<?> getAllByRestaurant(@PathVariable String restaurantId) {
+    public ResponseEntity<List<Reservation>> getAllByRestaurant(@PathVariable String restaurantId) {
         return ResponseEntity.ok(reservationService.findAllByRestaurantId(restaurantId));
     }
 
     // Managers can view a single reservation of their restaurant
     @GetMapping("/restaurants/{restaurantId}/reservations/{reservationId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<?> getReservation(@PathVariable String restaurantId, @PathVariable String reservationId) {
+    public ResponseEntity<Reservation> getReservation(@PathVariable String restaurantId, @PathVariable String reservationId) {
         Reservation reservation = reservationService.findByIdAndRestaurantId(reservationId, restaurantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return ResponseEntity.ok(reservation);
@@ -94,7 +95,7 @@ public class ReservationController {
     // Users can access their reservations
     @GetMapping("/reservations")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getAllByUserId(@AuthenticationPrincipal UserInfoUserDetails userDetails) {
+    public ResponseEntity<List<Reservation>> getAllByUserId(@AuthenticationPrincipal UserInfoUserDetails userDetails) {
         UserInfo user = userDetails.getUserInfo();
         return ResponseEntity.ok(reservationService.findAllByUserId(user.getId()));
     }
@@ -102,13 +103,12 @@ public class ReservationController {
     // Users can see a single reservation
     @GetMapping("/reservations/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<?> getReservationById(@PathVariable String id) {
+    public ResponseEntity<Reservation> getReservationById(@PathVariable String id) {
         Optional<Reservation> reservationOptional = reservationService.findById(id);
         if (reservationOptional.isPresent()) {
             return ResponseEntity.ok(reservationOptional.get());
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-
 
 }
