@@ -51,9 +51,9 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token!"));
 
         refreshTokenService.verifyExpiration(refreshToken);
-        String accessToken = jwtService.generateToken(refreshToken.getUserInfo().getUsername());
+        String accessToken = jwtService.generateToken(refreshToken.getUserInfo().getEmail());
 
-        return new JwtResponse(refreshToken.getUserInfo().getUsername(), accessToken, refreshToken.getToken());
+        return new JwtResponse(refreshToken.getUserInfo().getEmail(), accessToken, refreshToken.getToken(), refreshToken.getUserInfo().getRoles());
     }
 
     @GetMapping("/data")

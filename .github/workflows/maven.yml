@@ -1,0 +1,110 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  release:
+    types: [published]
+  workflow_dispatch:
+  
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_ID: cmpe202-456801
+      CLUSTER_NAME: cmpe202
+      CLUSTER_ZONE: us-west1
+      SPRING_PROFILES_ACTIVE: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+          cache: maven
+
+      - name: Build Spring Boot App
+        run: mvn -B clean package -DskipTests
+        working-directory: ./server
+
+      - name: Extract GitHub Release Tag as VERSION
+        id: release_tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Decode GCP credentials
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        run: echo "${{ secrets.GCP_CREDENTIALS }}" | base64 -d > /tmp/key.json
+
+      - name: Authenticate Docker with GCR
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        run: cat /tmp/key.json | docker login -u _json_key --password-stdin https://gcr.io
+
+      - name: Build Docker image
+        if: github.event_name == 'release'
+        run: docker build -t gcr.io/${{ env.PROJECT_ID }}/server:${{ steps.release_tag.outputs.VERSION }} ./server
+
+      - name: Push Docker image
+        if: github.event_name == 'release'
+        run: docker push gcr.io/${{ env.PROJECT_ID }}/server:${{ steps.release_tag.outputs.VERSION }}
+
+      - name: Authenticate to Google Cloud
+        if: github.event_name == 'release'
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: Set up gcloud CLI
+        if: github.event_name == 'release'
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Install gke-gcloud-auth-plugin
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        run: |
+          gcloud components install gke-gcloud-auth-plugin --quiet
+
+
+      - name: Configure kubectl
+        if: github.event_name == 'release'
+        run: |
+          gcloud container clusters get-credentials $CLUSTER_NAME \
+            --zone $CLUSTER_ZONE \
+            --project $PROJECT_ID
+
+      - name: Create app-secret in Kubernetes
+        if: github.event_name == 'release'
+        run: |
+          kubectl delete secret app-secret --ignore-not-found
+          kubectl create secret generic app-secret \
+            --from-literal=MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+            --from-literal=TWILIO_SID="${{ secrets.TWILIO_SID }}" \
+            --from-literal=TWILIO_TOKEN="${{ secrets.TWILIO_TOKEN }}" \
+            --from-literal=TWILIO_PHONE="${{ secrets.TWILIO_PHONE }}"
+            
+      - name: Update Deployment Image on GKE
+        if: github.event_name == 'release'
+        run: |
+          kubectl set image deployment/server server-container=gcr.io/${{ env.PROJECT_ID }}/server:${{ steps.release_tag.outputs.VERSION }}
+          kubectl rollout status deployment/server
+
+      - name: Apply service & autoscale (optional)
+        if: github.event_name == 'release'
+        run: |
+          kubectl apply -f ./k8s/service.yaml
+          kubectl apply -f ./k8s/hpa.yaml

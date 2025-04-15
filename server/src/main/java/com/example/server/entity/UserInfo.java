@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class UserInfo {
     @Id
     private String id;
-    private String username;
+    private String email;
     private String password;
     private String phone;
     private Set<String> roles; 

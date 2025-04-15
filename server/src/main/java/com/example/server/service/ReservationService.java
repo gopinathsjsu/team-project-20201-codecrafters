@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -49,13 +50,13 @@ public class ReservationService {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found"));
 
-
         LocalDateTime reservationDateTime = reservationCreateDTO.getDateTime();
         LocalDate reservationDate = reservationDateTime.toLocalDate();
         LocalTime reservationTime = reservationDateTime.toLocalTime();
 
         // Check if the reservation date is in the past
-        if (reservationDate.isBefore(LocalDate.now()) || (reservationDate.isEqual(LocalDate.now()) && reservationTime.isBefore(LocalTime.now()))) {
+        if (reservationDate.isBefore(LocalDate.now())
+                || (reservationDate.isEqual(LocalDate.now()) && reservationTime.isBefore(LocalTime.now()))) {
             throw new RuntimeException("Reservation date and time must be in the future");
         }
         // Check if the reservation date is within the restaurant's booking hours
@@ -73,12 +74,10 @@ public class ReservationService {
         BeanUtils.copyProperties(reservationCreateDTO, reservation);
         reservation.setStatus(ReservationStatus.PENDING);
         reservationRepository.save(reservation);
-
         // Send reservation message to RabbitMQ
         sendConfirmationSms("+18777804236", reservation);
         return reservation;
     }
-
 
     public void deleteReservation(@NotNull String id) {
         reservationRepository.deleteById(id);
@@ -120,6 +119,11 @@ public class ReservationService {
         return reservationRepository.findAllByDateTimeBetween(startDate, endDate);
     }
 
+    public List<Reservation> getUpcomingReservations(String restaurantId) {
+        LocalDateTime now = LocalDateTime.now();
+        return reservationRepository.findAllByRestaurant_IdAndDateTimeAfterOrderByDateTimeAsc(restaurantId, now);
+    }
+
     public boolean isAvailable(UserInfo user, Restaurant restaurant, ReservationCreateDTO reservationCreateDTO) {
         boolean hasPending = reservationRepository.existsByUser_IdAndRestaurant_IdAndStatus(
                 user.getId(),
@@ -143,11 +147,23 @@ public class ReservationService {
 
         String message = String.format(
                 "Hi %s, your reservation on %s at %s for %d people is created.",
-                reservation.getUser().getUsername(), formattedDate, formattedTime, reservation.getPartySize());
+                reservation.getUser().getEmail(), formattedDate, formattedTime, reservation.getPartySize());
 
         Message.creator(
                 new PhoneNumber(toPhoneNumber),
                 new PhoneNumber(fromPhoneNumber),
                 message).create();
     }
+
+    @Scheduled(cron = "0 0/30 * * * *")
+    public void autoCompleteReservations() {
+        List<Reservation> list = reservationRepository
+                .findAllByStatusAndDateTimeBefore(ReservationStatus.PENDING, LocalDateTime.now());
+                System          .out.println("Auto-completing reservations: " + list.size());
+        for (Reservation r : list) {
+            r.setStatus(ReservationStatus.COMPLETED);
+        }
+        reservationRepository.saveAll(list);
+    }
+
 }

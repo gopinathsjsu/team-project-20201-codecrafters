@@ -20,7 +20,7 @@ public class UserService {
     }
 
     public String addUser(UserCreateDTO user) {
-        repository.findByUsername(user.getUsername()).ifPresent(u -> {
+        repository.findByEmail(user.getUsername()).ifPresent(u -> {
             throw new RuntimeException(u.getUsername() + " already exists!");
         });
 

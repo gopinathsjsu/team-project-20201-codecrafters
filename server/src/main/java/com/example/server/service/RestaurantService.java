@@ -1,18 +1,25 @@
 package com.example.server.service;
 
+import com.example.server.dto.restaurant.RestaurantAndAvailableSeatDTO;
+import com.example.server.dto.restaurant.RestaurantAndAvailableSeatDTO.ReservationTime;
 import com.example.server.dto.restaurant.RestaurantCreateDTO;
 import com.example.server.dto.restaurant.RestaurantUpdateDTO;
+import com.example.server.entity.Reservation;
 import com.example.server.entity.Restaurant;
-import com.example.server.entity.UserInfo;
-import com.example.server.exception.BadRequestException;
-import com.example.server.exception.ResourceNotFoundException;
-import com.example.server.exception.UnauthorizedAccessException;
 import com.example.server.repository.ReservationRepository;
 import com.example.server.repository.RestaurantRepository;
 import com.example.server.repository.ReviewRepository;
-import org.springframework.stereotype.Service;
 
+import org.springframework.stereotype.Service;
+import org.bson.types.ObjectId;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+
 
 @Service
 public class RestaurantService {
@@ -33,6 +40,10 @@ public class RestaurantService {
 
     public List<Restaurant> getAllApprovedRestaurants() {
         return restaurantRepository.findByApprovedTrue();
+    }
+
+    public List<Restaurant> getAllNotApprovedRestaurants() {
+        return restaurantRepository.findByApprovedFalse();
     }
 
     public Restaurant getRestaurantById(String id) {
@@ -101,26 +112,72 @@ public class RestaurantService {
         return restaurantRepository.save(restaurant);
     }
 
-    public void deleteRestaurant(String id) {
-        restaurantRepository.deleteById(id);
-        reviewRepository.deleteByRestaurant_Id(id);
-        reservationRepository.deleteByRestaurant_Id(id);
+    public Restaurant updateRestaurant(String id, RestaurantUpdateDTO dto) {
+        return restaurantRepository.findById(id)
+                .map(restaurant -> {
+                    BeanUtils.copyProperties(dto, restaurant);
+                    return restaurantRepository.save(restaurant);
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
     }
 
-    public Restaurant approveRestaurant(String restaurantId, boolean approved) {
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
-        restaurant.setApproved(approved);
-        return restaurantRepository.save(restaurant);
+    public void deleteRestaurantsAndRelatedData(List<String> restaurantIds) {
+        List<ObjectId> objectIds = restaurantIds.stream()
+                .map(ObjectId::new)
+                .toList();
+        reservationRepository.deleteAllByRestaurantIds(objectIds);
+        reviewRepository.deleteAllByRestaurantIds(objectIds);
+        restaurantRepository.deleteAllById(restaurantIds);
+
     }
+
+    public List<Restaurant> approveRestaurants(List<String> restaurantIds, boolean approved) {
+        List<Restaurant> restaurants = restaurantRepository.findAllById(restaurantIds);
+        if (restaurants.isEmpty()) {
+            throw new IllegalArgumentException("Restaurants not found");
+        }
+        for (Restaurant restaurant : restaurants) {
+            restaurant.setApproved(approved);
+        }
+        return restaurantRepository.saveAll(restaurants);
+    }
+    
 
     public List<Restaurant> search(String name, String state, String city, String cuisine) {
         return restaurantRepository
-                .findByNameContainingIgnoreCaseAndStateContainingIgnoreCaseAndCityContainingIgnoreCaseAndCuisineContainingIgnoreCase(
+                .findByNameContainingIgnoreCaseAndStateContainingIgnoreCaseAndCityContainingIgnoreCaseAndCuisineContainingIgnoreCaseAndApproved(
                         name != null ? name : "",
                         state != null ? state : "",
                         city != null ? city : "",
-                        cuisine != null ? cuisine : "");
+                        cuisine != null ? cuisine : "", true);
+    }
+
+    public RestaurantAndAvailableSeatDTO getAvailableSeatsByTime(String restaurantId) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Reservation> reservations =
+                reservationRepository.findAllByRestaurant_IdAndDateTimeAfterOrderByDateTimeAsc(restaurantId, now);
+
+        Map<LocalDateTime, List<Reservation>> groupedByTime =
+                reservations.stream().collect(Collectors.groupingBy(Reservation::getDateTime));
+
+        List<ReservationTime> reservationTimes = new ArrayList<>();
+
+        for (Map.Entry<LocalDateTime, List<Reservation>> entry : groupedByTime.entrySet()) {
+            int totalReserved = entry.getValue().stream()
+                    .mapToInt(Reservation::getPartySize)
+                    .sum();
+            int available = restaurant.getCapacity() - totalReserved;
+            reservationTimes.add(new ReservationTime(
+                    Math.max(available, 0), 
+                    entry.getKey() 
+            ));
+        }
+        reservationTimes.sort(Comparator.comparing(ReservationTime::getDateTime));
+        return new RestaurantAndAvailableSeatDTO(restaurant, reservationTimes);
     }
 
 }
