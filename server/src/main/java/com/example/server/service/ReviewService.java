@@ -1,6 +1,7 @@
 package com.example.server.service;
 
 import com.example.server.dto.review.ReviewRequestDTO;
+import com.example.server.dto.review.ReviewRespondDTO;
 import com.example.server.entity.Restaurant;
 import com.example.server.entity.Review;
 import com.example.server.entity.UserInfo;
@@ -17,6 +18,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
@@ -56,8 +58,17 @@ public class ReviewService {
     }
 
     // Get all reviews by restaurant
-    public List<Review> getReviewsByRestaurant(String restaurantId) {
-        return reviewRepository.findByRestaurant_Id(restaurantId);
+    public List<ReviewRespondDTO> getReviewsByRestaurant(String restaurantId) {
+        List<Review> reviews = reviewRepository.findByRestaurant_Id(restaurantId);
+        return reviews.stream()
+            .map(r -> new ReviewRespondDTO(
+                    r.getUser().getEmail(),
+                    r.getRating(),
+                    r.getComment(),
+                    r.getCreatedAt(),
+                    r.getUpdatedAt()
+            ))
+            .collect(Collectors.toList());
     }
 
     // Get all reviews by user

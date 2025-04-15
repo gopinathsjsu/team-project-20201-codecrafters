@@ -6,6 +6,10 @@ import com.example.server.dto.restaurant.RestaurantCreateDTO;
 import com.example.server.dto.restaurant.RestaurantUpdateDTO;
 import com.example.server.entity.Reservation;
 import com.example.server.entity.Restaurant;
+import com.example.server.entity.UserInfo;
+import com.example.server.exception.BadRequestException;
+import com.example.server.exception.ResourceNotFoundException;
+import com.example.server.exception.UnauthorizedAccessException;
 import com.example.server.repository.ReservationRepository;
 import com.example.server.repository.RestaurantRepository;
 import com.example.server.repository.ReviewRepository;
@@ -19,6 +23,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -53,7 +59,7 @@ public class RestaurantService {
 
     public Restaurant createRestaurant(RestaurantCreateDTO dto, UserInfo userInfo) {
         if (!userInfo.getRoles().contains("RESTAURANT_MANAGER")) {
-            throw new BadRequestException("Username: " + userInfo.getUsername() + " is not a Restaurant Manager");
+            throw new BadRequestException("Username: " + userInfo.getEmail() + " is not a Restaurant Manager");
         }
 
         if (restaurantRepository.existsByName(dto.getName())) {
@@ -77,7 +83,6 @@ public class RestaurantService {
         restaurant.setEmail(dto.getEmail());
         restaurant.setCuisine(dto.getCuisine());
         restaurant.setCapacity(dto.getCapacity());
-        restaurant.setCostRating(dto.getCostRating());
         restaurant.setHours(dto.getHours());
         restaurant.setUserInfo(userInfo);
         restaurant.setAverageRating(0.0);
@@ -105,7 +110,6 @@ public class RestaurantService {
         restaurant.setCuisine(dto.getCuisine());
         restaurant.setCapacity(dto.getCapacity());
         restaurant.setAverageRating(dto.getAverageRating());
-        restaurant.setCostRating(dto.getCostRating());
         restaurant.setHours(dto.getHours());
         restaurant.setTotalReviews(dto.getTotalReviews());
 

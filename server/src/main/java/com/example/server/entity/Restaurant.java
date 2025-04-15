@@ -63,10 +63,6 @@ public class Restaurant {
     private double averageRating;
 
     @Min(value = 0)
-    @Max(value = 5)
-    private int costRating;
-
-    @Min(value = 0)
     private int totalReviews;
 
     private Map<DayOfWeek, TimeInterval> hours;
