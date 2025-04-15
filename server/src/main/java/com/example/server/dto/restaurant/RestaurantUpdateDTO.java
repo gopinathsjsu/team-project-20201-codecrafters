@@ -7,7 +7,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
+import java.util.List;
 import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @NoArgsConstructor
@@ -52,5 +55,8 @@ public class RestaurantUpdateDTO {
     private int totalReviews;
 
     private Map<DayOfWeek, TimeInterval> hours;
+
+    private List<MultipartFile> images;
+    private List<String> deletedImages;
 }
 
