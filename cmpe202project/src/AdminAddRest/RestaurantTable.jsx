@@ -55,28 +55,35 @@ function RestaurantApprovalTable() {
       r.id === id ? { ...r, selected: !r.selected } : r
     );
     setRestaurants(updated);
-  };
+  }; 
 
   const handleApproval = async (shouldApprove) => {
     const selectedIds = restaurants.filter((r) => r.selected).map((r) => r.id);
-
+  
     if (selectedIds.length === 0) {
       setError(`Please select at least one restaurant to ${shouldApprove ? "approve" : "reject"}`);
       return;
     }
-
+  
+    // Only show confirmation for disapproval
+    if (!shouldApprove && !window.confirm(
+      `Are you sure you want to reject ${selectedIds.length} restaurant(s)?`
+    )) {
+      return;
+    }
+  
     try {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-
+  
       if (!token) {
         throw new Error("Authorization token not found");
       }
-
-      await axios.post(
+  
+      await axios.put(
         `${BASE_URL}/api/admin/restaurants/approve?approved=${shouldApprove}`,
-        { restaurantIds: selectedIds },
+        selectedIds,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -84,8 +91,10 @@ function RestaurantApprovalTable() {
           },
         }
       );
-
-      await fetchUnapprovedRestaurants();
+  
+      // Remove disapproved restaurants from local state immediately
+      setRestaurants(prev => prev.filter(restaurant => !selectedIds.includes(restaurant.id)));
+  
     } catch (err) {
       setError(
         err.response?.data?.message ||
