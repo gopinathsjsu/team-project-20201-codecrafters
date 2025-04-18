@@ -364,6 +364,8 @@
   }
 }
 .column3 {
+  color: black;
+  font-size: 16px;
   flex-direction: column;
   align-items: stretch;
   width: 34%;
@@ -395,8 +397,18 @@
   }
 }
 .reservation {
-  font-size: 20px;
+  color: black;
+  font-size: 24px;
+  font-weight: bold;
 }
+
+.address,
+.customer {
+  color: black;
+  font-size: 18px;
+}
+
+
 .restaurantname {
   margin-top: 23px;
   font-size: 14px;
@@ -407,6 +419,8 @@
   }
 }
 .column4 {
+  color: black;
+  font-size: 16px;
   flex-direction: column;
   align-items: stretch;
   width: 16%;
@@ -438,6 +452,8 @@
   }
 }
 .column5 {
+  color: black;
+  font-size: 16px;
   flex-direction: column;
   align-items: stretch;
   width: 50%;
