@@ -1,7 +1,6 @@
 package com.example.server;
 
 import com.example.server.entity.UserInfo;
-import com.example.server.repository.UserInfoRepository;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -90,7 +89,7 @@ public class AuthControllerTest {
         String json = """
                 {
                     "email": "test@example.com",
-                    "password": "123",
+                    "password": "password",
                     "phone": "123-456-7890",
                     "roles": [
                         "USER"
@@ -144,5 +143,38 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void correctEmailFormat() throws Exception {
+        String json = """
+                {
+                    "email": "adminexa",
+                    "password": "123",
+                    "phone": "123-456-7890",
+                    "roles": [
+                        "USER"
+                    ]
+                }
+                """;
+
+        mvc.perform(post("/signUp")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void passwordMustBe8To16() throws Exception {
+        String json = """
+                {
+                    "email": "adminexa",
+                    "password": "passwordpasswordpassword",
+                    "phone": "123-456-7890",
+                    "roles": [
+                        "USER"
+                    ]
+                }
+                """;
     }
 }
