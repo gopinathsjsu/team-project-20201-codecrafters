@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import RestaurantImage from "../assets/make-a-reservation-bg.png";
 import SearchComponent from "../components/SearchComponent";
+import { useNavigate } from "react-router-dom";
 import TrendUp from "../assets/trend-up.svg";
 import "../styles/RestaurantPage.css";
+import TimeSlotsComponent from "../components/TimeSlotsComponent";
 
 const RestaurantPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedRating, setSelectedRating] = useState(0); // Tracks the clicked rating
   const [hoveredRating, setHoveredRating] = useState(0); // Tracks the hovered rating
 
@@ -64,13 +67,7 @@ const RestaurantPage = () => {
             <SearchComponent showSearch={false} />
             <div className="available-times">
               <h3>Select a time</h3>
-              <div className="availability">
-                {timeSlots?.map((time, index) => (
-                  <span className="time-slot" key={index}>
-                    {time}
-                  </span>
-                ))}
-              </div>
+              <TimeSlotsComponent timeSlots={timeSlots} name={name} />
             </div>
             <div className="booked-times">
               <img src={TrendUp} alt="Trend Up" className="trend-icon" />

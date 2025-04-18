@@ -3,6 +3,7 @@ import "../styles/RestaurantBox.css";
 import RestaurantImage from "../assets/restaurant-example.png";
 import TrendUp from "../assets/trend-up.svg";
 import { useNavigate } from "react-router-dom";
+import TimeSlotsComponent from "./TimeSlotsComponent";
 
 const RestaurantBox = ({
   name,
@@ -14,7 +15,6 @@ const RestaurantBox = ({
   horizontal = false,
 }) => {
   const navigate = useNavigate();
-
   const handleClick = () => {
     navigate(`/restaurant/${name}`, {
       state: {
@@ -65,17 +65,7 @@ const RestaurantBox = ({
         ) : (
           <span className="availability-text">No available time slots</span>
         )}
-        <div className="availability">
-          {timeSlots && timeSlots.length > 0 ? (
-            timeSlots.map((time, index) => (
-              <span key={index} className="time-slot">
-                {time}
-              </span>
-            ))
-          ) : (
-            <span className="no-availability">No slots available</span>
-          )}
-        </div>
+        <TimeSlotsComponent timeSlots={timeSlots} name={name} />
       </div>
     </div>
   );
