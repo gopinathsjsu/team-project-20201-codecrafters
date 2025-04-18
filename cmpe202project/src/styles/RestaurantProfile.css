@@ -100,3 +100,76 @@
     width: 100%;
   }
   
+
+  /* Added style */
+
+  .profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  .profile-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    padding: 2rem;
+  }
+  
+  .profile-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  
+  .form-section {
+    margin-bottom: 2rem;
+  }
+  
+  .form-section h3 {
+    color: #555;
+    margin-bottom: 0.8rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  
+  .photo-preview {
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 8px;
+  }
+  
+  .save-btn,
+  .edit-btn {
+    background: #ffcc00;
+    border: none;
+    padding: 0.8rem 1.4rem;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .save-btn:hover,
+  .edit-btn:hover {
+    background: #e6b800;
+  }
+  
