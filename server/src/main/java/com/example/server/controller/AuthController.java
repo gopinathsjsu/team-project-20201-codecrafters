@@ -2,6 +2,7 @@ package com.example.server.controller;
 
 import com.example.server.dto.UserCreateDTO;
 import com.example.server.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +34,7 @@ public class AuthController {
     }
 
     @PostMapping("/signUp")
-    public ResponseEntity<?> addNewUser(@RequestBody UserCreateDTO user) {
+    public ResponseEntity<?> addNewUser(@Valid @RequestBody UserCreateDTO user) {
         System.out.println("user: " + user);
         return ResponseEntity.ok(service.addUser(user));
     }
