@@ -1,13 +1,11 @@
+// SidebarNavItem.js
 "use client";
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import styles from "../styles/SidebarNavItem.module.css"; 
+import { useNavigate } from "react-router-dom";
+import styles from "../styles/SidebarNavItem.module.css";
 
-function SidebarNavItem({ icon, text, path }) {
+function SidebarNavItem({ icon, text, isActive, path }) {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const isActive = location.pathname === path;
 
   const handleClick = () => {
     navigate(path);

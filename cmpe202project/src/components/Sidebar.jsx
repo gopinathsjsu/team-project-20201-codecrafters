@@ -1,10 +1,11 @@
 "use client";
 import React from "react";
+import PropTypes from 'prop-types';
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/Sidebar.module.css";
 import SidebarNavItem from "./SidebarNavItem";
 
-function Sidebar() {
+function Sidebar({ activePath, navItems, adminName = "Admin" }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -17,21 +18,14 @@ function Sidebar() {
     <nav className={styles.sidebar}>
       <div className={styles.navContainer}>
         <ul className={styles.navList}>
-          <SidebarNavItem
-            text="Dashboard"
-            isActive={true}
-            path="/admin/dashboard"
-          />
-          <SidebarNavItem
-            text="Restaurant"
-            isActive={false}
-            path="/admin/restaurants"
-          />
-          <SidebarNavItem
-            text="Approve New Restaurant"
-            isActive={false}
-            path="/admin/approve"
-          />
+          {navItems.map((item) => (
+            <SidebarNavItem
+              key={item.path}
+              text={item.text}
+              isActive={activePath === item.path}
+              path={item.path}
+            />
+          ))}
         </ul>
       </div>
       <div className={styles.profileSection}>
@@ -60,7 +54,7 @@ function Sidebar() {
               letterSpacing="0px"
             >
               <tspan x="110.157" y="26.0392">
-                Admin
+                {adminName}
               </tspan>
             </text>
             <text
@@ -103,5 +97,16 @@ function Sidebar() {
     </nav>
   );
 }
+
+Sidebar.propTypes = {
+  activePath: PropTypes.string.isRequired,
+  navItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      text: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  adminName: PropTypes.string,
+};
 
 export default Sidebar;

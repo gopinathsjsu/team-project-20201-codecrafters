@@ -1,7 +1,7 @@
 import Layout from "./pages/Layout";
 import Dashboard from "./AdminDashboard/Dashboard";
 import RemoveRest from "./AdminRemoveRest/RemoveRest";
-import ApproveNewRestaurant from "./AdminAddRest/ApproveNewRestauant";
+import ApproveNewRestaurant from "./AdminAddRest/ApproveNewRestaurant";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import CustomerLayout from "./pages/CustomerLayout";
@@ -39,7 +39,7 @@ function App() {
           <Route path="admin/restaurants" element={<RemoveRest />} />
         </Route>
         <Route path="*" element={<NoPage />} />
-      </Routes>
+      </Routes>{" "}
     </BrowserRouter>
   );
 }
