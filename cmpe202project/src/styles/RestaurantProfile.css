@@ -1,0 +1,102 @@
+
+  .restaurant-title {
+    font-family:
+    Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #333;
+  }
+  
+  .restaurant-info p {
+    margin-bottom: 0.75rem;
+    color: #444;
+  }
+  
+  .status-active {
+    color: #16a34a;
+  }
+  
+  .status-pending {
+    color: #d97706;
+  }
+  
+  .status-inactive {
+    color: #dc2626;
+  }
+  
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+  
+  .form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ffffff;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .btn-edit,
+  .btn-save {
+    padding: 0.6rem 1.5rem;
+    background-color: #facc15;
+    color: #333;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .btn-edit:hover,
+  .btn-save:hover {
+    background-color: #eab308;
+  }
+
+  /* .restaurant-card-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #fffde7, #ffffff);
+    padding: 2rem;
+  } */
+  
+  .restaurant-card {
+    background-color: #ffffff;       
+    border: 1px solid #000000;      
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); /* Soft shadow */
+    max-width: 700px;
+    width: 100%;
+  }
+  
+  .restaurant-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #333;
+  }
+
+  .restaurant-card-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem;
+    width: 100%;
+  }
+  

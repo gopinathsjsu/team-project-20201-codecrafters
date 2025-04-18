@@ -44,3 +44,31 @@
     padding: 20px;
   }
 }
+
+
+
+.mainContent {
+  padding: 2rem;
+  background-color: #ffffff; /*  Set the whole page background to white */
+  min-height: 100vh;
+}
+
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+
+.profileContainer {
+  /* Optional area for user image, info, etc. */
+}
+
+.profileWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
