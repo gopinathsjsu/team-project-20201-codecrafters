@@ -1,9 +1,11 @@
 .mainContent {
+  color: black;
   flex: 1;
   padding: 40px;
 }
 
 .header {
+  
   justify-content: space-between;
   align-items: center;
   margin-bottom: 40px;
@@ -14,6 +16,7 @@
   font-size: 36px;
   font-weight: 700;
   margin: 0;
+  color: black;
 }
 
 .profileContainer {

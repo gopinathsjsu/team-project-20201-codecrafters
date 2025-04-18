@@ -10,7 +10,6 @@ function RestaurantTableRow({ id, name, location, quantity, selected, onSelectCh
     <div className={styles.tableRow}>
       <div className={styles.restaurantName}>{name}</div>
       <div className={styles.location}>{location}</div>
-      
       <div
         className={`${styles.selectBox} ${selected ? styles.selected : ""}`}
         onClick={handleClick}

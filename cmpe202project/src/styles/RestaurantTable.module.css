@@ -1,0 +1,111 @@
+.tableContainer {
+  background-color: #fff;
+  border-width: 1px;
+  border-color: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 4px #00000040;
+}
+
+
+
+.tableHeader {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  display: flex;
+}
+
+
+
+.tableTitle {
+  color: black;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+
+.buttonContainer {
+  display: flex;
+  gap: 10px; /* You can change this to any spacing you want */
+}
+
+.deleteButton {
+  width: 100px;
+  color: #fff;
+  background-color: #f71414;
+  border-radius: 14px;
+  padding: 8px 17px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.errorBanner {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 12px 20px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 4px solid #c62828;
+}
+
+.closeError {
+  background: none;
+  border: none;
+  color: #c62828;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.closeError:hover {
+  opacity: 0.8;
+}
+
+.loading {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.approveButton {
+  width: 100px;
+  color: #fff;
+  background-color: #142ff7;
+  border-radius: 14px;
+  padding: 8px 17px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.disapproveButton {
+  width: 100px;
+  color: #fff;
+  background-color: #f71414;
+  border-radius: 14px;
+  padding: 8px 17px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+
+.columnHeaders {
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+}
+
+.tableBody {
+  flex-direction: column;
+  gap: 15px;
+  display: flex;
+}

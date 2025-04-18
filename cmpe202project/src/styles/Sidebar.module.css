@@ -17,6 +17,7 @@
 }
 
 .navList {
+  font-family: 'Inter';
   flex-direction: column;
   gap: 40px;
   display: flex;

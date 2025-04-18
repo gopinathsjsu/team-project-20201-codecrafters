@@ -8,7 +8,7 @@ function MainContent() {
   return (
     <main className={styles.mainContent}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Restaurants</h1>
+        <h1 className={styles.title}>Approve New Restaurants</h1>
         <div className={styles.profileContainer}>
          
 
