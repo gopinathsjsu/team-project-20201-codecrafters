@@ -12,6 +12,7 @@ import RestaurantPage from "./pages/RestaurantPage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ReservationProvider } from "./context/ReservationContext";
 import "./App.css";
+import BookingPage from "./pages/BookingPage";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route index path="/" element={<HomePage />} />
           <Route path="search" element={<SearchResultsPage />} />
           <Route path="restaurant/:name" element={<RestaurantPage />} />
+          <Route path="booking" element={<BookingPage />} />
         </Route>
         <Route path="/" element={<Layout />}>
           <Route path="login" element={<LoginPage />} />
