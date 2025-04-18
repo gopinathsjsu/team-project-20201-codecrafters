@@ -8,7 +8,9 @@ const CustomerNavBar = () => {
 
   return (
     <nav className="customer-navbar">
-      <div className="logo-container">Logo</div>
+      <div className="logo-container" onClick={() => navigate("/")}>
+        Logo
+      </div>
       <div className="search-login-container">
         <div className="search-bar">
           <img src={searchIcon} alt="search icon" />

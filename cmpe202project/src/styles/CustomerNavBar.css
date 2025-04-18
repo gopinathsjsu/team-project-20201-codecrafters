@@ -11,6 +11,7 @@
     right: 0;
     top: 0;
     font-family: Inter, sans-serif;
+    z-index: 1000;
 }
 
 .logo-container{
