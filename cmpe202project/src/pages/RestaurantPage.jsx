@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import RestaurantImage from "../assets/make-a-reservation-bg.png";
 import SearchComponent from "../components/SearchComponent";
@@ -7,8 +7,27 @@ import "../styles/RestaurantPage.css";
 
 const RestaurantPage = () => {
   const location = useLocation();
+  const [selectedRating, setSelectedRating] = useState(0); // Tracks the clicked rating
+  const [hoveredRating, setHoveredRating] = useState(0); // Tracks the hovered rating
+
+  const handleStarClick = (rating) => {
+    setSelectedRating(rating); // Set the clicked rating
+  };
+
+  const handleStarHover = (rating) => {
+    setHoveredRating(rating); // Set the hovered rating
+  };
+
+  const handleStarMouseLeave = () => {
+    setHoveredRating(0); // Reset hovered rating when mouse leaves
+  };
   const { name, rating, reviews, cuisine, bookedTimes, timeSlots } =
     location.state || {};
+
+  const handleSubmitReview = (e) => {
+    e.preventDefault();
+    console.log("Review submitted");
+  };
 
   return (
     <div className="restaurant-page">
@@ -46,7 +65,7 @@ const RestaurantPage = () => {
             <div className="available-times">
               <h3>Select a time</h3>
               <div className="availability">
-                {timeSlots.map((time, index) => (
+                {timeSlots?.map((time, index) => (
                   <span className="time-slot" key={index}>
                     {time}
                   </span>
@@ -136,6 +155,34 @@ const RestaurantPage = () => {
           </div>
           <button className="show-all-reviews-btn">Show all</button>
         </div>
+      </div>
+      {/* Leave a review */}
+      <div className="leave-review-container">
+        <h2>Leave a review</h2>
+        <form className="leave-review-form" onSubmit={handleSubmitReview}>
+          <div className="review-rating">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span
+                key={star}
+                className={`star ${
+                  (hoveredRating || selectedRating) >= star ? "filled" : "empty"
+                }`}
+                onClick={() => handleStarClick(star)}
+                onMouseEnter={() => handleStarHover(star)}
+                onMouseLeave={handleStarMouseLeave}
+              >
+                &#9733;
+              </span>
+            ))}
+          </div>
+          <textarea
+            placeholder="Write your review here..."
+            className="review-textarea"
+          ></textarea>
+          <button className="submit-review-btn" type="submit">
+            Submit Review
+          </button>
+        </form>
       </div>
     </div>
   );
