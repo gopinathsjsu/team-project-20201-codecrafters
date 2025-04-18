@@ -30,9 +30,11 @@ function ReservationTable() {
     <article className={styles.topStore}>
       <div className={styles.div11}>
         <div className={styles.div}>
-          <div className={styles.column3}><h2 className={styles.reservation}>Restaurants</h2></div>
-          <div className={styles.column4}><h3 className={styles.address}>Address</h3></div>
-          <div className={styles.column5}><h3 className={styles.customer}>Cuisine Type</h3></div>
+          <div className={styles.column3}><h2 className={styles.reservation}>Customer name</h2></div>
+          <div className={styles.column5}><h3 className={styles.customer}>Number of people</h3></div>
+          <div className={styles.column4}><h2 className={styles.address}>Phone Number</h2></div>
+          <div className={styles.column4}><h3 className={styles.address}>Time</h3></div>
+          
         </div>
         {restaurants.map((r) => (
           <div key={r.id} className={styles.div} style={{ marginTop: "20px" }}>
