@@ -1,0 +1,299 @@
+.restaurant-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: black;
+}
+
+.restaurant-image-container{
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    position: relative;
+}
+
+.restaurant-image-container img{
+    width: 100%;
+    height: 100%;
+    object-fit:cover;
+}
+
+.see-all-photos-btn{
+    position: absolute;
+    bottom: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+}
+
+.see-all-photos-btn:hover{
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid white;
+}
+
+.restaurant-page .restaurant-info{
+    width: 95%;
+}
+
+.restaurant-info h1{
+    font-size: 2.3rem;
+    margin: 0;
+    margin-top: 20px;
+}
+
+.restaurant-details{
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.restaurant-details .cuisine{
+    margin: 10px;
+}
+
+.restaurant-details .rating-container{
+    font-size: larger;
+}
+
+.description-and-reservation{
+    display: flex;
+    margin-top: 30px;
+    justify-content: center;
+    width: 100%;
+}
+
+.description-and-reservation .description{
+    width: 55%;
+    font-size: xx-large;
+    padding: 20px;
+    padding-left: 0;
+}
+
+.description-and-reservation .reservation{
+    width: max-content;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: max-content;
+    text-align: center;
+    border: 1px solid #0E2840;
+    border-radius: 10px;
+}
+
+.description-and-reservation .reservation .reservation-input-group{
+    flex-direction: column;
+}
+
+.restaurant-page .photos-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 500px;
+    width: 100%;
+    flex-direction: column;
+}
+
+.photos-container h2{
+    width: 95%;
+    font-size: xx-large;
+}
+
+.photos-grid{
+    display: flex;
+    width: 95%;
+    height: 350px;
+    gap: 10px;
+}
+
+.photos-grid > :first-child{
+    width: 55%;
+    min-width: 500px;
+    height: 350px;
+    overflow: hidden;
+}
+
+.photos-grid > :first-child img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 25px;
+}
+
+.photos-grid .right-photos{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    overflow: hidden;
+    height: 100%;
+}
+
+.right-photos .photo-thumbnail{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.right-photos img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 25px;
+}
+
+.right-photos .see-all-photos-btn{
+    position: absolute;
+    border-radius: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    top: 0;
+    transform: none;
+    border-radius: 25px;
+    font-size: x-large;
+}
+
+.reviews-container{
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 95%;
+    height: max-content;
+    min-height: 500px;
+}
+
+.reviews-container h2{
+    margin-bottom: 50px;
+    width: 100%;
+    font-size: xx-large;
+}
+
+.reviews-list{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    min-height: 300px;
+    background-color: rgb(245, 245, 245);
+    padding: 20px;
+    border-radius: 20px;
+    height: fit-content;
+    flex-direction: row;
+    gap: 20px;
+    width: 95%;
+}
+
+.reviews-list h3{
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    width: 100%;
+}
+
+.review-item{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-height: 150px;
+    border: 1px dashed #0E2840;
+    border-radius: 10px;
+    padding: 15px;
+    max-width: 400px;
+}
+
+.review-header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.reviews-container .star{
+    font-size: 1.5rem;
+}
+
+.show-all-reviews-btn{
+    border: none;
+    background-color: rgb(245, 245, 245);
+    position: absolute;
+    bottom: 22px;
+    font-size: larger;
+    cursor: pointer;
+}
+
+.leave-review-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 95%;
+    height: max-content;
+    margin-bottom: 50px;
+}
+
+.leave-review-container h2{
+    font-size: xx-large;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.leave-review-form{
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    justify-content: center;
+    width: 95%;
+    height: max-content;
+    gap: 10px;
+    background-color: white;
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.review-textarea{
+    height: 130px;
+    border-radius: 10px;
+    padding: 0px 5px;
+    font-size: x-large;
+    border: none;
+}
+
+.submit-review-btn{
+    background-color: #D33223;
+    font-weight: bold;
+    width: fit-content;
+    align-self: center;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: larger;
+}
+
+.leave-review-form .star {
+    font-size: 2.3rem;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+  
+.leave-review-form .star.filled {
+    color: #D33223;
+}
+
+.leave-review-form .star.empty {
+    color: #ccc;
+}
