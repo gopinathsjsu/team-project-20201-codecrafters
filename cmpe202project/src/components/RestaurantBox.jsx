@@ -47,11 +47,17 @@ const RestaurantBox = ({
         <div className="rating-container">
           <div className="star-rating">
             <span className="rating-value">{rating} </span>
-            <span className="star">&#9733;</span> {/* Star 1 */}
-            <span className="star">&#9733;</span> {/* Star 2 */}
-            <span className="star">&#9733;</span> {/* Star 3 */}
-            <span className="star">&#9733;</span> {/* Star 4 */}
-            <span className="star">&#9734;</span> {/* Star 5 (empty) */}
+            {[...Array(5)].map((_, index) => (
+              <span
+                key={index}
+                className="star"
+                style={{
+                  color: index < Math.floor(rating) ? "#D33223" : "#ccc",
+                }}
+              >
+                {index < Math.floor(rating) ? "★" : "☆"}
+              </span>
+            ))}
           </div>
           <div className="reviews">{reviews} reviews</div>
         </div>

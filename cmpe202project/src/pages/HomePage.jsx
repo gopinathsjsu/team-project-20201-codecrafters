@@ -1,94 +1,50 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import RestaurantBox from "../components/RestaurantBox";
 import SearchComponent from "../components/SearchComponent";
+import { getRestaurants } from "../utils/HomePageCalls";
 import "../styles/HomePage.css";
 
 const HomePage = () => {
-  // Simulate fetching top-rated restaurants
-  const getTopRatedRestaurants = () => {
-    return [
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-      {
-        name: "Sushi Palace",
-        rating: 4.7,
-        reviews: 2100,
-        cuisine: "Japanese • Sushi",
-        bookedTimes: 20,
-        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
-      },
-      {
-        name: "Taco Haven",
-        rating: 4.2,
-        reviews: 2100,
-        cuisine: "Mexican • Tacos",
-        bookedTimes: 10,
-        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
-      },
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-      {
-        name: "Sushi Palace",
-        rating: 4.7,
-        reviews: 2100,
-        cuisine: "Japanese • Sushi",
-        bookedTimes: 20,
-        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
-      },
-      {
-        name: "Taco Haven",
-        rating: 4.2,
-        reviews: 2100,
-        cuisine: "Mexican • Tacos",
-        bookedTimes: 10,
-        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
-      },
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-      {
-        name: "Sushi Palace",
-        rating: 4.7,
-        reviews: 2100,
-        cuisine: "Japanese • Sushi",
-        bookedTimes: 20,
-        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
-      },
-      {
-        name: "Taco Haven",
-        rating: 4.2,
-        reviews: 2100,
-        cuisine: "Mexican • Tacos",
-        bookedTimes: 10,
-        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
-      },
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-    ];
-  };
+  const [topRatedRestaurants, setTopRatedRestaurants] = useState([]);
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        // Check if topRatedRestaurants are already stored in sessionStorage
+        const cachedRestaurants = sessionStorage.getItem("topRatedRestaurants");
+        console.log("Cached Restaurants:", cachedRestaurants);
+        if (cachedRestaurants) {
+          // Parse the cached data and set it to state
+          setTopRatedRestaurants(JSON.parse(cachedRestaurants));
+        } else {
+          // Fetch from API if not in sessionStorage
+          const restaurants = await getRestaurants();
+          if (restaurants && restaurants.length > 0) {
+            // Sort by rating and take the top 5
+            const sortedRestaurants = restaurants
+              .sort((a, b) => b.rating - a.rating)
+              .slice(0, 5)
+              .map((restaurant) => ({
+                ...restaurant,
+                bookedTimes: restaurant.bookedTimes || [],
+                timeSlots: restaurant.timeSlots || [],
+              }));
+            setTopRatedRestaurants(sortedRestaurants);
+
+            // Store the sorted restaurants in sessionStorage for caching
+            sessionStorage.setItem(
+              "topRatedRestaurants",
+              JSON.stringify(sortedRestaurants)
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching top-rated restaurants:", error);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
 
   return (
     <main className="homePage">
@@ -116,12 +72,12 @@ const HomePage = () => {
             &#8249;
           </button>
           <div className="restaurant-list">
-            {getTopRatedRestaurants().map((restaurant, index) => (
+            {topRatedRestaurants.map((restaurant, index) => (
               <RestaurantBox
                 key={index}
                 name={restaurant.name}
-                rating={restaurant.rating}
-                reviews={restaurant.reviews}
+                rating={restaurant.averageRating}
+                reviews={restaurant.totalReviews}
                 cuisine={restaurant.cuisine}
                 bookedTimes={restaurant.bookedTimes}
                 timeSlots={restaurant.timeSlots}
