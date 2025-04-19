@@ -76,7 +76,7 @@ const RestaurantProfile = () => {
   return (
     <div className="restaurant-card-wrapper">
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", marginBottom: "20px" }}>
-        <h2 className="restaurant-title">🍋 Your Restaurant Listings</h2>
+        <h2 className="restaurant-title">Your Restaurant Listings</h2>
         <button onClick={() => setShowModal(true)} className="edit-btn">+ Add New Listing</button>
       </div>
 
