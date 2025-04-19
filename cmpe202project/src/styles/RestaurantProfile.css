@@ -37,10 +37,12 @@
 .form-group input,
 .form-group textarea {
   width: 100%;
+  max-width: 500px;
   padding: 0.75rem;
   border: 1px solid #ccc;
   border-radius: 0.5rem;
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
 /* 📷 Photo Preview */
@@ -48,6 +50,7 @@
   width: 100%;
   margin-top: 10px;
   border-radius: 8px;
+  object-fit: cover;
 }
 
 /* ✅ Buttons */
@@ -204,4 +207,20 @@
 .form-section h3 {
   color: #555;
   margin-bottom: 0.8rem;
+}
+
+/* 🔄 Scrollable edit form */
+.edit-form-scrollable {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.edit-form-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.edit-form-scrollable::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
 }
