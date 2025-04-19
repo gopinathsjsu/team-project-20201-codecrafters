@@ -80,7 +80,7 @@ const RestaurantProfile = () => {
             if (end) formData.append(`hours[${day}].end`, end);
           }
         } else if (key === "photo") {
-          if (newRestaurant.photo) {
+          if (newRestaurant.photo instanceof File) {
             formData.append("photo", newRestaurant.photo, newRestaurant.photo.name || "restaurant.jpg");
           }
         } else if (newRestaurant[key] !== undefined && newRestaurant[key] !== "") {
@@ -88,17 +88,16 @@ const RestaurantProfile = () => {
         }
       }
 
-      // Debug FormData (optional)
-      // for (let [key, value] of formData.entries()) console.log(`${key}: ${value}`);
-
       let response;
       if (editingIndex !== null) {
         const restaurantId = restaurants[editingIndex]._id;
-        response = await axios.put(`${BASE_URL}/api/restaurants/${restaurantId}`, formData, {
+
+        response = await axios.put(`${BASE_URL}/api/restaurants/${id}`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+
         const updated = [...restaurants];
         updated[editingIndex] = response.data;
         setRestaurants(updated);
@@ -108,6 +107,7 @@ const RestaurantProfile = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+
         setRestaurants([...restaurants, response.data]);
       }
 
@@ -217,6 +217,7 @@ const RestaurantProfile = () => {
                 onClick={() => {
                   setEditingIndex(index);
                   setNewRestaurant({ ...restaurant });
+                  setNewPhoto(null); // Reset preview in edit mode
                   setShowModal(true);
                 }}
               >
@@ -293,11 +294,17 @@ const RestaurantProfile = () => {
                 <button type="submit" className="save-btn">
                   {editingIndex !== null ? "Update" : "Add"}
                 </button>
-                <button type="button" onClick={() => {
-                  setShowModal(false);
-                  setEditingIndex(null);
-                  setNewPhoto(null);
-                }} className="edit-btn">Cancel</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingIndex(null);
+                    setNewPhoto(null);
+                  }}
+                  className="edit-btn"
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
@@ -308,3 +315,4 @@ const RestaurantProfile = () => {
 };
 
 export default RestaurantProfile;
+
