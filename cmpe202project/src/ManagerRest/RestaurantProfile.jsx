@@ -30,7 +30,7 @@ const RestaurantProfile = () => {
         }
 
         const response = await axios.get(
-          "http://team-project-20201-codecrafters-production.up.railway.app/api/restaurant/me",
+          "https://team-project-20201-codecrafters-production.up.railway.app/api/restaurant/me",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -86,7 +86,7 @@ const RestaurantProfile = () => {
       }
 
       const response = await axios.post(
-        "http://team-project-20201-codecrafters-production.up.railway.app/api/restaurants",
+        "https://team-project-20201-codecrafters-production.up.railway.app/api/restaurants",
         formData,
         {
           headers: {
@@ -146,7 +146,7 @@ const RestaurantProfile = () => {
       }
 
       const response = await axios.put(
-        `http://team-project-20201-codecrafters-production.up.railway.app/api/restaurants/${restaurantToUpdate._id}`,
+        `https://team-project-20201-codecrafters-production.up.railway.app/api/restaurants/${restaurantToUpdate._id}`,
         formData,
         {
           headers: {
@@ -174,7 +174,7 @@ const RestaurantProfile = () => {
       }
 
       await axios.delete(
-        `http://team-project-20201-codecrafters-production.up.railway.app/api/restaurants/${id}`,
+        `https://team-project-20201-codecrafters-production.up.railway.app/api/restaurants/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
