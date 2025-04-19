@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import "../styles/RestaurantProfile.css";
 
@@ -18,6 +17,7 @@ const RestaurantProfile = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [newPhoto, setNewPhoto] = useState(null);
 
   const [newRestaurant, setNewRestaurant] = useState({
     name: "",
@@ -29,8 +29,6 @@ const RestaurantProfile = () => {
     tableSizes: "",
     photo: null,
   });
-
-  const [newPhoto, setNewPhoto] = useState(null);
 
   const handleNewChange = (e) => {
     setNewRestaurant({ ...newRestaurant, [e.target.name]: e.target.value });
@@ -84,83 +82,88 @@ const RestaurantProfile = () => {
         {restaurants.map((restaurant, index) => (
           <div className="restaurant-card" key={index}>
             {editingIndex === index ? (
-              <form onSubmit={handleEditSubmit}>
-                {["name", "address", "contact", "description", "hours", "bookingTimes", "tableSizes"].map((field) => (
-                  <div className="form-group" key={field}>
-                    <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-                    {field === "description" ? (
-                      <textarea
-                        name={field}
-                        value={restaurant[field]}
-                        onChange={handleEditChange}
-                        className="form-input"
-                        rows={3}
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        name={field}
-                        value={restaurant[field]}
-                        onChange={handleEditChange}
-                        className="form-input"
-                      />
-                    )}
-                  </div>
-                ))}
-                {restaurant.photo ? (
-                  <div className="form-group">
-                    <label className="form-label">Current Photo</label>
-                    <img src={restaurant.photo} alt="Current" className="photo-preview" />
-                    <div style={{ marginTop: "0.5rem", display: "flex", gap: "10px" }}>
-                      <button
-                        type="button"
-                        className="edit-btn"
-                        onClick={() => {
-                          const updated = [...restaurants];
-                          updated[index].photo = null;
-                          setRestaurants(updated);
-                        }}
-                      >
-                        Remove
-                      </button>
-                      <label className="edit-btn" style={{ cursor: "pointer" }}>
-                        Replace
-                        <input
-                          type="file"
-                          accept="image/*"
-                          style={{ display: "none" }}
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file) {
-                              const updated = [...restaurants];
-                              updated[index].photo = URL.createObjectURL(file);
-                              setRestaurants(updated);
-                            }
-                          }}
+              <div className="edit-form-scrollable">
+                <form onSubmit={handleEditSubmit}>
+                  {["name", "address", "contact", "description", "hours", "bookingTimes", "tableSizes"].map((field) => (
+                    <div className="form-group" key={field}>
+                      <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                      {field === "description" ? (
+                        <textarea
+                          name={field}
+                          value={restaurant[field]}
+                          onChange={handleEditChange}
+                          className="form-input"
+                          rows={3}
                         />
-                      </label>
+                      ) : (
+                        <input
+                          type="text"
+                          name={field}
+                          value={restaurant[field]}
+                          onChange={handleEditChange}
+                          className="form-input"
+                        />
+                      )}
                     </div>
+                  ))}
+                  {restaurant.photo ? (
+                    <div className="form-group">
+                      <label className="form-label">Current Photo</label>
+                      <img src={restaurant.photo} alt="Current" className="photo-preview" />
+                      <div style={{ marginTop: "0.5rem", display: "flex", gap: "10px" }}>
+                        <button
+                          type="button"
+                          className="edit-btn"
+                          onClick={() => {
+                            const updated = [...restaurants];
+                            updated[index].photo = null;
+                            setRestaurants(updated);
+                          }}
+                        >
+                          Remove
+                        </button>
+                        <label className="edit-btn" style={{ cursor: "pointer" }}>
+                          Replace
+                          <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: "none" }}
+                            onChange={(e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                const updated = [...restaurants];
+                                updated[index].photo = URL.createObjectURL(file);
+                                setRestaurants(updated);
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="form-group">
+                      <label className="form-label">Add Photo</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="form-input"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const updated = [...restaurants];
+                            updated[index].photo = URL.createObjectURL(file);
+                            setRestaurants(updated);
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
+                    <button type="submit" className="save-btn">Save</button>
+                    <button type="button" className="edit-btn" onClick={() => setEditingIndex(null)}>Cancel</button>
                   </div>
-                ) : (
-                  <div className="form-group">
-                    <label className="form-label">Add Photo</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="form-input"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const updated = [...restaurants];
-                          updated[index].photo = URL.createObjectURL(file);
-                          setRestaurants(updated);
-                        }
-                      }}
-                    />
-                  </div>
-                )}
-                <button type="submit" className="save-btn">Save</button>
-              </form>
+                </form>
+              </div>
             ) : (
               <>
                 <h3>{restaurant.name}</h3>
