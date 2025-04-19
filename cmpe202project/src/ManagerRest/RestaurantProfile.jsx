@@ -23,12 +23,11 @@ const RestaurantProfile = () => {
     phone: "",
     email: "",
     cuisine: "",
-    capacity: "",
-    averageRating: "",
+    capacity: 0,
+    averageRating: 0,
     hours: {},
-    bookingTimes: "",
-    tableSizes: "",
-    photo: null,
+    images: [],
+    deletedImages: []
   });
 
   useEffect(() => {
@@ -54,15 +53,31 @@ const RestaurantProfile = () => {
   }, []);
 
   const handleNewChange = (e) => {
-    setNewRestaurant({ ...newRestaurant, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setNewRestaurant(prev => ({
+      ...prev,
+      [name]: name === "capacity" || name === "averageRating" ? Number(value) : value
+    }));
   };
 
   const handleNewPhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setNewRestaurant({ ...newRestaurant, photo: file });
+      setNewRestaurant(prev => ({
+        ...prev,
+        images: [file]
+      }));
       setNewPhoto(file);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setNewRestaurant(prev => ({
+      ...prev,
+      images: [],
+      deletedImages: [...prev.deletedImages, ...prev.images.filter(img => typeof img === 'string')]
+    }));
+    setNewPhoto(null);
   };
 
   const handleNewSubmit = async (e) => {
@@ -72,30 +87,42 @@ const RestaurantProfile = () => {
       if (!token) throw new Error("No authentication token found");
 
       const formData = new FormData();
-      for (const key in newRestaurant) {
-        if (key === "hours") {
-          for (const day in newRestaurant.hours) {
-            const { start, end } = newRestaurant.hours[day];
-            if (start) formData.append(`hours[${day}].start`, start);
-            if (end) formData.append(`hours[${day}].end`, end);
-          }
-        } else if (key === "photo") {
-          if (newRestaurant.photo instanceof File) {
-            formData.append("photo", newRestaurant.photo, newRestaurant.photo.name || "restaurant.jpg");
-          }
-        } else if (newRestaurant[key] !== undefined && newRestaurant[key] !== "") {
+
+      // Append simple fields
+      Object.keys(newRestaurant).forEach(key => {
+        if (key === 'hours') {
+          Object.entries(newRestaurant.hours).forEach(([day, {start, end}]) => {
+            if (start && end) {
+              formData.append(`hours[${day}].start`, start);
+              formData.append(`hours[${day}].end`, end);
+            }
+          });
+        } 
+        else if (key === 'images') {
+          newRestaurant.images.forEach(file => {
+            if (file instanceof File) {
+              formData.append('images', file);
+            }
+          });
+        }
+        else if (key === 'deletedImages') {
+          newRestaurant.deletedImages.forEach(url => {
+            formData.append('deletedImages', url);
+          });
+        }
+        else if (key !== 'deletedImages') {
           formData.append(key, newRestaurant[key]);
         }
-      }
+      });
 
       let response;
       if (editingIndex !== null) {
         const restaurantId = restaurants[editingIndex]._id;
-
-        response = await axios.put(`${BASE_URL}/api/restaurants/${id}`, formData, {
+        response = await axios.put(`${BASE_URL}/api/restaurants/${restaurantId}`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'multipart/form-data'
+          }
         });
 
         const updated = [...restaurants];
@@ -105,12 +132,13 @@ const RestaurantProfile = () => {
         response = await axios.post(`${BASE_URL}/api/restaurants`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'multipart/form-data'
+          }
         });
-
         setRestaurants([...restaurants, response.data]);
       }
 
+      // Reset form
       setNewRestaurant({
         name: "",
         description: "",
@@ -121,22 +149,18 @@ const RestaurantProfile = () => {
         phone: "",
         email: "",
         cuisine: "",
-        capacity: "",
-        averageRating: "",
+        capacity: 0,
+        averageRating: 0,
         hours: {},
-        bookingTimes: "",
-        tableSizes: "",
-        photo: null,
+        images: [],
+        deletedImages: []
       });
       setNewPhoto(null);
       setShowModal(false);
       setEditingIndex(null);
     } catch (err) {
       console.error("Error submitting restaurant:", err);
-      if (err.response?.data) {
-        console.error("Backend response:", err.response.data);
-      }
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
     }
   };
 
@@ -161,12 +185,11 @@ const RestaurantProfile = () => {
               phone: "",
               email: "",
               cuisine: "",
-              capacity: "",
-              averageRating: "",
+              capacity: 0,
+              averageRating: 0,
               hours: {},
-              bookingTimes: "",
-              tableSizes: "",
-              photo: null,
+              images: [],
+              deletedImages: []
             });
             setNewPhoto(null);
             setEditingIndex(null);
@@ -207,17 +230,23 @@ const RestaurantProfile = () => {
               <p><strong>Cuisine:</strong> {restaurant.cuisine}</p>
               <p><strong>Capacity:</strong> {restaurant.capacity}</p>
               <p><strong>Rating:</strong> {restaurant.averageRating}</p>
-              <p><strong>Booking Times:</strong> {restaurant.bookingTimes}</p>
-              <p><strong>Table Sizes:</strong> {restaurant.tableSizes}</p>
-              {restaurant.photo && (
-                <img src={restaurant.photo} alt="Preview" className="photo-preview" />
+              {restaurant.images?.[0] && (
+                <img 
+                  src={restaurant.images[0]} 
+                  alt="Preview" 
+                  className="photo-preview" 
+                />
               )}
               <button
                 className="edit-btn"
                 onClick={() => {
                   setEditingIndex(index);
-                  setNewRestaurant({ ...restaurant });
-                  setNewPhoto(null); // Reset preview in edit mode
+                  setNewRestaurant({ 
+                    ...restaurant,
+                    images: restaurant.images || [],
+                    deletedImages: []
+                  });
+                  setNewPhoto(null);
                   setShowModal(true);
                 }}
               >
@@ -235,12 +264,12 @@ const RestaurantProfile = () => {
             <form onSubmit={handleNewSubmit}>
               {[
                 "name", "description", "address", "city", "state", "zip", "phone",
-                "email", "cuisine", "capacity", "averageRating", "bookingTimes", "tableSizes"
+                "email", "cuisine"
               ].map((field) => (
                 <div className="form-group" key={field}>
                   <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
                   <input
-                    type={field === "capacity" || field === "averageRating" ? "number" : "text"}
+                    type="text"
                     name={field}
                     value={newRestaurant[field] || ""}
                     onChange={handleNewChange}
@@ -248,6 +277,31 @@ const RestaurantProfile = () => {
                   />
                 </div>
               ))}
+
+              <div className="form-group">
+                <label className="form-label">Capacity</label>
+                <input
+                  type="number"
+                  name="capacity"
+                  value={newRestaurant.capacity}
+                  onChange={handleNewChange}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Average Rating</label>
+                <input
+                  type="number"
+                  name="averageRating"
+                  value={newRestaurant.averageRating}
+                  onChange={handleNewChange}
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  className="form-input"
+                />
+              </div>
 
               <h4>Operating Hours (only fill if open)</h4>
               {daysOfWeek.map((day) => (
@@ -258,7 +312,7 @@ const RestaurantProfile = () => {
                       type="time"
                       value={newRestaurant.hours?.[day]?.start || ""}
                       onChange={(e) =>
-                        setNewRestaurant((prev) => ({
+                        setNewRestaurant(prev => ({
                           ...prev,
                           hours: {
                             ...prev.hours,
@@ -271,7 +325,7 @@ const RestaurantProfile = () => {
                       type="time"
                       value={newRestaurant.hours?.[day]?.end || ""}
                       onChange={(e) =>
-                        setNewRestaurant((prev) => ({
+                        setNewRestaurant(prev => ({
                           ...prev,
                           hours: {
                             ...prev.hours,
@@ -286,8 +340,39 @@ const RestaurantProfile = () => {
 
               <div className="form-group">
                 <label className="form-label">Photo</label>
-                <input type="file" accept="image/*" onChange={handleNewPhotoChange} className="form-input" />
-                {newPhoto && <img src={URL.createObjectURL(newPhoto)} alt="Preview" className="photo-preview" />}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleNewPhotoChange} 
+                  className="form-input" 
+                />
+                {(newPhoto || newRestaurant.images?.[0]) && (
+                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                    <img 
+                      src={newPhoto ? URL.createObjectURL(newPhoto) : newRestaurant.images[0]} 
+                      alt="Preview" 
+                      className="photo-preview" 
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      style={{
+                        position: 'absolute',
+                        top: '5px',
+                        right: '5px',
+                        background: 'red',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '25px',
+                        height: '25px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -315,4 +400,3 @@ const RestaurantProfile = () => {
 };
 
 export default RestaurantProfile;
-
