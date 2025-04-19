@@ -1,37 +1,79 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import axios from "axios";
 
 function SignupForm() {
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Signing up with", { fullName, email, password, role });
+
+    if (!role) {
+      alert("Please select a role.");
+      return;
+    }
+
+    const payload = {
+      email,
+      phone,
+      password,
+      roles: [role], // Now uses correct role format
+    };
+
+    console.log("Sending signup payload:", JSON.stringify(payload, null, 2));
+
+    try {
+      const res = await axios.post(
+        "https://team-project-20201-codecrafters-production.up.railway.app/signUp",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+
+      console.log("✅ Signup success:", res.data);
+      alert("Signup successful!");
+      navigate("/"); // Redirect to login
+    } catch (error) {
+      console.error("Signup error:", error);
+
+      if (error.response) {
+        console.error("Status Code:", error.response.status);
+        console.error("Response Data:", error.response.data);
+        alert(
+          "Signup failed:\n" +
+            "Status: " + error.response.status + "\n" +
+            "Details: " +
+            (typeof error.response.data === "string"
+              ? error.response.data
+              : JSON.stringify(error.response.data))
+        );
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        alert("Signup failed: No response from server.");
+      } else {
+        console.error("General Error:", error.message);
+        alert("Signup failed: " + error.message);
+      }
+    }
   };
 
   return (
     <div className="auth">
-      {" "}
-      {/* Added auth class for consistency with LoginForm */}
       <div className="container">
         <h2>Account Signup</h2>
         <p>Become a member and enjoy exclusive promotions.</p>
 
         <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            className="input-field"
-            required
-          />
-
           <input
             type="email"
             placeholder="Email Address"
@@ -41,7 +83,15 @@ function SignupForm() {
             required
           />
 
-          {/* Password Field with Eye Icon */}
+          <input
+            type="tel"
+            placeholder="Phone Number"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="input-field"
+            required
+          />
+
           <div className="password-container">
             <input
               type={showPassword ? "text" : "password"}
@@ -61,7 +111,6 @@ function SignupForm() {
             </button>
           </div>
 
-          {/* Role Selection */}
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
@@ -69,8 +118,8 @@ function SignupForm() {
             required
           >
             <option value="">Select Role</option>
-            <option value="customer">Customer</option>
-            <option value="restaurant">Restaurant Owner</option>
+            <option value="CUSTOMER">Customer</option>
+            <option value="RESTAURANT_MANAGER">Restaurant Owner</option>
           </select>
 
           <button type="submit" className="btn">
