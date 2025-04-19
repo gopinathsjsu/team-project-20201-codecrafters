@@ -46,9 +46,9 @@ jobs:
         id: release_tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: Decode GCP credentials
+      - name: Write GCP credentials to file
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
-        run: echo "${{ secrets.GCP_CREDENTIALS }}" | base64 -d > /tmp/key.json
+        run: echo '${{ secrets.GCP_CREDENTIALS }}' > /tmp/key.json
 
       - name: Authenticate Docker with GCR
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
