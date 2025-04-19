@@ -65,7 +65,7 @@
 .description-and-reservation{
     display: flex;
     margin-top: 30px;
-    justify-content: center;
+    justify-content: space-between;
     width: 100%;
 }
 
@@ -77,8 +77,9 @@
 }
 
 .description-and-reservation .reservation{
-    width: max-content;
-    padding: 25px;
+    width: 25%;
+    padding: 30px;
+    margin-right: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -110,14 +111,14 @@
 .photos-grid{
     display: flex;
     width: 95%;
-    height: 350px;
+    height: 500px;
     gap: 10px;
 }
 
 .photos-grid > :first-child{
-    width: 55%;
+    width: 130%;
     min-width: 500px;
-    height: 350px;
+    height: 100%;
     overflow: hidden;
 }
 
