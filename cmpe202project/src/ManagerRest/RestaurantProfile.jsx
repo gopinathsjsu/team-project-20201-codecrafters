@@ -1,20 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/RestaurantProfile.css";
+import axios from "axios";
 
 const RestaurantProfile = () => {
-  const [restaurants, setRestaurants] = useState([
-    {
-      name: "Lemon Diner",
-      address: "123 Citrus St, San Jose, CA",
-      contact: "(408) 123-4567",
-      description: "A cozy diner specializing in lemon-inspired cuisine.",
-      hours: "Mon-Sun: 10am - 10pm",
-      bookingTimes: "11:00, 13:00, 18:00",
-      tableSizes: "2, 4, 6",
-      photo: null,
-    },
-  ]);
-
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [newPhoto, setNewPhoto] = useState(null);
@@ -30,6 +21,35 @@ const RestaurantProfile = () => {
     photo: null,
   });
 
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+
+        const response = await axios.get(
+          "http://team-project-20201-codecrafters-production.up.railway.app/api/restaurant/me",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setRestaurants(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+        console.error("Error fetching restaurants:", err);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
+
   const handleNewChange = (e) => {
     setNewRestaurant({ ...newRestaurant, [e.target.name]: e.target.value });
   };
@@ -43,21 +63,56 @@ const RestaurantProfile = () => {
     }
   };
 
-  const handleNewSubmit = (e) => {
+  const handleNewSubmit = async (e) => {
     e.preventDefault();
-    setRestaurants([...restaurants, newRestaurant]);
-    setNewRestaurant({
-      name: "",
-      address: "",
-      contact: "",
-      description: "",
-      hours: "",
-      bookingTimes: "",
-      tableSizes: "",
-      photo: null,
-    });
-    setNewPhoto(null);
-    setShowModal(false);
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const formData = new FormData();
+      formData.append("name", newRestaurant.name);
+      formData.append("address", newRestaurant.address);
+      formData.append("contact", newRestaurant.contact);
+      formData.append("description", newRestaurant.description);
+      formData.append("hours", newRestaurant.hours);
+      formData.append("bookingTimes", newRestaurant.bookingTimes);
+      formData.append("tableSizes", newRestaurant.tableSizes);
+
+      if (newPhoto) {
+        const blob = await fetch(newPhoto).then(r => r.blob());
+        formData.append("photo", blob, "restaurant.jpg");
+      }
+
+      const response = await axios.post(
+        "http://team-project-20201-codecrafters-production.up.railway.app/api/restaurants",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setRestaurants([...restaurants, response.data]);
+      setNewRestaurant({
+        name: "",
+        address: "",
+        contact: "",
+        description: "",
+        hours: "",
+        bookingTimes: "",
+        tableSizes: "",
+        photo: null,
+      });
+      setNewPhoto(null);
+      setShowModal(false);
+    } catch (err) {
+      console.error("Error creating restaurant:", err);
+      setError(err.message);
+    }
   };
 
   const handleEditChange = (e) => {
@@ -66,21 +121,95 @@ const RestaurantProfile = () => {
     setRestaurants(updated);
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
-    setEditingIndex(null);
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const restaurantToUpdate = restaurants[editingIndex];
+      const formData = new FormData();
+      formData.append("name", restaurantToUpdate.name);
+      formData.append("address", restaurantToUpdate.address);
+      formData.append("contact", restaurantToUpdate.contact);
+      formData.append("description", restaurantToUpdate.description);
+      formData.append("hours", restaurantToUpdate.hours);
+      formData.append("bookingTimes", restaurantToUpdate.bookingTimes);
+      formData.append("tableSizes", restaurantToUpdate.tableSizes);
+
+      if (restaurantToUpdate.photo && typeof restaurantToUpdate.photo !== "string") {
+        const blob = await fetch(restaurantToUpdate.photo).then(r => r.blob());
+        formData.append("photo", blob, "restaurant.jpg");
+      }
+
+      const response = await axios.put(
+        `http://team-project-20201-codecrafters-production.up.railway.app/api/restaurants/${restaurantToUpdate._id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const updatedRestaurants = [...restaurants];
+      updatedRestaurants[editingIndex] = response.data;
+      setRestaurants(updatedRestaurants);
+      setEditingIndex(null);
+    } catch (err) {
+      console.error("Error updating restaurant:", err);
+      setError(err.message);
+    }
   };
+
+  const handleDeleteRestaurant = async (id) => {
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      await axios.delete(
+        `http://team-project-20201-codecrafters-production.up.railway.app/api/restaurants/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setRestaurants(restaurants.filter((restaurant) => restaurant._id !== id));
+    } catch (err) {
+      console.error("Error deleting restaurant:", err);
+      setError(err.message);
+    }
+  };
+
+  if (loading) {
+    return <div className="restaurant-card-wrapper">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="restaurant-card-wrapper">Error: {error}</div>;
+  }
 
   return (
     <div className="restaurant-card-wrapper">
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", marginBottom: "20px" }}>
         <h2 className="restaurant-title">Your Restaurant Listings</h2>
-        <button onClick={() => setShowModal(true)} className="edit-btn">+ Add New Listing</button>
+        {(restaurants.length === 0 || restaurants.every(r => !r.name)) && (
+          <button onClick={() => setShowModal(true)} className="edit-btn">
+            + Add New Listing
+          </button>
+        )}
       </div>
 
       <div className="restaurant-grid">
         {restaurants.map((restaurant, index) => (
-          <div className="restaurant-card" key={index}>
+          <div className="restaurant-card" key={restaurant._id}>
             {editingIndex === index ? (
               <div className="edit-form-scrollable">
                 <form onSubmit={handleEditSubmit}>
@@ -109,7 +238,13 @@ const RestaurantProfile = () => {
                   {restaurant.photo ? (
                     <div className="form-group">
                       <label className="form-label">Current Photo</label>
-                      <img src={restaurant.photo} alt="Current" className="photo-preview" />
+                      <img
+                        src={typeof restaurant.photo === "string" ?
+                          restaurant.photo :
+                          URL.createObjectURL(restaurant.photo)}
+                        alt="Current"
+                        className="photo-preview"
+                      />
                       <div style={{ marginTop: "0.5rem", display: "flex", gap: "10px" }}>
                         <button
                           type="button"
@@ -132,7 +267,7 @@ const RestaurantProfile = () => {
                               const file = e.target.files[0];
                               if (file) {
                                 const updated = [...restaurants];
-                                updated[index].photo = URL.createObjectURL(file);
+                                updated[index].photo = file;
                                 setRestaurants(updated);
                               }
                             }}
@@ -151,7 +286,7 @@ const RestaurantProfile = () => {
                           const file = e.target.files[0];
                           if (file) {
                             const updated = [...restaurants];
-                            updated[index].photo = URL.createObjectURL(file);
+                            updated[index].photo = file;
                             setRestaurants(updated);
                           }
                         }}
@@ -173,8 +308,25 @@ const RestaurantProfile = () => {
                 <p><strong>Hours:</strong> {restaurant.hours}</p>
                 <p><strong>Booking Times:</strong> {restaurant.bookingTimes}</p>
                 <p><strong>Table Sizes:</strong> {restaurant.tableSizes}</p>
-                {restaurant.photo && <img src={restaurant.photo} alt="Preview" className="photo-preview" />}
-                <button onClick={() => setEditingIndex(index)} className="edit-btn">Edit</button>
+                {restaurant.photo && (
+                  <img
+                    src={typeof restaurant.photo === "string" ?
+                      restaurant.photo :
+                      URL.createObjectURL(restaurant.photo)}
+                    alt="Preview"
+                    className="photo-preview"
+                  />
+                )}
+                <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                  <button onClick={() => setEditingIndex(index)} className="edit-btn">Edit</button>
+                  <button
+                    onClick={() => handleDeleteRestaurant(restaurant._id)}
+                    className="edit-btn"
+                    style={{ backgroundColor: "#ff4444" }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </>
             )}
           </div>
