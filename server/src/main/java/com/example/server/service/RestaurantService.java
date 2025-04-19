@@ -226,4 +226,8 @@ public class RestaurantService {
         String fileName = parts[parts.length - 1];
         return fileName.substring(0, fileName.lastIndexOf("."));
     }
+
+    public List<Restaurant> getRestaurantByOwner(UserInfo user) {
+        return restaurantRepository.findByUserInfo_Id(user.getId());
+    }
 }
