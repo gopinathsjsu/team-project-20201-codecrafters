@@ -1,86 +1,223 @@
+
 import React, { useState } from "react";
 import "../styles/RestaurantProfile.css";
 
 const RestaurantProfile = () => {
-  const [restaurant, setRestaurant] = useState({
-    name: "Lemon Diner",
-    address: "123 Citrus St, San Jose, CA",
-    contact: "(408) 123-4567",
-    description: "A cozy diner specializing in lemon-inspired cuisine.",
-    hours: "Mon-Sun: 10am - 10pm",
-    bookingTimes: "11:00, 13:00, 18:00",
-    tableSizes: "2, 4, 6",
-    status: "Active",
+  const [restaurants, setRestaurants] = useState([
+    {
+      name: "Lemon Diner",
+      address: "123 Citrus St, San Jose, CA",
+      contact: "(408) 123-4567",
+      description: "A cozy diner specializing in lemon-inspired cuisine.",
+      hours: "Mon-Sun: 10am - 10pm",
+      bookingTimes: "11:00, 13:00, 18:00",
+      tableSizes: "2, 4, 6",
+      photo: null,
+    },
+  ]);
+
+  const [showModal, setShowModal] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
+
+  const [newRestaurant, setNewRestaurant] = useState({
+    name: "",
+    address: "",
+    contact: "",
+    description: "",
+    hours: "",
+    bookingTimes: "",
+    tableSizes: "",
+    photo: null,
   });
 
-  const [photo, setPhoto] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [newPhoto, setNewPhoto] = useState(null);
 
-  const handleChange = (e) => {
-    setRestaurant({ ...restaurant, [e.target.name]: e.target.value });
+  const handleNewChange = (e) => {
+    setNewRestaurant({ ...newRestaurant, [e.target.name]: e.target.value });
   };
 
-  const handlePhotoChange = (e) => {
+  const handleNewPhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setPhoto(URL.createObjectURL(file));
+      const preview = URL.createObjectURL(file);
+      setNewRestaurant({ ...newRestaurant, photo: preview });
+      setNewPhoto(preview);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleNewSubmit = (e) => {
     e.preventDefault();
-    console.log("Updated restaurant:", restaurant);
-    setIsEditing(false);
+    setRestaurants([...restaurants, newRestaurant]);
+    setNewRestaurant({
+      name: "",
+      address: "",
+      contact: "",
+      description: "",
+      hours: "",
+      bookingTimes: "",
+      tableSizes: "",
+      photo: null,
+    });
+    setNewPhoto(null);
+    setShowModal(false);
+  };
+
+  const handleEditChange = (e) => {
+    const updated = [...restaurants];
+    updated[editingIndex][e.target.name] = e.target.value;
+    setRestaurants(updated);
+  };
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+    setEditingIndex(null);
   };
 
   return (
-    <div className="profile-container">
-      <div className="profile-card">
-        <h2 className="profile-title">Restaurant Manager Profile</h2>
-
-        {isEditing ? (
-          <form onSubmit={handleSubmit} className="profile-form">
-            <div className="form-section">
-              <h3>Basic Info</h3>
-              <div className="form-group"><label>Name</label><input type="text" name="name" value={restaurant.name} onChange={handleChange} /></div>
-              <div className="form-group"><label>Address</label><input type="text" name="address" value={restaurant.address} onChange={handleChange} /></div>
-              <div className="form-group"><label>Contact</label><input type="text" name="contact" value={restaurant.contact} onChange={handleChange} /></div>
-            </div>
-
-            <div className="form-section">
-              <h3>Description</h3>
-              <div className="form-group"><label>Description</label><textarea name="description" value={restaurant.description} onChange={handleChange} rows={3} /></div>
-            </div>
-
-            <div className="form-section">
-              <h3>Settings</h3>
-              <div className="form-group"><label>Hours</label><input type="text" name="hours" value={restaurant.hours} onChange={handleChange} /></div>
-              <div className="form-group"><label>Booking Times</label><input type="text" name="bookingTimes" value={restaurant.bookingTimes} onChange={handleChange} /></div>
-              <div className="form-group"><label>Table Sizes</label><input type="text" name="tableSizes" value={restaurant.tableSizes} onChange={handleChange} /></div>
-            </div>
-
-            <div className="form-group">
-              <label>Photo</label>
-              <input type="file" accept="image/*" onChange={handlePhotoChange} />
-              {photo && <img src={photo} alt="Preview" className="photo-preview" />}
-            </div>
-
-            <button type="submit" className="save-btn">Save</button>
-          </form>
-        ) : (
-          <div className="profile-display">
-            <p><strong>Name:</strong> {restaurant.name}</p>
-            <p><strong>Address:</strong> {restaurant.address}</p>
-            <p><strong>Contact:</strong> {restaurant.contact}</p>
-            <p><strong>Description:</strong> {restaurant.description}</p>
-            <p><strong>Hours:</strong> {restaurant.hours}</p>
-            <p><strong>Booking Times:</strong> {restaurant.bookingTimes}</p>
-            <p><strong>Table Sizes:</strong> {restaurant.tableSizes}</p>
-            {photo && <img src={photo} alt="Preview" className="photo-preview" />}
-            <button onClick={() => setIsEditing(true)} className="edit-btn">Edit</button>
-          </div>
-        )}
+    <div className="restaurant-card-wrapper">
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", marginBottom: "20px" }}>
+        <h2 className="restaurant-title">🍋 Your Restaurant Listings</h2>
+        <button onClick={() => setShowModal(true)} className="edit-btn">+ Add New Listing</button>
       </div>
+
+      <div className="restaurant-grid">
+        {restaurants.map((restaurant, index) => (
+          <div className="restaurant-card" key={index}>
+            {editingIndex === index ? (
+              <form onSubmit={handleEditSubmit}>
+                {["name", "address", "contact", "description", "hours", "bookingTimes", "tableSizes"].map((field) => (
+                  <div className="form-group" key={field}>
+                    <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                    {field === "description" ? (
+                      <textarea
+                        name={field}
+                        value={restaurant[field]}
+                        onChange={handleEditChange}
+                        className="form-input"
+                        rows={3}
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        name={field}
+                        value={restaurant[field]}
+                        onChange={handleEditChange}
+                        className="form-input"
+                      />
+                    )}
+                  </div>
+                ))}
+                {restaurant.photo ? (
+                  <div className="form-group">
+                    <label className="form-label">Current Photo</label>
+                    <img src={restaurant.photo} alt="Current" className="photo-preview" />
+                    <div style={{ marginTop: "0.5rem", display: "flex", gap: "10px" }}>
+                      <button
+                        type="button"
+                        className="edit-btn"
+                        onClick={() => {
+                          const updated = [...restaurants];
+                          updated[index].photo = null;
+                          setRestaurants(updated);
+                        }}
+                      >
+                        Remove
+                      </button>
+                      <label className="edit-btn" style={{ cursor: "pointer" }}>
+                        Replace
+                        <input
+                          type="file"
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const updated = [...restaurants];
+                              updated[index].photo = URL.createObjectURL(file);
+                              setRestaurants(updated);
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="form-group">
+                    <label className="form-label">Add Photo</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="form-input"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const updated = [...restaurants];
+                          updated[index].photo = URL.createObjectURL(file);
+                          setRestaurants(updated);
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+                <button type="submit" className="save-btn">Save</button>
+              </form>
+            ) : (
+              <>
+                <h3>{restaurant.name}</h3>
+                <p><strong>Address:</strong> {restaurant.address}</p>
+                <p><strong>Contact:</strong> {restaurant.contact}</p>
+                <p><strong>Description:</strong> {restaurant.description}</p>
+                <p><strong>Hours:</strong> {restaurant.hours}</p>
+                <p><strong>Booking Times:</strong> {restaurant.bookingTimes}</p>
+                <p><strong>Table Sizes:</strong> {restaurant.tableSizes}</p>
+                {restaurant.photo && <img src={restaurant.photo} alt="Preview" className="photo-preview" />}
+                <button onClick={() => setEditingIndex(index)} className="edit-btn">Edit</button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Add New Restaurant Listing</h3>
+            <form onSubmit={handleNewSubmit}>
+              {["name", "address", "contact", "description", "hours", "bookingTimes", "tableSizes"].map((field) => (
+                <div className="form-group" key={field}>
+                  <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                  {field === "description" ? (
+                    <textarea
+                      name={field}
+                      value={newRestaurant[field]}
+                      onChange={handleNewChange}
+                      className="form-input"
+                      rows={3}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      name={field}
+                      value={newRestaurant[field]}
+                      onChange={handleNewChange}
+                      className="form-input"
+                    />
+                  )}
+                </div>
+              ))}
+              <div className="form-group">
+                <label className="form-label">Photo</label>
+                <input type="file" accept="image/*" onChange={handleNewPhotoChange} className="form-input" />
+                {newPhoto && <img src={newPhoto} alt="Preview" className="photo-preview" />}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <button type="submit" className="save-btn">Add</button>
+                <button onClick={() => setShowModal(false)} className="edit-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
