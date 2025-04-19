@@ -51,6 +51,8 @@
 
 .reviews{
     align-self: center;
+    translate: 0 2px;
+    margin-left: 5px;
 }
 
 .restaurant-cuisine{
