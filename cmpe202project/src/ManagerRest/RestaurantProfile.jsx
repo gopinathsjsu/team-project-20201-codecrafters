@@ -1,6 +1,11 @@
+
+
 import React, { useState, useEffect } from "react";
 import "../styles/RestaurantProfile.css";
 import axios from "axios";
+import { BASE_URL } from "../config/api";
+
+const daysOfWeek = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 
 const RestaurantProfile = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -12,10 +17,17 @@ const RestaurantProfile = () => {
 
   const [newRestaurant, setNewRestaurant] = useState({
     name: "",
-    address: "",
-    contact: "",
     description: "",
-    hours: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    phone: "",
+    email: "",
+    cuisine: "",
+    capacity: "",
+    averageRating: "",
+    hours: {},
     bookingTimes: "",
     tableSizes: "",
     photo: null,
@@ -25,25 +37,19 @@ const RestaurantProfile = () => {
     const fetchRestaurants = async () => {
       try {
         const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
+        if (!token) throw new Error("No authentication token found");
 
-        const response = await axios.get(
-          "https://team-project-20201-codecrafters-production.up.railway.app/api/restaurant/me",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get(`${BASE_URL}/api/restaurants/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         setRestaurants(response.data);
         setLoading(false);
       } catch (err) {
         setError(err.message);
         setLoading(false);
-        console.error("Error fetching restaurants:", err);
       }
     };
 
@@ -57,9 +63,8 @@ const RestaurantProfile = () => {
   const handleNewPhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const preview = URL.createObjectURL(file);
-      setNewRestaurant({ ...newRestaurant, photo: preview });
-      setNewPhoto(preview);
+      setNewRestaurant({ ...newRestaurant, photo: file });
+      setNewPhoto(file);
     }
   };
 
@@ -67,42 +72,46 @@ const RestaurantProfile = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
+      if (!token) throw new Error("No authentication token found");
 
       const formData = new FormData();
-      formData.append("name", newRestaurant.name);
-      formData.append("address", newRestaurant.address);
-      formData.append("contact", newRestaurant.contact);
-      formData.append("description", newRestaurant.description);
-      formData.append("hours", newRestaurant.hours);
-      formData.append("bookingTimes", newRestaurant.bookingTimes);
-      formData.append("tableSizes", newRestaurant.tableSizes);
-      
-      if (newPhoto) {
-        const blob = await fetch(newPhoto).then(r => r.blob());
-        formData.append("photo", blob, "restaurant.jpg");
+      for (const key in newRestaurant) {
+        if (key === "hours") {
+          for (const day in newRestaurant.hours) {
+            const { start, end } = newRestaurant.hours[day];
+            if (start) formData.append(`hours[${day}].start`, start);
+            if (end) formData.append(`hours[${day}].end`, end);
+          }
+        } else if (key === "photo") {
+          if (newRestaurant.photo) {
+            formData.append("photo", newRestaurant.photo, newRestaurant.photo.name || "restaurant.jpg");
+          }
+        } else {
+          formData.append(key, newRestaurant[key]);
+        }
       }
 
-      const response = await axios.post(
-        "https://team-project-20201-codecrafters-production.up.railway.app/api/restaurants",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post(`${BASE_URL}/api/restaurants`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       setRestaurants([...restaurants, response.data]);
       setNewRestaurant({
         name: "",
-        address: "",
-        contact: "",
         description: "",
-        hours: "",
+        address: "",
+        city: "",
+        state: "",
+        zip: "",
+        phone: "",
+        email: "",
+        cuisine: "",
+        capacity: "",
+        averageRating: "",
+        hours: {},
         bookingTimes: "",
         tableSizes: "",
         photo: null,
@@ -110,281 +119,225 @@ const RestaurantProfile = () => {
       setNewPhoto(null);
       setShowModal(false);
     } catch (err) {
-      console.error("Error creating restaurant:", err);
       setError(err.message);
     }
   };
 
-  const handleEditChange = (e) => {
+  const handleEditChange = (e, index) => {
     const updated = [...restaurants];
-    updated[editingIndex][e.target.name] = e.target.value;
+    updated[index][e.target.name] = e.target.value;
     setRestaurants(updated);
   };
 
-  const handleEditSubmit = async (e) => {
+  const handleEditSubmit = async (e, index) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
+      if (!token) throw new Error("No authentication token found");
 
-      const restaurantToUpdate = restaurants[editingIndex];
+      const restaurantToUpdate = restaurants[index];
       const formData = new FormData();
-      
-      formData.append("name", restaurantToUpdate.name);
-      formData.append("address", restaurantToUpdate.address);
-      formData.append("contact", restaurantToUpdate.contact);
-      formData.append("description", restaurantToUpdate.description);
-      formData.append("hours", restaurantToUpdate.hours);
-      formData.append("bookingTimes", restaurantToUpdate.bookingTimes);
-      formData.append("tableSizes", restaurantToUpdate.tableSizes);
-      
-      if (restaurantToUpdate.photo && typeof restaurantToUpdate.photo !== "string") {
-        const blob = await fetch(restaurantToUpdate.photo).then(r => r.blob());
-        formData.append("photo", blob, "restaurant.jpg");
+
+      for (const key in restaurantToUpdate) {
+        if (key === "hours") {
+          for (const day in restaurantToUpdate.hours) {
+            const { start, end } = restaurantToUpdate.hours[day];
+            if (start) formData.append(`hours[${day}].start`, start);
+            if (end) formData.append(`hours[${day}].end`, end);
+          }
+        } else if (key === "photo") {
+          if (restaurantToUpdate.photo && typeof restaurantToUpdate.photo !== "string") {
+            formData.append("photo", restaurantToUpdate.photo, restaurantToUpdate.photo.name || "restaurant.jpg");
+          }
+        } else {
+          formData.append(key, restaurantToUpdate[key]);
+        }
       }
 
-      const response = await axios.put(
-        `https://team-project-20201-codecrafters-production.up.railway.app/api/restaurants/${restaurantToUpdate._id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.put(`${BASE_URL}/api/restaurants/${restaurantToUpdate._id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       const updatedRestaurants = [...restaurants];
-      updatedRestaurants[editingIndex] = response.data;
+      updatedRestaurants[index] = response.data;
       setRestaurants(updatedRestaurants);
       setEditingIndex(null);
     } catch (err) {
-      console.error("Error updating restaurant:", err);
       setError(err.message);
     }
   };
-
-  const handleDeleteRestaurant = async (id) => {
-    try {
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      await axios.delete(
-        `https://team-project-20201-codecrafters-production.up.railway.app/api/restaurants/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setRestaurants(restaurants.filter((restaurant) => restaurant._id !== id));
-    } catch (err) {
-      console.error("Error deleting restaurant:", err);
-      setError(err.message);
-    }
-  };
-
-  if (loading) {
-    return <div className="restaurant-card-wrapper">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="restaurant-card-wrapper">Error: {error}</div>;
-  }
 
   return (
     <div className="restaurant-card-wrapper">
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", marginBottom: "20px" }}>
-        <h2 className="restaurant-title">
-          {restaurants.length > 0 ? "Your Restaurant Listings" : "Your Restaurant Dashboard"}
-        </h2>
-        <button onClick={() => setShowModal(true)} className="edit-btn">
-          + Add New Listing
-        </button>
-      </div>
+      {error && <div style={{ color: "black" }}>Error: {error}</div>}
+      <h2 className="restaurant-title">Your Restaurant Listings</h2>
+      <button onClick={() => setShowModal(true)} className="edit-btn">+ Add New Listing</button>
 
-      {restaurants.length === 0 ? (
-        <div className="empty-restaurant-state">
-          <div className="empty-state-content">
-            <h3>No Restaurants Listed Yet</h3>
-            <p>Get started by adding your first restaurant to manage bookings and attract customers</p>
-            <button 
-              onClick={() => setShowModal(true)} 
-              className="edit-btn"
-              style={{ padding: "10px 20px", fontSize: "1.1rem" }}
-            >
-              Create Your First Restaurant
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="restaurant-grid">
-          {restaurants.map((restaurant, index) => (
-            <div className="restaurant-card" key={restaurant._id}>
-              {editingIndex === index ? (
-                <div className="edit-form-scrollable">
-                  <form onSubmit={handleEditSubmit}>
-                    {["name", "address", "contact", "description", "hours", "bookingTimes", "tableSizes"].map((field) => (
-                      <div className="form-group" key={field}>
-                        <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-                        {field === "description" ? (
-                          <textarea
-                            name={field}
-                            value={restaurant[field]}
-                            onChange={handleEditChange}
-                            className="form-input"
-                            rows={3}
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            name={field}
-                            value={restaurant[field]}
-                            onChange={handleEditChange}
-                            className="form-input"
-                          />
-                        )}
-                      </div>
-                    ))}
-                    {restaurant.photo ? (
-                      <div className="form-group">
-                        <label className="form-label">Current Photo</label>
-                        <img 
-                          src={typeof restaurant.photo === "string" ? 
-                            restaurant.photo : 
-                            URL.createObjectURL(restaurant.photo)} 
-                          alt="Current" 
-                          className="photo-preview" 
-                        />
-                        <div style={{ marginTop: "0.5rem", display: "flex", gap: "10px" }}>
-                          <button
-                            type="button"
-                            className="edit-btn"
-                            onClick={() => {
-                              const updated = [...restaurants];
-                              updated[index].photo = null;
-                              setRestaurants(updated);
-                            }}
-                          >
-                            Remove
-                          </button>
-                          <label className="edit-btn" style={{ cursor: "pointer" }}>
-                            Replace
-                            <input
-                              type="file"
-                              accept="image/*"
-                              style={{ display: "none" }}
-                              onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                  const updated = [...restaurants];
-                                  updated[index].photo = file;
-                                  setRestaurants(updated);
-                                }
-                              }}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="form-group">
-                        <label className="form-label">Add Photo</label>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="form-input"
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file) {
-                              const updated = [...restaurants];
-                              updated[index].photo = file;
-                              setRestaurants(updated);
-                            }
-                          }}
-                        />
-                      </div>
-                    )}
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
-                      <button type="submit" className="save-btn">Save</button>
-                      <button type="button" className="edit-btn" onClick={() => setEditingIndex(null)}>Cancel</button>
+      <div className="restaurant-grid">
+        {restaurants.map((restaurant, index) => (
+          <div key={restaurant._id} className="restaurant-card">
+            {editingIndex === index ? (
+              <form onSubmit={(e) => handleEditSubmit(e, index)} className="edit-form-scrollable">
+                {["name", "description", "address", "city", "state", "zip", "phone", "email", "cuisine", "capacity", "averageRating", "bookingTimes", "tableSizes"].map((field) => (
+                  <div className="form-group" key={field}>
+                    <label className="form-label">{field}</label>
+                    <input
+                      name={field}
+                      value={restaurant[field] || ""}
+                      onChange={(e) => handleEditChange(e, index)}
+                      className="form-input"
+                    />
+                  </div>
+                ))}
+
+                {daysOfWeek.map((day) => (
+                  <div className="form-group" key={day}>
+                    <label className="form-label">{day}</label>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <input
+                        type="time"
+                        value={restaurant.hours?.[day]?.start || ""}
+                        onChange={(e) => {
+                          const updated = [...restaurants];
+                          updated[index].hours = {
+                            ...updated[index].hours,
+                            [day]: {
+                              ...(updated[index].hours?.[day] || {}),
+                              start: e.target.value,
+                            },
+                          };
+                          setRestaurants(updated);
+                        }}
+                      />
+                      <input
+                        type="time"
+                        value={restaurant.hours?.[day]?.end || ""}
+                        onChange={(e) => {
+                          const updated = [...restaurants];
+                          updated[index].hours = {
+                            ...updated[index].hours,
+                            [day]: {
+                              ...(updated[index].hours?.[day] || {}),
+                              end: e.target.value,
+                            },
+                          };
+                          setRestaurants(updated);
+                        }}
+                      />
                     </div>
-                  </form>
-                </div>
-              ) : (
-                <>
-                  <h3>{restaurant.name}</h3>
-                  <p><strong>Address:</strong> {restaurant.address}</p>
-                  <p><strong>Contact:</strong> {restaurant.contact}</p>
-                  <p><strong>Description:</strong> {restaurant.description}</p>
-                  <p><strong>Hours:</strong> {restaurant.hours}</p>
-                  <p><strong>Booking Times:</strong> {restaurant.bookingTimes}</p>
-                  <p><strong>Table Sizes:</strong> {restaurant.tableSizes}</p>
+                  </div>
+                ))}
+
+                <div className="form-group">
+                  <label className="form-label">Photo</label>
+                  <input type="file" accept="image/*" onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const updated = [...restaurants];
+                      updated[index].photo = file;
+                      setRestaurants(updated);
+                    }
+                  }} />
                   {restaurant.photo && (
-                    <img 
-                      src={typeof restaurant.photo === "string" ? 
-                        restaurant.photo : 
-                        URL.createObjectURL(restaurant.photo)} 
-                      alt="Preview" 
-                      className="photo-preview" 
+                    <img
+                      src={typeof restaurant.photo === "string" ? restaurant.photo : URL.createObjectURL(restaurant.photo)}
+                      alt="Preview"
+                      className="photo-preview"
                     />
                   )}
-                  <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                    <button onClick={() => setEditingIndex(index)} className="edit-btn">Edit</button>
-                    <button 
-                      onClick={() => handleDeleteRestaurant(restaurant._id)} 
-                      className="edit-btn"
-                      style={{ backgroundColor: "#ff4444" }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                </div>
+
+                <button type="submit" className="save-btn">Save</button>
+                <button type="button" onClick={() => setEditingIndex(null)} className="edit-btn">Cancel</button>
+              </form>
+            ) : (
+              <>
+                <h3>{restaurant.name}</h3>
+                <p><strong>Description:</strong> {restaurant.description}</p>
+                <p><strong>Address:</strong> {restaurant.address}</p>
+                <p><strong>City:</strong> {restaurant.city}</p>
+                <p><strong>State:</strong> {restaurant.state}</p>
+                <p><strong>ZIP:</strong> {restaurant.zip}</p>
+                <p><strong>Phone:</strong> {restaurant.phone}</p>
+                <p><strong>Email:</strong> {restaurant.email}</p>
+                <p><strong>Cuisine:</strong> {restaurant.cuisine}</p>
+                <p><strong>Capacity:</strong> {restaurant.capacity}</p>
+                <p><strong>Rating:</strong> {restaurant.averageRating}</p>
+                <p><strong>Booking Times:</strong> {restaurant.bookingTimes}</p>
+                <p><strong>Table Sizes:</strong> {restaurant.tableSizes}</p>
+                {restaurant.photo && (
+                  <img src={restaurant.photo} alt="Preview" className="photo-preview" />
+                )}
+                <button onClick={() => setEditingIndex(index)} className="edit-btn">Edit</button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
 
       {showModal && (
         <div className="modal-overlay">
           <div className="modal">
             <h3>Add New Restaurant Listing</h3>
             <form onSubmit={handleNewSubmit}>
-              {["name", "address", "contact", "description", "hours", "bookingTimes", "tableSizes"].map((field) => (
+              {["name", "description", "address", "city", "state", "zip", "phone", "email", "cuisine", "capacity", "averageRating", "bookingTimes", "tableSizes"].map((field) => (
                 <div className="form-group" key={field}>
-                  <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-                  {field === "description" ? (
-                    <textarea
-                      name={field}
-                      value={newRestaurant[field]}
-                      onChange={handleNewChange}
-                      className="form-input"
-                      rows={3}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      name={field}
-                      value={newRestaurant[field]}
-                      onChange={handleNewChange}
-                      className="form-input"
-                    />
-                  )}
+                  <label className="form-label">{field}</label>
+                  <input
+                    name={field}
+                    value={newRestaurant[field] || ""}
+                    onChange={handleNewChange}
+                    className="form-input"
+                  />
                 </div>
               ))}
+
+              {daysOfWeek.map((day) => (
+                <div className="form-group" key={day}>
+                  <label className="form-label">{day}</label>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <input
+                      type="time"
+                      onChange={(e) => setNewRestaurant((prev) => ({
+                        ...prev,
+                        hours: {
+                          ...prev.hours,
+                          [day]: {
+                            ...(prev.hours[day] || {}),
+                            start: e.target.value,
+                          },
+                        },
+                      }))}
+                    />
+                    <input
+                      type="time"
+                      onChange={(e) => setNewRestaurant((prev) => ({
+                        ...prev,
+                        hours: {
+                          ...prev.hours,
+                          [day]: {
+                            ...(prev.hours[day] || {}),
+                            end: e.target.value,
+                          },
+                        },
+                      }))}
+                    />
+                  </div>
+                </div>
+              ))}
+
               <div className="form-group">
                 <label className="form-label">Photo</label>
                 <input type="file" accept="image/*" onChange={handleNewPhotoChange} className="form-input" />
-                {newPhoto && <img src={newPhoto} alt="Preview" className="photo-preview" />}
+                {newPhoto && <img src={URL.createObjectURL(newPhoto)} alt="Preview" className="photo-preview" />}
               </div>
+
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <button type="submit" className="save-btn">Add</button>
-                <button onClick={() => setShowModal(false)} className="edit-btn">Cancel</button>
+                <button type="button" onClick={() => setShowModal(false)} className="edit-btn">Cancel</button>
               </div>
             </form>
           </div>
