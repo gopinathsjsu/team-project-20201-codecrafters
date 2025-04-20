@@ -1,122 +1,81 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ReservationContext } from "../context/ReservationContext";
 import SearchComponent from "../components/SearchComponent";
 import RestaurantBox from "../components/RestaurantBox";
+import { getRestaurants } from "../utils/apiCalls";
 import "../styles/SearchResultsPage.css";
 
 const SearchResultsPage = () => {
-  const { reservationDate, reservationTime, numberOfGuests, searchTerm } =
+  const { numberOfGuests, searchTerm, setNumberOfGuests } =
     useContext(ReservationContext);
+  const [restaurants, setRestaurants] = useState([]);
+  const [allCuisines, setAllCuisines] = useState([]);
+  const [allLocations, setAllLocations] = useState([]);
 
-  const getTopRatedRestaurants = () => {
-    return [
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-      {
-        name: "Sushi Palace",
-        rating: 4.7,
-        reviews: 2100,
-        cuisine: "Japanese • Sushi",
-        bookedTimes: 20,
-        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
-      },
-      {
-        name: "Taco Haven",
-        rating: 4.2,
-        reviews: 2100,
-        cuisine: "Mexican • Tacos",
-        bookedTimes: 10,
-        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
-      },
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-      {
-        name: "Sushi Palace",
-        rating: 4.7,
-        reviews: 2100,
-        cuisine: "Japanese • Sushi",
-        bookedTimes: 20,
-        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
-      },
-      {
-        name: "Taco Haven",
-        rating: 4.2,
-        reviews: 2100,
-        cuisine: "Mexican • Tacos",
-        bookedTimes: 10,
-        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
-      },
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-      {
-        name: "Sushi Palace",
-        rating: 4.7,
-        reviews: 2100,
-        cuisine: "Japanese • Sushi",
-        bookedTimes: 20,
-        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
-      },
-      {
-        name: "Taco Haven",
-        rating: 4.2,
-        reviews: 2100,
-        cuisine: "Mexican • Tacos",
-        bookedTimes: 10,
-        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
-      },
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-    ];
+  const getRestaurantsData = async () => {
+    const allRestaurants = await getRestaurants();
+
+    // Sort restaurants based on whether they match the searchTerm
+    const sortedRestaurants = allRestaurants.sort((a, b) => {
+      const aMatches =
+        a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        a.cuisine.toLowerCase().includes(searchTerm.toLowerCase());
+      const bMatches =
+        b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        b.cuisine.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Prioritize matches (true > false)
+      if (aMatches && !bMatches) return -1;
+      if (!aMatches && bMatches) return 1;
+
+      // If both match or neither match, maintain original order
+      return 0;
+    });
+
+    setRestaurants(sortedRestaurants);
   };
+
+  useEffect(() => {
+    if (restaurants.length > 0) {
+      const cuisines = new Set();
+      const locations = new Set();
+
+      restaurants.forEach((restaurant) => {
+        cuisines.add(restaurant.cuisine);
+        locations.add(restaurant.city);
+      });
+
+      setAllCuisines(Array.from(cuisines)); // Convert Set to Array
+      setAllLocations(Array.from(locations)); // Convert Set to Array
+    }
+  }, [restaurants]);
+
+  const handleSearchClick = () => {
+    getRestaurantsData(); // Fetch and filter restaurants when the search button is clicked
+  };
+
+  useEffect(() => {
+    if (numberOfGuests === "") {
+      setNumberOfGuests(1);
+    }
+    getRestaurantsData();
+  }, [numberOfGuests, setNumberOfGuests]);
 
   return (
     <main className="search-container">
       <div className="search-component-container">
-        <SearchComponent horizontal={true} />
+        {/* Pass the handleSearchClick function to SearchComponent */}
+        <SearchComponent horizontal={true} onSearch={handleSearchClick} />
       </div>
       <div className="search-results-container">
         <div className="filters-container">
           <ul className="filter-item">
             <li className="filter-type">Type of Cuisine</li>
-            <label>
-              <input type="checkbox" value="Italian" /> Italian
-            </label>
-            <label>
-              <input type="checkbox" value="Chinese" /> Chinese
-            </label>
-            <label>
-              <input type="checkbox" value="Indian" /> Indian
-            </label>
-            <label>
-              <input type="checkbox" value="Mexican" /> Mexican
-            </label>
-            <label>
-              <input type="checkbox" value="American" /> American
-            </label>
+            {allCuisines?.map((cuisine, index) => (
+              <label key={index}>
+                <input type="checkbox" value={cuisine} /> {cuisine}
+              </label>
+            ))}
           </ul>
           <div className="filter-item">
             <li className="filter-type">Price</li>
@@ -158,24 +117,17 @@ const SearchResultsPage = () => {
           </div>
           <div className="filter-item">
             <li className="filter-type">Location</li>
-            <label>
-              <input type="checkbox" value="New York" /> New York
-            </label>
-            <label>
-              <input type="checkbox" value="San Francisco" /> San Francisco
-            </label>
-            <label>
-              <input type="checkbox" value="Los Angeles" /> Los Angeles
-            </label>
-            <label>
-              <input type="checkbox" value="Chicago" /> Chicago
-            </label>
+            {allLocations?.map((location, index) => (
+              <label key={index}>
+                <input type="checkbox" value={location} /> {location}
+              </label>
+            ))}
           </div>
         </div>
         <div className="results-container">
-          <h2>{`Results for "${searchTerm}"`}</h2>
+          {searchTerm && <h2>{`Results for "${searchTerm}"`}</h2>}
           <div className="restaurant-list">
-            {getTopRatedRestaurants().map((restaurant, index) => (
+            {restaurants.map((restaurant, index) => (
               <RestaurantBox
                 horizontal={true}
                 key={index}
