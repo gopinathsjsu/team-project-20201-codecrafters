@@ -30,30 +30,87 @@ const RestaurantProfile = () => {
     deletedImages: []
   });
 
+  console.log("Current state:", {
+    restaurants,
+    loading,
+    error,
+    showModal,
+    editingIndex,
+    newPhoto,
+    newRestaurant
+  });
+
+  const fetchRestaurants = async () => {
+    console.log("Starting to fetch restaurants...");
+    try {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+
+      console.log("Making API call to fetch restaurants...");
+      const response = await axios.get(`${BASE_URL}/api/restaurants/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("API response:", response.data);
+      setRestaurants(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching restaurants:", err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const createRestaurant = async (formData) => {
+    console.log("Creating new restaurant with form data:", formData);
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    if (!token) throw new Error("No authentication token found");
+
+    try {
+      console.log("Making POST request to create restaurant...");
+      const response = await axios.post(`${BASE_URL}/api/restaurants`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      console.log("Restaurant created successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating restaurant:", error);
+      throw error;
+    }
+  };
+
+  const updateRestaurant = async (restaurantId, formData) => {
+    console.log(`Updating restaurant ${restaurantId} with data:`, formData);
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    if (!token) throw new Error("No authentication token found");
+
+    try {
+      console.log("Making PUT request to update restaurant...");
+      const response = await axios.put(`${BASE_URL}/api/restaurants/${restaurantId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      console.log("Restaurant updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating restaurant:", error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-        if (!token) throw new Error("No authentication token found");
-
-        const response = await axios.get(`${BASE_URL}/api/restaurants/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        setRestaurants(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-        console.error("Error fetching restaurants:", err);
-      }
-    };
-
+    console.log("Component mounted - fetching restaurants");
     fetchRestaurants();
   }, []);
 
   const handleNewChange = (e) => {
     const { name, value } = e.target;
+    console.log(`Handling change for ${name}: ${value}`);
     setNewRestaurant(prev => ({
       ...prev,
       [name]: name === "capacity" || name === "averageRating" ? Number(value) : value
@@ -62,111 +119,92 @@ const RestaurantProfile = () => {
 
   const handleNewPhotoChange = (e) => {
     const file = e.target.files[0];
+    console.log("New photo selected:", file);
     if (file) {
-      setNewRestaurant(prev => ({
-        ...prev,
-        images: [file]
-      }));
       setNewPhoto(file);
     }
   };
 
   const handleRemoveImage = () => {
+    console.log("Removing image - current images:", newRestaurant.images);
     setNewRestaurant(prev => ({
       ...prev,
-      images: [],
-      deletedImages: [...prev.deletedImages, ...prev.images.filter(img => typeof img === 'string')]
+      deletedImages: [...prev.deletedImages, ...prev.images.filter(img => typeof img === 'string')],
+      images: []
     }));
     setNewPhoto(null);
   };
 
   const handleNewSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form submission started");
     try {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
 
       const formData = new FormData();
-
-      // Append simple fields
+      
+      console.log("Building form data...");
+      // Append all basic fields
       Object.keys(newRestaurant).forEach(key => {
-        if (key === 'hours') {
-          Object.entries(newRestaurant.hours).forEach(([day, {start, end}]) => {
-            if (start && end) {
-              formData.append(`hours[${day}].start`, start);
-              formData.append(`hours[${day}].end`, end);
-            }
-          });
-        } 
-        else if (key === 'images') {
-          newRestaurant.images.forEach(file => {
-            if (file instanceof File) {
-              formData.append('images', file);
-            }
-          });
-        }
-        else if (key === 'deletedImages') {
-          newRestaurant.deletedImages.forEach(url => {
-            formData.append('deletedImages', url);
-          });
-        }
-        else if (key !== 'deletedImages') {
-          formData.append(key, newRestaurant[key]);
+        if (key !== 'images' && key !== 'deletedImages' && key !== 'id') {
+          if (key === 'hours') {
+            console.log(`Adding hours: ${JSON.stringify(newRestaurant[key])}`);
+            formData.append(key, JSON.stringify(newRestaurant[key]));
+          } else {
+            console.log(`Adding ${key}: ${newRestaurant[key]}`);
+            formData.append(key, newRestaurant[key]);
+          }
         }
       });
 
-      let response;
-      if (editingIndex !== null) {
-        const restaurantId = restaurants[editingIndex]._id;
-        response = await axios.put(`${BASE_URL}/api/restaurants/${restaurantId}`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
-        const updated = [...restaurants];
-        updated[editingIndex] = response.data;
-        setRestaurants(updated);
-      } else {
-        response = await axios.post(`${BASE_URL}/api/restaurants`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        setRestaurants([...restaurants, response.data]);
+      // Append new photo if available
+      if (newPhoto) {
+        console.log("Adding new photo to form data");
+        formData.append('images', newPhoto);
       }
 
-      // Reset form
-      setNewRestaurant({
-        name: "",
-        description: "",
-        address: "",
-        city: "",
-        state: "",
-        zip: "",
-        phone: "",
-        email: "",
-        cuisine: "",
-        capacity: 0,
-        averageRating: 0,
-        hours: {},
-        images: [],
-        deletedImages: []
-      });
-      setNewPhoto(null);
+      // Append deleted images if any
+      if (newRestaurant.deletedImages.length > 0) {
+        console.log("Adding deleted images:", newRestaurant.deletedImages);
+        formData.append('deletedImages', JSON.stringify(newRestaurant.deletedImages));
+      }
+
+      if (editingIndex !== null) {
+        // Update existing restaurant
+        const restaurantId = newRestaurant.id || restaurants[editingIndex].id;
+        console.log(`Updating restaurant with ID: ${restaurantId}`);
+        console.log("newRestaurant.id:", newRestaurant.id);
+        console.log("restaurants[editingIndex].id:", restaurants[editingIndex].id);
+        console.log("Complete restaurant being edited:", restaurants[editingIndex]);
+        await updateRestaurant(restaurantId, formData);
+      } else {
+        // Create new restaurant
+        console.log("Creating new restaurant");
+        await createRestaurant(formData);
+      }
+
+      console.log("Operation successful, refreshing data...");
+      await fetchRestaurants();
       setShowModal(false);
       setEditingIndex(null);
+      setNewPhoto(null);
     } catch (err) {
-      console.error("Error submitting restaurant:", err);
-      setError(err.response?.data?.message || err.message);
+      console.error("Error saving restaurant:", err);
+      setError(err.message);
     }
   };
 
-  if (loading) return <div className="restaurant-card-wrapper">Loading...</div>;
-  if (error) return <div className="restaurant-card-wrapper" style={{ color: "black" }}>Error: {error}</div>;
+  if (loading) {
+    console.log("Rendering loading state");
+    return <div className="restaurant-card-wrapper">Loading...</div>;
+  }
+  if (error) {
+    console.log("Rendering error state:", error);
+    return <div className="restaurant-card-wrapper" style={{ color: "black" }}>Error: {error}</div>;
+  }
 
+  console.log("Rendering component with restaurants:", restaurants);
   return (
     <div className="restaurant-card-wrapper">
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", marginBottom: "20px" }}>
@@ -175,6 +213,7 @@ const RestaurantProfile = () => {
         </h2>
         <button
           onClick={() => {
+            console.log("Add new listing button clicked");
             setNewRestaurant({
               name: "",
               description: "",
@@ -207,7 +246,10 @@ const RestaurantProfile = () => {
             <h3>No Restaurants Listed Yet</h3>
             <p>Get started by adding your first restaurant to manage bookings and attract customers</p>
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                console.log("Create first restaurant button clicked");
+                setShowModal(true);
+              }}
               className="edit-btn"
               style={{ padding: "10px 20px", fontSize: "1.1rem" }}
             >
@@ -218,8 +260,9 @@ const RestaurantProfile = () => {
       ) : (
         <div className="restaurant-grid">
           {restaurants.map((restaurant, index) => (
-            <div className="restaurant-card" key={restaurant._id}>
+            <div className="restaurant-card" key={restaurant.id}>
               <h3>{restaurant.name}</h3>
+              <p><strong>ID:</strong> {restaurant.id}</p>
               <p><strong>Description:</strong> {restaurant.description}</p>
               <p><strong>Address:</strong> {restaurant.address}</p>
               <p><strong>City:</strong> {restaurant.city}</p>
@@ -240,9 +283,23 @@ const RestaurantProfile = () => {
               <button
                 className="edit-btn"
                 onClick={() => {
+                  console.log(`Edit button clicked for restaurant at index ${index}`);
+                  console.log("Restaurant being edited:", restaurant);
                   setEditingIndex(index);
                   setNewRestaurant({ 
-                    ...restaurant,
+                    id: restaurant.id,
+                    name: restaurant.name,
+                    description: restaurant.description,
+                    address: restaurant.address,
+                    city: restaurant.city,
+                    state: restaurant.state,
+                    zip: restaurant.zip,
+                    phone: restaurant.phone,
+                    email: restaurant.email,
+                    cuisine: restaurant.cuisine,
+                    capacity: restaurant.capacity,
+                    averageRating: restaurant.averageRating,
+                    hours: restaurant.hours || {},
                     images: restaurant.images || [],
                     deletedImages: []
                   });
@@ -311,7 +368,8 @@ const RestaurantProfile = () => {
                     <input
                       type="time"
                       value={newRestaurant.hours?.[day]?.start || ""}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        console.log(`Setting ${day} start time: ${e.target.value}`);
                         setNewRestaurant(prev => ({
                           ...prev,
                           hours: {
@@ -319,12 +377,13 @@ const RestaurantProfile = () => {
                             [day]: { ...(prev.hours?.[day] || {}), start: e.target.value },
                           },
                         }))
-                      }
+                      }}
                     />
                     <input
                       type="time"
                       value={newRestaurant.hours?.[day]?.end || ""}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        console.log(`Setting ${day} end time: ${e.target.value}`);
                         setNewRestaurant(prev => ({
                           ...prev,
                           hours: {
@@ -332,7 +391,7 @@ const RestaurantProfile = () => {
                             [day]: { ...(prev.hours?.[day] || {}), end: e.target.value },
                           },
                         }))
-                      }
+                      }}
                     />
                   </div>
                 </div>
@@ -382,6 +441,7 @@ const RestaurantProfile = () => {
                 <button
                   type="button"
                   onClick={() => {
+                    console.log("Cancel button clicked");
                     setShowModal(false);
                     setEditingIndex(null);
                     setNewPhoto(null);
