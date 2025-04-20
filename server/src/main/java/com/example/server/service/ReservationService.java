@@ -1,5 +1,6 @@
 package com.example.server.service;
 
+import com.example.server.exception.ResourceNotFoundException;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 
@@ -100,7 +101,14 @@ public class ReservationService {
         return reservationRepository.findByIdAndRestaurant(id, restaurant);
     }
 
-    public List<Reservation> findAllByRestaurantId(String restaurantId) {
+    public List<Reservation> findAllByRestaurantId(String restaurantId, String userId) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+
+        if (!restaurant.getUserInfo().getId().equals(userId)) {
+            throw new RuntimeException("User is not authorized to access this resource");
+        }
+
         return reservationRepository.findByRestaurant_Id(restaurantId);
     }
 

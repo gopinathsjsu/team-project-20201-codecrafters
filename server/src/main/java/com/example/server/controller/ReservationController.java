@@ -41,8 +41,11 @@ public class ReservationController {
     // Managers get their reservations from a restaurant
     @GetMapping("/restaurants/{restaurantId}/reservations")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<List<Reservation>> getAllByRestaurant(@PathVariable String restaurantId) {
-        return ResponseEntity.ok(reservationService.findAllByRestaurantId(restaurantId));
+    public ResponseEntity<List<Reservation>> getAllByRestaurant(@PathVariable String restaurantId,
+                                                                @AuthenticationPrincipal UserInfoUserDetails userDetails) {
+        UserInfo user = userDetails.getUserInfo();
+
+        return ResponseEntity.ok(reservationService.findAllByRestaurantId(restaurantId, user.getId()));
     }
 
     // Managers can view a single reservation of their restaurant

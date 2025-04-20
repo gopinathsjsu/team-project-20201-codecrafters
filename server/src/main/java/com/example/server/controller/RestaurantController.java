@@ -40,12 +40,6 @@ public class RestaurantController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getRestaurant(@PathVariable String id) {
-        Restaurant restaurant = restaurantService.getRestaurantById(id);
-        return ResponseEntity.ok(restaurant);
-    }
-
     @GetMapping("/{id}/availability")
     public ResponseEntity<RestaurantAndAvailableSeatDTO> getRestaurantWithAvailability(@PathVariable String id) {
         try {
@@ -68,10 +62,17 @@ public class RestaurantController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     public ResponseEntity<Restaurant> updateRestaurant(@PathVariable String id,
-                                              @Valid @ModelAttribute RestaurantUpdateDTO dto,
-                                              @AuthenticationPrincipal UserInfoUserDetails userDetails) {
+                                                       @Valid @ModelAttribute RestaurantUpdateDTO dto,
+                                                       @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         Restaurant updatedRestaurant = restaurantService
                 .updateRestaurant(id, dto, userDetails.getUserInfo());
         return ResponseEntity.status(HttpStatus.OK).body(updatedRestaurant);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getRestaurant(@PathVariable String id) {
+        System.out.println("Hello");
+        Restaurant restaurant = restaurantService.getRestaurantById(id);
+        return ResponseEntity.ok(restaurant);
     }
 }
