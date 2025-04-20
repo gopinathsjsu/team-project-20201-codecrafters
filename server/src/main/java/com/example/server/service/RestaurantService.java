@@ -206,7 +206,7 @@ public class RestaurantService {
         return new RestaurantAndAvailableSeatDTO(restaurant, reservationTimes);
     }
 
-    private List<String> uploadImages(List<MultipartFile> images) {
+    public List<String> uploadImages(List<MultipartFile> images) {
         return images.stream()
                 .map(file -> {
                     try {

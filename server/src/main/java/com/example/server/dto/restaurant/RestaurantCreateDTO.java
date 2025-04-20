@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RestaurantCreateDTO {
+
     @NotBlank(message = "The name cannot be blanked")
     private String name;
 
@@ -45,10 +46,6 @@ public class RestaurantCreateDTO {
 
     @Min(value = 1)
     private int capacity;
-
-    @DecimalMin("0.0")
-    @DecimalMax("5.0")
-    private double averageRating;
 
     private Map<DayOfWeek, TimeInterval> hours;
 
