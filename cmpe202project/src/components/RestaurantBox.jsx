@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import TimeSlotsComponent from "./TimeSlotsComponent";
 
 const RestaurantBox = ({
+  id,
   name,
   rating,
   reviews,
@@ -16,8 +17,9 @@ const RestaurantBox = ({
 }) => {
   const navigate = useNavigate();
   const handleClick = () => {
-    navigate(`/restaurant/${name}`, {
+    navigate(`/restaurant/${id}`, {
       state: {
+        id,
         name,
         rating,
         reviews,
@@ -46,7 +48,7 @@ const RestaurantBox = ({
         <h2 className="restaurant-name">{name}</h2>
         <div className="rating-container">
           <div className="star-rating">
-            <span className="rating-value">{rating} </span>
+            <span className="rating-value">{reviews > 0 ? rating : ""} </span>
             {[...Array(5)].map((_, index) => (
               <span
                 key={index}
@@ -59,7 +61,9 @@ const RestaurantBox = ({
               </span>
             ))}
           </div>
-          <div className="reviews">{reviews} reviews</div>
+          <div className="reviews">
+            {reviews > 0 ? `${reviews} reviews` : "No reviews yet"}
+          </div>
         </div>
         <p className="restaurant-cuisine">{cuisine}</p>
         <div className="booked-times">
