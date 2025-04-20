@@ -1,8 +1,13 @@
 import React, { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ReservationContext } from "../context/ReservationContext";
+import SearchIcon from "../assets/searchIcon.svg";
 
-const SearchComponent = ({ horizontal = false, showSearch = true }) => {
+const SearchComponent = ({
+  horizontal = false,
+  showSearch = true,
+  onSearch,
+}) => {
   const navigate = useNavigate();
   const {
     reservationDate,
@@ -39,7 +44,6 @@ const SearchComponent = ({ horizontal = false, showSearch = true }) => {
 
   const handleMakeReservation = (e) => {
     e.preventDefault();
-    console.log("show results for reservation");
     navigate("/search", {
       state: {
         reservationDate,
@@ -83,14 +87,20 @@ const SearchComponent = ({ horizontal = false, showSearch = true }) => {
       </div>
       {showSearch && (
         <div className="search-and-submit">
+          <img className="searchIcon" src={SearchIcon} alt="search icon" />
           <input
             type="text"
             placeholder="Search restaurant"
             className="reservation-input"
             value={searchTerm}
+            maxLength={25}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button type="submit" className="reservation-button">
+          <button
+            type="submit"
+            className="reservation-button"
+            onClick={onSearch}
+          >
             Search
           </button>
         </div>
