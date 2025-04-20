@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import RestaurantBox from "../components/RestaurantBox";
 import SearchComponent from "../components/SearchComponent";
-import { getRestaurants } from "../utils/HomePageCalls";
+import { getRestaurants } from "../utils/apiCalls";
 import "../styles/HomePage.css";
 
 const HomePage = () => {
