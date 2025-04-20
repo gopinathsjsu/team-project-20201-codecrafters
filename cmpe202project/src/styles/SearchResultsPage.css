@@ -63,6 +63,7 @@
 
 .results-container h2{
     margin: 18px 0px;
+    overflow: hidden;
 }
 
 .results-container .restaurant-list{
