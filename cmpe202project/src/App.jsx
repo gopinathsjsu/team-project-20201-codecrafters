@@ -39,7 +39,7 @@ function App() {
           <Route path="admin/restaurants" element={<RemoveRest />} />
         </Route>
         <Route path="*" element={<NoPage />} />
-      </Routes>{" "}
+      </Routes>
     </BrowserRouter>
   );
 }
