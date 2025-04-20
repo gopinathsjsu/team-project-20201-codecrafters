@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import RestaurantImage from "../assets/make-a-reservation-bg.png";
 import SearchComponent from "../components/SearchComponent";
@@ -6,12 +6,15 @@ import { useNavigate } from "react-router-dom";
 import TrendUp from "../assets/trend-up.svg";
 import "../styles/RestaurantPage.css";
 import TimeSlotsComponent from "../components/TimeSlotsComponent";
+import { getRestaurantById } from "../utils/apiCalls";
+import { reviewRestaurant } from "../utils/apiCalls";
 
 const RestaurantPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedRating, setSelectedRating] = useState(0); // Tracks the clicked rating
   const [hoveredRating, setHoveredRating] = useState(0); // Tracks the hovered rating
+  const [reviewText, setReviewText] = useState(""); // State for review text
 
   const handleStarClick = (rating) => {
     setSelectedRating(rating); // Set the clicked rating
@@ -24,13 +27,41 @@ const RestaurantPage = () => {
   const handleStarMouseLeave = () => {
     setHoveredRating(0); // Reset hovered rating when mouse leaves
   };
-  const { name, rating, reviews, cuisine, bookedTimes, timeSlots } =
+  const { id, name, rating, reviews, cuisine, bookedTimes, timeSlots } =
     location.state || {};
 
   const handleSubmitReview = (e) => {
     e.preventDefault();
-    console.log("Review submitted");
+    if (selectedRating === 0) {
+      alert("Please select a rating before submitting your review.");
+      return; // Prevent submission if no rating is selected
+    }
+    const response = reviewRestaurant(id, {
+      rating: selectedRating,
+      comment: reviewText.trim(),
+    });
+    console.log("Review submitted:", response);
   };
+
+  const handleReviewTextChange = (e) => {
+    setReviewText(e.target.value);
+  };
+
+  useEffect(() => {
+    if (location.state === null || !location.state.id) {
+      const fetchRestaurant = async () => {
+        const restaurantId = location.pathname.split("/").pop().trim();
+        console.log("Fetching restaurant with ID:", restaurantId);
+        const restaurantData = await getRestaurantById(restaurantId);
+        if (restaurantData) {
+          console.log("Fetched restaurant data:", restaurantData);
+        } else {
+          console.log("No restaurant data found for ID:", restaurantId);
+        }
+      };
+      fetchRestaurant();
+    }
+  }, [location.state, navigate]);
 
   return (
     <div className="restaurant-page">
@@ -44,14 +75,22 @@ const RestaurantPage = () => {
         <div className="restaurant-details">
           <div className="rating-container">
             <div className="star-rating">
-              <span className="rating-value">{rating} </span>
-              <span className="star">&#9733;</span> {/* Star 1 */}
-              <span className="star">&#9733;</span> {/* Star 2 */}
-              <span className="star">&#9733;</span> {/* Star 3 */}
-              <span className="star">&#9733;</span> {/* Star 4 */}
-              <span className="star">&#9734;</span> {/* Star 5 (empty) */}
+              <span className="rating-value">{reviews > 0 ? rating : ""} </span>
+              {[...Array(5)].map((_, index) => (
+                <span
+                  key={index}
+                  className="star"
+                  style={{
+                    color: index < Math.floor(rating) ? "#D33223" : "#ccc",
+                  }}
+                >
+                  {index < Math.floor(rating) ? "★" : "☆"}
+                </span>
+              ))}
             </div>
-            <div className="reviews">{reviews} reviews</div>
+            <div className="reviews">
+              {reviews > 0 ? `${reviews} reviews` : "No reviews yet"}
+            </div>
           </div>
           <p className="cuisine">{cuisine}</p>
         </div>
@@ -175,6 +214,7 @@ const RestaurantPage = () => {
           <textarea
             placeholder="Write your review here..."
             className="review-textarea"
+            onChange={handleReviewTextChange}
           ></textarea>
           <button className="submit-review-btn" type="submit">
             Submit Review
