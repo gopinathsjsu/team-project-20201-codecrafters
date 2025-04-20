@@ -83,7 +83,7 @@ const RestaurantProfile = () => {
   };
 
   const updateRestaurant = async (restaurantId, formData) => {
-    console.log(`Updating restaurant ${restaurantId} with data:`, formData);
+    console.log("Updating restaurant ${restaurantId} with data:", formData);
     const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
     if (!token) throw new Error("No authentication token found");
 
@@ -98,10 +98,11 @@ const RestaurantProfile = () => {
       console.log("Restaurant updated successfully:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error updating restaurant:", error);
+      //console.error("Error updating restaurant:", error);
       throw error;
     }
   };
+
 
   useEffect(() => {
     console.log("Component mounted - fetching restaurants");
@@ -180,7 +181,7 @@ const RestaurantProfile = () => {
         await updateRestaurant(restaurantId, formData);
       } else {
         // Create new restaurant
-        console.log("Creating new restaurant");
+       // console.log("Creating new restaurant");
         await createRestaurant(formData);
       }
 
@@ -190,7 +191,7 @@ const RestaurantProfile = () => {
       setEditingIndex(null);
       setNewPhoto(null);
     } catch (err) {
-      console.error("Error saving restaurant:", err);
+      //console.error("Error saving restaurant:", err);
       setError(err.message);
     }
   };
