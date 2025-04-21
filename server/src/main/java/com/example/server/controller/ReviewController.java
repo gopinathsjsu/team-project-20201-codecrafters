@@ -39,7 +39,6 @@ public class ReviewController {
 
     // Get all reviews
     @GetMapping
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
     public ResponseEntity<?> getReviews(@PathVariable String restaurantId) {
         return ResponseEntity.ok(reviewService.getReviewsByRestaurant(restaurantId));
     }
