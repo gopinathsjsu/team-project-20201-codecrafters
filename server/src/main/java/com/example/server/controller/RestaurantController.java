@@ -81,11 +81,4 @@ public class RestaurantController {
                 .updateRestaurant(id, dto, userDetails.getUserInfo());
         return ResponseEntity.status(HttpStatus.OK).body(updatedRestaurant);
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getRestaurant(@PathVariable String id) {
-        System.out.println("Hello");
-        Restaurant restaurant = restaurantService.getRestaurantById(id);
-        return ResponseEntity.ok(restaurant);
-    }
 }

@@ -34,9 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        String path = request.getRequestURI();
-        if (path.startsWith("/login") || path.startsWith("/signUp") || path.startsWith("/refreshToken")
-                || path.startsWith("/api/restaurants/search")) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -91,5 +89,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.getWriter().write("{\"error\": \"" + message + "\"}");
         response.getWriter().flush();
     }
-    
+
 }
