@@ -40,6 +40,19 @@ public class RestaurantController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getRestaurant(@PathVariable String id) {
+        Restaurant restaurant = restaurantService.getRestaurantById(id);
+        return ResponseEntity.ok(restaurant);
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    public ResponseEntity<List<Restaurant>> getRestaurantByUser(@AuthenticationPrincipal UserInfoUserDetails userDetails) {
+        List<Restaurant> restaurant = restaurantService.getRestaurantByOwner(userDetails.getUserInfo());
+        return ResponseEntity.ok(restaurant);
+    }
+
     @GetMapping("/{id}/availability")
     public ResponseEntity<RestaurantAndAvailableSeatDTO> getRestaurantWithAvailability(@PathVariable String id) {
         try {
