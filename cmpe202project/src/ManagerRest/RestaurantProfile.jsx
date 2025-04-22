@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../styles/RestaurantProfile.css";
 import axios from "axios";
 import { BASE_URL } from "../config/api";
+import { fetchRestaurants } from "../utils/fetchRestaurants";
 
 const daysOfWeek = [
   "MONDAY",
@@ -37,28 +38,6 @@ const RestaurantProfile = () => {
     deletedImages: [],
   });
   console.log("Initial newRestaurant state:", newRestaurant);
-
-  const fetchRestaurants = async () => {
-    console.log("Starting to fetch restaurants...");
-    try {
-      const token =
-        localStorage.getItem("authToken") ||
-        sessionStorage.getItem("authToken");
-      if (!token) throw new Error("No authentication token found");
-
-      console.log("Making API call to fetch restaurants...");
-      const response = await axios.get(`${BASE_URL}/api/restaurants/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setRestaurants(response.data);
-      setLoading(false);
-    } catch (err) {
-      console.error("Error fetching restaurants:", err);
-      setError(err.message);
-      setLoading(false);
-    }
-  };
 
   const createRestaurant = async (formData) => {
     console.log("===== FormData content =====");
@@ -121,8 +100,22 @@ const RestaurantProfile = () => {
   };
 
   useEffect(() => {
-    console.log("Component mounted - fetching restaurants");
-    fetchRestaurants();
+    const loadRestaurants = async () => {
+      setLoading(true);
+      try {
+        const token =
+          localStorage.getItem("authToken") ||
+          sessionStorage.getItem("authToken");
+        const data = await fetchRestaurants(token);
+        setRestaurants(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRestaurants();
   }, []);
 
   const handleNewChange = (e) => {
