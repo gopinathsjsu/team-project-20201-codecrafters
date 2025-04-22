@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import "../styles/LoginSignup.css";
+import {BASE_URL} from "../config/api";
 
 function LoginForm() {
   const [formData, setFormData] = useState({
