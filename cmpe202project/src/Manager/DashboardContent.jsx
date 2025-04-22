@@ -34,32 +34,28 @@ function DashboardContent() {
   return (
     <section className={styles.column2}>
       <div className={styles.div6}>
-        <h2>Dashboard</h2>
 
         {!selectedRestaurantId ? (
           <div>
-            <h3>Click a Restaurant to View Reservations:</h3>
-            {restaurants.map((res) => (
-              <div
-                key={res.id}
-                onClick={() => setSelectedRestaurantId(res.id)}
-                style={{
-                  cursor: "pointer",
-                  border: "1px solid #ccc",
-                  padding: "8px",
-                  marginBottom: "8px",
-                  borderRadius: "4px",
-                  backgroundColor: "#fff",
-                  color: "#333",
-                }}
-              >
-                <strong>{res.name}</strong>
-              </div>
-            ))}
+            <h3 className={styles.restaurantPrompt}>Click a Restaurant to View Reservations:</h3>
+            <div className={styles.restaurantList}>
+              {restaurants.map((res) => (
+                <div
+                  key={res.id}
+                  onClick={() => setSelectedRestaurantId(res.id)}
+                  className={styles.restaurantItem}
+                >
+                  <div className={styles.restaurantName}>{res.name}</div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <div>
-            <button onClick={() => setSelectedRestaurantId(null)}>
+            <button 
+              onClick={() => setSelectedRestaurantId(null)}
+              className={styles.backButton}
+            >
               ← Back to Restaurant List
             </button>
             <ReservationTable restaurantId={selectedRestaurantId} />
@@ -69,4 +65,6 @@ function DashboardContent() {
     </section>
   );
 }
+
 export default DashboardContent;
+
