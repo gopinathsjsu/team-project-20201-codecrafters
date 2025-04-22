@@ -23,6 +23,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Document(collection = "restaurants")
 public class Restaurant {
+    
     @DBRef @JsonIgnore
     private UserInfo userInfo;
 
