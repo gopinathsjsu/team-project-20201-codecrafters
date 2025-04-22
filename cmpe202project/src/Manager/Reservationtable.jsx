@@ -1,7 +1,6 @@
-
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { fetchReservations } from "../utils/fetchReservations";
 import styles from "../styles/Dashboard.module.css";
-import { BASE_URL } from "../config/api";
 
 function ReservationTable({ restaurantId }) {
   const [reservations, setReservations] = useState([]);
@@ -9,40 +8,27 @@ function ReservationTable({ restaurantId }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchReservations = async () => {
+    if (!restaurantId) {
+      setReservations([]);
+      setLoading(false);
+      return;
+    }
+
+    const loadReservations = async () => {
       try {
         setLoading(true);
-        setError(null);
-
         const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-        if (!token) throw new Error("Authorization token not found");
-        if (!restaurantId) throw new Error("Restaurant ID is missing");
-
-        const url = `${BASE_URL}/api/restaurants/${restaurantId}/reservations`;
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          }
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Failed to fetch reservations: ${response.status} ${errorText}`);
-        }
-
-        const data = await response.json();
-        setReservations(data);
-        console.log("✅ Reservation data:", data);
+        const data = await fetchReservations(token, restaurantId);
+        console.log("Fetched reservations:", data);
+        setReservations(data || []);
       } catch (err) {
-        console.error("❌ Error:", err.message);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchReservations();
+    loadReservations();
   }, [restaurantId]);
 
   const formatDateTime = (datetime) => {
@@ -50,16 +36,17 @@ function ReservationTable({ restaurantId }) {
     return new Date(datetime).toLocaleString(undefined, options);
   };
 
+  if (!restaurantId) return <div>Please select a restaurant.</div>;
   if (loading) return <div>Loading reservations...</div>;
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
   if (reservations.length === 0) return <div style={{ color: "gray" }}>No reservations found.</div>;
 
   return (
-    <article className={styles.topStore}>
+    <article className={styles.topStore} style={{ color: "black" }}>
       <h2 className={styles.reservationTitle}>Reservation Information</h2>
 
       {reservations.map((res, index) => (
-        <div key={index} className={styles.reservationCard}>
+        <div key={res.id} className={styles.reservationCard}>
           <h3 className={styles.reservationHeading}>Reservation #{index + 1}</h3>
           <div className={styles.row}>
             <strong>Email:</strong>
@@ -71,7 +58,7 @@ function ReservationTable({ restaurantId }) {
           </div>
           <div className={styles.row}>
             <strong>Reservation Time:</strong>
-            <span>{formatDateTime(res.dateTime)}</span>
+            <span>{res.dateTime ? formatDateTime(res.dateTime) : "N/A"}</span>
           </div>
           <div className={styles.row}>
             <strong>Restaurant ID:</strong>
