@@ -1,49 +1,84 @@
+
 import React, { useState, useEffect } from "react";
 import styles from "../styles/Dashboard.module.css";
 import { BASE_URL } from "../config/api";
 
-function ReservationTable() {
-  const [restaurants, setRestaurants] = useState([]);
+function ReservationTable({ restaurantId }) {
+  const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchRestaurants = async () => {
+    const fetchReservations = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/api/restaurants`);
-        if (!response.ok) throw new Error("Failed to fetch restaurants");
+        setLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+        if (!token) throw new Error("Authorization token not found");
+        if (!restaurantId) throw new Error("Restaurant ID is missing");
+
+        const url = `${BASE_URL}/api/restaurants/${restaurantId}/reservations`;
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          }
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to fetch reservations: ${response.status} ${errorText}`);
+        }
+
         const data = await response.json();
-        setRestaurants(data);
+        setReservations(data);
+        console.log("✅ Reservation data:", data);
       } catch (err) {
+        console.error("❌ Error:", err.message);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    fetchRestaurants();
-  }, []);
 
-  if (loading) return <div>Loading restaurants...</div>;
-  if (error) return <div>Error: {error}</div>;
+    fetchReservations();
+  }, [restaurantId]);
+
+  const formatDateTime = (datetime) => {
+    const options = { dateStyle: "medium", timeStyle: "short" };
+    return new Date(datetime).toLocaleString(undefined, options);
+  };
+
+  if (loading) return <div>Loading reservations...</div>;
+  if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
+  if (reservations.length === 0) return <div style={{ color: "gray" }}>No reservations found.</div>;
 
   return (
     <article className={styles.topStore}>
-      <div className={styles.div11}>
-        <div className={styles.div}>
-          <div className={styles.column3}><h2 className={styles.reservation}>Customer name</h2></div>
-          <div className={styles.column5}><h3 className={styles.customer}>Number of people</h3></div>
-          <div className={styles.column4}><h2 className={styles.address}>Phone Number</h2></div>
-          <div className={styles.column4}><h3 className={styles.address}>Time</h3></div>
-          
-        </div>
-        {restaurants.map((r) => (
-          <div key={r.id} className={styles.div} style={{ marginTop: "20px" }}>
-            <div className={styles.column3}><p>{r.name}</p></div>
-            <div className={styles.column4}><p>{r.address}</p></div>
-            <div className={styles.column5}><p>{r.cuisine || "N/A"} — {r.phone || "N/A"}</p></div>
+      <h2 className={styles.reservationTitle}>Reservation Information</h2>
+
+      {reservations.map((res, index) => (
+        <div key={index} className={styles.reservationCard}>
+          <h3 className={styles.reservationHeading}>Reservation #{index + 1}</h3>
+          <div className={styles.row}>
+            <strong>Email:</strong>
+            <span>{res.email || "N/A"}</span>
           </div>
-        ))}
-      </div>
+          <div className={styles.row}>
+            <strong>Party Size:</strong>
+            <span>{res.partySize || "N/A"}</span>
+          </div>
+          <div className={styles.row}>
+            <strong>Reservation Time:</strong>
+            <span>{formatDateTime(res.dateTime)}</span>
+          </div>
+          <div className={styles.row}>
+            <strong>Restaurant ID:</strong>
+            <span>{res.restaurantId || "N/A"}</span>
+          </div>
+        </div>
+      ))}
     </article>
   );
 }
