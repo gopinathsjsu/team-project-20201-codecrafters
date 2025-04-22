@@ -2,6 +2,7 @@ package com.example.server.controller;
 
 import com.example.server.config.UserInfoUserDetails;
 import com.example.server.dto.reservation.ReservationCreateDTO;
+import com.example.server.dto.reservation.ReservationResponseDTO;
 import com.example.server.dto.reservation.ReservationUpdateDTO;
 import com.example.server.entity.Reservation;
 import com.example.server.entity.ReservationStatus;
@@ -30,8 +31,8 @@ public class ReservationController {
     @PostMapping("/restaurants/{restaurantId}/reservations")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> createReservation(@AuthenticationPrincipal UserInfoUserDetails userDetails,
-                                               @PathVariable String restaurantId,
-                                               @RequestBody ReservationCreateDTO dto) {
+            @PathVariable String restaurantId,
+            @RequestBody ReservationCreateDTO dto) {
         UserInfo user = userDetails.getUserInfo();
         reservationService.createReservation(user.getId(), restaurantId, dto);
         return ResponseEntity.status(201)
@@ -41,29 +42,42 @@ public class ReservationController {
     // Managers get their reservations from a restaurant
     @GetMapping("/restaurants/{restaurantId}/reservations")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<List<Reservation>> getAllByRestaurant(@PathVariable String restaurantId,
-                                                                @AuthenticationPrincipal UserInfoUserDetails userDetails) {
+    public ResponseEntity<List<ReservationResponseDTO>> getAllByRestaurant(@PathVariable String restaurantId,
+            @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         UserInfo user = userDetails.getUserInfo();
+        List<Reservation> reservationList = reservationService.findAllByRestaurantId(restaurantId, user.getId());
 
-        return ResponseEntity.ok(reservationService.findAllByRestaurantId(restaurantId, user.getId()));
+        List<ReservationResponseDTO> dtoList = reservationList.stream().map(res -> new ReservationResponseDTO(
+                res.getUser().getId(),
+                res.getRestaurant().getId(),
+                res.getDateTime(),
+                res.getPartySize())).toList();
+        return ResponseEntity.ok(dtoList);
     }
 
     // Managers can view a single reservation of their restaurant
     @GetMapping("/restaurants/{restaurantId}/reservations/{reservationId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<Reservation> getReservation(@PathVariable String restaurantId, @PathVariable String reservationId) {
+    public ResponseEntity<ReservationResponseDTO> getReservation(@PathVariable String restaurantId,
+            @PathVariable String reservationId) {
         Reservation reservation = reservationService.findByIdAndRestaurantId(reservationId, restaurantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return ResponseEntity.ok(reservation);
+        ReservationResponseDTO dto = new ReservationResponseDTO(
+                reservation.getUser().getEmail(),
+                reservation.getRestaurant().getId(),
+                reservation.getDateTime(),
+                reservation.getPartySize());
+
+        return ResponseEntity.ok(dto);
     }
 
     // Update reservation
     @PutMapping("/restaurants/{restaurantId}/reservations/{reservationId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
     public ResponseEntity<?> updateReservation(@AuthenticationPrincipal UserInfo user,
-                                               @PathVariable String restaurantId,
-                                               @PathVariable String reservationId,
-                                               @RequestBody ReservationUpdateDTO dto) {
+            @PathVariable String restaurantId,
+            @PathVariable String reservationId,
+            @RequestBody ReservationUpdateDTO dto) {
         if (user.getRoles().contains("USER") && !dto.getStatus().equals(ReservationStatus.CANCELLED)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User can only cancel the reservation");
         }
@@ -76,12 +90,13 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reservation not found");
     }
 
-    // Only the manager who own the restaurant can delete the reservation from that restaurant
+    // Only the manager who own the restaurant can delete the reservation from that
+    // restaurant
     @DeleteMapping("/restaurants/{restaurantId}/reservations/{id}")
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     public ResponseEntity<?> deleteReservation(@PathVariable String id,
-                                               @PathVariable String restaurantId,
-                                               @AuthenticationPrincipal UserInfoUserDetails userDetails) {
+            @PathVariable String restaurantId,
+            @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         Reservation reservation = reservationService.findByIdAndRestaurantId(id, restaurantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
         Restaurant restaurant = reservation.getRestaurant();
@@ -98,20 +113,35 @@ public class ReservationController {
     // Users can access their reservations
     @GetMapping("/reservations")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<Reservation>> getAllByUserId(@AuthenticationPrincipal UserInfoUserDetails userDetails) {
+    public ResponseEntity<List<ReservationResponseDTO>> getAllByUserId(
+            @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         UserInfo user = userDetails.getUserInfo();
-        return ResponseEntity.ok(reservationService.findAllByUserId(user.getId()));
+        List<Reservation> reservations = reservationService.findAllByUserId(user.getId());
+
+        List<ReservationResponseDTO> dtoList = reservations.stream()
+                .map(res -> new ReservationResponseDTO(
+                        res.getUser().getEmail(),
+                        res.getRestaurant().getId(),
+                        res.getDateTime(),
+                        res.getPartySize()))
+                .toList();
+
+        return ResponseEntity.ok(dtoList);
     }
 
     // Users can see a single reservation
     @GetMapping("/reservations/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
-    public ResponseEntity<Reservation> getReservationById(@PathVariable String id) {
-        Optional<Reservation> reservationOptional = reservationService.findById(id);
-        if (reservationOptional.isPresent()) {
-            return ResponseEntity.ok(reservationOptional.get());
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<ReservationResponseDTO> getReservationById(@PathVariable String id) {
+        return reservationService.findById(id)
+            .map(res -> new ReservationResponseDTO(
+                    res.getUser().getEmail(),
+                    res.getRestaurant().getId(),
+                    res.getDateTime(),
+                    res.getPartySize()
+            ))
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
 }
