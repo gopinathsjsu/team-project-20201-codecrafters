@@ -8,33 +8,78 @@ import "../styles/RestaurantPage.css";
 import TimeSlotsComponent from "../components/TimeSlotsComponent";
 import { getRestaurantById } from "../utils/apiCalls";
 import { reviewRestaurant } from "../utils/apiCalls";
+import HoursOfOperation from "../components/HoursOfOperation";
 
 const RestaurantPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedRating, setSelectedRating] = useState(0); // Tracks the clicked rating
-  const [hoveredRating, setHoveredRating] = useState(0); // Tracks the hovered rating
-  const [reviewText, setReviewText] = useState(""); // State for review text
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
 
-  const handleStarClick = (rating) => {
-    setSelectedRating(rating); // Set the clicked rating
-  };
+  // Create state for restaurant data
+  const [restaurantData, setRestaurantData] = useState({
+    id: location.state?.id || "",
+    name: location.state?.name || "",
+    rating: location.state?.rating || 0,
+    reviews: location.state?.reviews || 0,
+    cuisine: location.state?.cuisine || "",
+    bookedTimes: location.state?.bookedTimes || 0,
+    timeSlots: location.state?.timeSlots || [],
+    description: location.state?.description || "",
+    address: location.state?.address || "",
+    city: location.state?.city || "",
+    state: location.state?.state || "",
+    zip: location.state?.zip || "",
+    phone: location.state?.phone || "",
+    email: location.state?.email || "",
+    hours: location.state?.hours || {},
+    imageUrls: location.state?.imageUrls || [],
+  });
 
-  const handleStarHover = (rating) => {
-    setHoveredRating(rating); // Set the hovered rating
-  };
+  useEffect(() => {
+    if (location.state === null || !location.state.id) {
+      const fetchRestaurant = async () => {
+        const restaurantId = location.pathname.split("/").pop().trim();
+        console.log("Fetching restaurant with ID:", restaurantId);
+        const fetchedData = await getRestaurantById(restaurantId);
+        if (fetchedData) {
+          console.log("Fetched restaurant data:", fetchedData);
+          // Update state with fetched data
+          setRestaurantData({
+            id: fetchedData.id || "",
+            name: fetchedData.name || "",
+            rating: fetchedData.averageRating || 0, // Map averageRating to rating
+            reviews: fetchedData.totalReviews || 0, // Map totalReviews to reviews
+            cuisine: fetchedData.cuisine || "",
+            bookedTimes: fetchedData.bookedTimes || 0, // Default if not available
+            timeSlots: fetchedData.timeSlots || [], // Default if not available
+            description: fetchedData.description || "",
+            address: fetchedData.address || "",
+            city: fetchedData.city || "",
+            state: fetchedData.state || "",
+            zip: fetchedData.zip || "",
+            phone: fetchedData.phone || "",
+            email: fetchedData.email || "",
+            hours: fetchedData.hours || {},
+            imageUrls: fetchedData.imageUrls || [],
+          });
+        } else {
+          console.log("No restaurant data found for ID:", restaurantId);
+          // Optionally redirect to 404 page
+          // navigate("/not-found");
+        }
+      };
+      fetchRestaurant();
+    }
+  }, [location.state, navigate, location.pathname]);
 
-  const handleStarMouseLeave = () => {
-    setHoveredRating(0); // Reset hovered rating when mouse leaves
-  };
-  const { id, name, rating, reviews, cuisine, bookedTimes, timeSlots } =
-    location.state || {};
-
+  // Rest of your component remains the same, but now uses the state variables
   const handleSubmitReview = (e) => {
     e.preventDefault();
     if (selectedRating === 0) {
       alert("Please select a rating before submitting your review.");
-      return; // Prevent submission if no rating is selected
+      return;
     }
     const response = reviewRestaurant(id, {
       rating: selectedRating,
@@ -47,21 +92,17 @@ const RestaurantPage = () => {
     setReviewText(e.target.value);
   };
 
-  useEffect(() => {
-    if (location.state === null || !location.state.id) {
-      const fetchRestaurant = async () => {
-        const restaurantId = location.pathname.split("/").pop().trim();
-        console.log("Fetching restaurant with ID:", restaurantId);
-        const restaurantData = await getRestaurantById(restaurantId);
-        if (restaurantData) {
-          console.log("Fetched restaurant data:", restaurantData);
-        } else {
-          console.log("No restaurant data found for ID:", restaurantId);
-        }
-      };
-      fetchRestaurant();
-    }
-  }, [location.state, navigate]);
+  const handleStarClick = (rating) => {
+    setSelectedRating(rating); // Set the clicked rating
+  };
+
+  const handleStarHover = (rating) => {
+    setHoveredRating(rating); // Set the hovered rating
+  };
+
+  const handleStarMouseLeave = () => {
+    setHoveredRating(0); // Reset hovered rating when mouse leaves
+  };
 
   return (
     <div className="restaurant-page">
@@ -71,46 +112,62 @@ const RestaurantPage = () => {
       </div>
       {/* Restaurant info */}
       <div className="restaurant-info">
-        <h1>{name}</h1>
+        <h1>{restaurantData.name}</h1>
         <div className="restaurant-details">
           <div className="rating-container">
             <div className="star-rating">
-              <span className="rating-value">{reviews > 0 ? rating : ""} </span>
+              <span className="rating-value">
+                {restaurantData.reviews > 0 ? restaurantData.rating : ""}{" "}
+              </span>
               {[...Array(5)].map((_, index) => (
                 <span
                   key={index}
                   className="star"
                   style={{
-                    color: index < Math.floor(rating) ? "#D33223" : "#ccc",
+                    color:
+                      index < Math.floor(restaurantData.rating)
+                        ? "#D33223"
+                        : "#ccc",
                   }}
                 >
-                  {index < Math.floor(rating) ? "★" : "☆"}
+                  {index < Math.floor(restaurantData.rating) ? "★" : "☆"}
                 </span>
               ))}
             </div>
             <div className="reviews">
-              {reviews > 0 ? `${reviews} reviews` : "No reviews yet"}
+              {restaurantData.reviews > 0
+                ? `${restaurantData.reviews} reviews`
+                : "No reviews yet"}
             </div>
           </div>
-          <p className="cuisine">{cuisine}</p>
+          <p className="cuisine">{restaurantData.cuisine}</p>
+          <div className="restaurant-address">
+            <p>
+              🗺️{" "}
+              {`${restaurantData.address}, ${restaurantData.city}, ${restaurantData.state} ${restaurantData.zip}`}
+            </p>
+            <p>📞 {restaurantData.phone}</p>
+            <p>✉️ {restaurantData.email}</p>
+          </div>
         </div>
         <div className="description-and-reservation">
           <div className="description">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
+            {restaurantData.description || "No description available."}
           </div>
+          <HoursOfOperation hours={restaurantData?.hours} />
           <div className="reservation">
             <h2>Make a Reservation</h2>
             <SearchComponent showSearch={false} />
             <div className="available-times">
               <h3>Select a time</h3>
-              <TimeSlotsComponent timeSlots={timeSlots} name={name} />
+              <TimeSlotsComponent
+                timeSlots={restaurantData.timeSlots}
+                name={restaurantData.name}
+              />
             </div>
             <div className="booked-times">
               <img src={TrendUp} alt="Trend Up" className="trend-icon" />
-              Booked {bookedTimes} times today
+              Booked {restaurantData.bookedTimes} times today
             </div>
           </div>
         </div>
