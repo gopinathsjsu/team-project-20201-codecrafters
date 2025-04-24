@@ -19,7 +19,7 @@ const HomePage = () => {
           if (restaurants && restaurants.length > 0) {
             const sortedRestaurants = restaurants
               .sort((a, b) => b.rating - a.rating)
-              .slice(0, 5)
+              .slice(0, 10)
               .map((restaurant) => ({
                 ...restaurant,
                 bookedTimes: restaurant.bookedTimes || [],
