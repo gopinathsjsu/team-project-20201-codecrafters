@@ -63,6 +63,50 @@
     font-size: larger;
 }
 
+.restaurant-address{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+.restaurant-hours{
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    border: #0E2840 1px solid;
+    border-radius: 10px;
+    padding: 20px;
+    margin-right: 20px;
+    font-size: larger;
+    align-self: center;
+}
+
+.current-status {
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  .open-now {
+    color: green;
+  }
+  
+  .closed-now {
+    color: #D33223;
+  }
+  
+  .today {
+    background-color: rgba(211, 50, 35, 0.1);
+    padding: 5px;
+    border-radius: 4px;
+  }
+  
+  .today-marker {
+    font-style: italic;
+    color: #D33223;
+  }
+
 .description-and-reservation{
     display: flex;
     margin-top: 30px;
