@@ -307,17 +307,7 @@ const SearchResultsPage = () => {
           {searchTerm && <h2>{`Results for "${searchTerm}"`}</h2>}
           <div className="restaurant-list">
             {filteredRestaurants.map((restaurant, index) => (
-              <RestaurantBox
-                horizontal={true}
-                key={index}
-                id={restaurant.id}
-                name={restaurant.name}
-                rating={restaurant.rating}
-                reviews={restaurant.reviews}
-                cuisine={restaurant.cuisine}
-                bookedTimes={restaurant.bookedTimes}
-                timeSlots={restaurant.timeSlots}
-              />
+              <RestaurantBox horizontal={true} key={index} {...restaurant} />
             ))}
           </div>
         </div>

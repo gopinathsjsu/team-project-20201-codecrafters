@@ -78,16 +78,7 @@ const HomePage = () => {
           </button>
           <div className="restaurant-list" ref={restaurantListRef}>
             {topRatedRestaurants.map((restaurant, index) => (
-              <RestaurantBox
-                key={index}
-                id={restaurant.id}
-                name={restaurant.name}
-                rating={restaurant.averageRating}
-                reviews={restaurant.totalReviews}
-                cuisine={restaurant.cuisine}
-                bookedTimes={restaurant.bookedTimes}
-                timeSlots={restaurant.timeSlots}
-              />
+              <RestaurantBox key={index} {...restaurant} />
             ))}
           </div>
           <button className="carousel-button right" onClick={scrollRight}>

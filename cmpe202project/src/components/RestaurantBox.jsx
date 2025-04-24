@@ -14,6 +14,7 @@ const RestaurantBox = ({
   bookedTimes,
   timeSlots,
   horizontal = false,
+  ...otherProps
 }) => {
   const navigate = useNavigate();
   const handleClick = () => {
@@ -26,6 +27,7 @@ const RestaurantBox = ({
         cuisine,
         bookedTimes,
         timeSlots,
+        ...otherProps,
       },
     });
   };
