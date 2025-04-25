@@ -2,7 +2,12 @@ import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { ReservationContext } from "../context/ReservationContext";
 
-const TimeSlotsComponent = ({ timeSlots = [], name }) => {
+const TimeSlotsComponent = ({
+  timeSlots = [],
+  name,
+  address = "",
+  id = "",
+}) => {
   const navigate = useNavigate();
   const { setReservationTime } = useContext(ReservationContext);
 
@@ -28,6 +33,8 @@ const TimeSlotsComponent = ({ timeSlots = [], name }) => {
     navigate("/booking", {
       state: {
         name,
+        address,
+        id,
       },
     });
   };
