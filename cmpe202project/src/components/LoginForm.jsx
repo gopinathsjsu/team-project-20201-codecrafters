@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import "../styles/LoginSignup.css";
+import {BASE_URL} from "../config/api";
 
 function LoginForm() {
   const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ function LoginForm() {
 
     try {
       const response = await axios.post(
-        "https://team-project-20201-codecrafters-production.up.railway.app/login",
+        `${BASE_URL}/login`,
         {
           email: formData.email,
           password: formData.password
@@ -67,11 +68,14 @@ function LoginForm() {
       axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
       // Redirect logic - enhanced with email check as fallback
-      if (user?.role?.includes("ADMIN"))  {
+      if (user?.role?.includes("ADMIN")) {
         navigate("/admin/dashboard");
+      } else if (user?.role?.includes("RESTAURANT_MANAGER")) {
+        navigate("/manager/dashboard");
       } else {
         navigate("/");
-      } 
+      }
+      
 
     } catch (err) {
       let errorMessage = "Login failed. Please check your credentials.";
