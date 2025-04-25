@@ -1,7 +1,7 @@
-.customer-navbar{
+.customer-navbar {
     display: flex;
-    position: sticky;
     justify-content: space-between;
+    padding: 0 2rem;
     align-items: center;
     color: white;
     font-size: larger;
@@ -14,13 +14,13 @@
     z-index: 1000;
 }
 
-.logo-container{
+.logo-container {
     display: flex;
     align-items: center;
     margin-left: 2rem;
 }
 
-.search-login-container{
+.search-login-container {
     display: flex;
     gap: 3rem;
     justify-content: space-between;
@@ -28,13 +28,13 @@
     margin-right: 2rem;
 }
 
-.search-bar{
+.search-bar {
     border-radius: 15px;
     overflow: hidden;
     position: relative;
 }
 
-.search-bar img{
+.search-bar img {
     width: 15px;
     height: 15px;
     position: absolute;
@@ -44,7 +44,7 @@
     pointer-events: none; /* Prevents the icon from interfering with input */
 }
 
-.search-bar input, .search-button{
+.search-bar input, .search-button {
     border: none;
     padding: 10px;
     padding-left: 30px;
@@ -52,31 +52,50 @@
     outline: none;
 }
 
-.search-button{
+.search-button {
     padding: 10px;
     transition: all 0.3s ease-in-out;
 }
 
-.search-button:hover{
+.search-button:hover {
     cursor: pointer;
     background-color: #D33223;
     color: white;
     border: none;
 }
 
-.login-btn{
-    background-color: #D33223;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    font-size: large;
+.navbar-logo a {
+    font-size: 1.5rem;
     font-weight: bold;
-    border-radius: 20px;
-    transition: all 0.3s ease-in-out;
+    color: #d33223;
+    text-decoration: none;
 }
 
-.login-btn:hover{
+.navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.navbar-links a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar-links a:hover {
+    color: #d33223;
+}
+
+.login-btn, .logout-btn {
+    background-color: #d33223;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
     cursor: pointer;
-    color: #D33223;
-    background-color: white;
+    font-size: 1rem;
+}
+
+.login-btn:hover, .logout-btn:hover {
+    background-color: #b82a1c;
 }
