@@ -1,15 +1,16 @@
 "use client";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import styles from "../styles/Sidebar.module.css";
 import SidebarNavItem from "./SidebarNavItem";
 
 function Sidebar() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    // Add any logout logic here (e.g., clearing tokens, cookies)
-    // Then navigate to the home page
+    logout();
     navigate("/");
   };
 
