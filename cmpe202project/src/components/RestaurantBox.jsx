@@ -17,19 +17,23 @@ const RestaurantBox = ({
   ...otherProps
 }) => {
   const navigate = useNavigate();
-  const handleClick = () => {
-    navigate(`/restaurant/${id}`, {
-      state: {
-        id,
-        name,
-        rating,
-        reviews,
-        cuisine,
-        bookedTimes,
-        timeSlots,
-        ...otherProps,
-      },
-    });
+
+  const handleClick = (event) => {
+    // Only navigate if the click didn't start from a time-slot
+    if (!event.target.closest(".time-slot")) {
+      navigate(`/restaurant/${id}`, {
+        state: {
+          id,
+          name,
+          rating,
+          reviews,
+          cuisine,
+          bookedTimes,
+          timeSlots,
+          ...otherProps,
+        },
+      });
+    }
   };
 
   return (
@@ -72,11 +76,6 @@ const RestaurantBox = ({
           <img src={TrendUp} alt="Trend Up" className="trend-icon" />
           Booked {bookedTimes} times today
         </div>
-        {timeSlots && timeSlots.length > 0 ? (
-          <span className="availability-text">Available Time Slots:</span>
-        ) : (
-          <span className="availability-text">No available time slots</span>
-        )}
         <TimeSlotsComponent timeSlots={timeSlots} name={name} />
       </div>
     </div>
