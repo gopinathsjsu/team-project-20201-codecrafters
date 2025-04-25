@@ -81,7 +81,7 @@ const RestaurantPage = () => {
       alert("Please select a rating before submitting your review.");
       return;
     }
-    const response = reviewRestaurant(id, {
+    const response = reviewRestaurant(restaurantData.id, {
       rating: selectedRating,
       comment: reviewText.trim(),
     });
@@ -195,58 +195,60 @@ const RestaurantPage = () => {
         <h2>Reviews</h2>
         <div className="reviews-list">
           <h3>Latest reviews</h3>
-          <div className="review-item">
-            <div className="review-rating">
-              <span className="star">&#9733;</span> {/* Star 1 */}
-              <span className="star">&#9733;</span> {/* Star 2 */}
-              <span className="star">&#9733;</span> {/* Star 3 */}
-              <span className="star">&#9733;</span> {/* Star 4 */}
-              <span className="star">&#9734;</span> {/* Star 5 (empty) */}
-            </div>
-            <div className="review-header">
-              <span className="reviewer-name">John Doe</span>
-              <span className="review-date">2 days ago</span>
-            </div>
-            <p className="review-text">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+          {Array.isArray(restaurantData.reviews) &&
+          restaurantData.reviews.length > 0 ? (
+            <>
+              {restaurantData.reviews
+                .slice(0, showAllReviews ? undefined : 3)
+                .map((review, index) => (
+                  <div key={review.id || index} className="review-item">
+                    <div className="review-rating">
+                      {[...Array(5)].map((_, i) => (
+                        <span
+                          key={i}
+                          className="star"
+                          style={{
+                            color:
+                              i < Math.floor(review.rating)
+                                ? "#D33223"
+                                : "#ccc",
+                          }}
+                        >
+                          {i < Math.floor(review.rating) ? "★" : "☆"}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="review-header">
+                      <span className="reviewer-name">
+                        {review.userName || "Anonymous"}
+                      </span>
+                      <span className="review-date">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="review-text">
+                      {review.comment || review.text}
+                    </p>
+                  </div>
+                ))}
+
+              {restaurantData.reviews.length > 3 && (
+                <button
+                  className="show-all-reviews-btn"
+                  onClick={() => setShowAllReviews(!showAllReviews)}
+                >
+                  {showAllReviews
+                    ? "Show less"
+                    : `Show all (${restaurantData.reviews.length})`}
+                </button>
+              )}
+            </>
+          ) : (
+            <p className="no-reviews">
+              No reviews yet. Be the first to leave a review!
             </p>
-          </div>
-          <div className="review-item">
-            <div className="review-rating">
-              <span className="star">&#9733;</span> {/* Star 1 */}
-              <span className="star">&#9733;</span> {/* Star 2 */}
-              <span className="star">&#9733;</span> {/* Star 3 */}
-              <span className="star">&#9733;</span> {/* Star 4 */}
-              <span className="star">&#9734;</span> {/* Star 5 (empty) */}
-            </div>
-            <div className="review-header">
-              <span className="reviewer-name">John Doe</span>
-              <span className="review-date">2 days ago</span>
-            </div>
-            <p className="review-text">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </p>
-          </div>
-          <div className="review-item">
-            <div className="review-rating">
-              <span className="star">&#9733;</span> {/* Star 1 */}
-              <span className="star">&#9733;</span> {/* Star 2 */}
-              <span className="star">&#9733;</span> {/* Star 3 */}
-              <span className="star">&#9733;</span> {/* Star 4 */}
-              <span className="star">&#9734;</span> {/* Star 5 (empty) */}
-            </div>
-            <div className="review-header">
-              <span className="reviewer-name">John Doe</span>
-              <span className="review-date">2 days ago</span>
-            </div>
-            <p className="review-text">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </p>
-          </div>
-          <button className="show-all-reviews-btn">Show all</button>
+          )}
         </div>
       </div>
       {/* Leave a review */}
