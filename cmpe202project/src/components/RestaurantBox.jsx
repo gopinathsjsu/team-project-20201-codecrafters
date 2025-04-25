@@ -76,7 +76,12 @@ const RestaurantBox = ({
           <img src={TrendUp} alt="Trend Up" className="trend-icon" />
           Booked {bookedTimes} times today
         </div>
-        <TimeSlotsComponent timeSlots={timeSlots} name={name} />
+        <TimeSlotsComponent
+          timeSlots={timeSlots}
+          name={name}
+          id={id}
+          address={`${otherProps?.address}, ${otherProps?.city}, ${otherProps?.state} ${otherProps?.zip}`}
+        />
       </div>
     </div>
   );
