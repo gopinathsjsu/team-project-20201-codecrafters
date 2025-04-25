@@ -50,7 +50,7 @@ function App() {
             <Route
               path="dashboard"
               element={
-                <ProtectedRoute role="MANAGER">
+                <ProtectedRoute role="RESTAURANT_MANAGER">
                   <ManagerDashboard />
                 </ProtectedRoute>
               }
@@ -58,7 +58,7 @@ function App() {
             <Route
               path="restaurants"
               element={
-                <ProtectedRoute role="MANAGER">
+                <ProtectedRoute role="RESTAURANT_MANAGER">
                   <ManagerRestaurants />
                 </ProtectedRoute>
               }
