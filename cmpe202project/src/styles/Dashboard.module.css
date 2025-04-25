@@ -364,6 +364,8 @@
   }
 }
 .column3 {
+  color: black;
+  font-size: 16px;
   flex-direction: column;
   align-items: stretch;
   width: 34%;
@@ -395,8 +397,18 @@
   }
 }
 .reservation {
-  font-size: 20px;
+  color: black;
+  font-size: 24px;
+  font-weight: bold;
 }
+
+.address,
+.customer {
+  color: black;
+  font-size: 18px;
+}
+
+
 .restaurantname {
   margin-top: 23px;
   font-size: 14px;
@@ -407,6 +419,8 @@
   }
 }
 .column4 {
+  color: black;
+  font-size: 16px;
   flex-direction: column;
   align-items: stretch;
   width: 16%;
@@ -438,6 +452,8 @@
   }
 }
 .column5 {
+  color: black;
+  font-size: 16px;
   flex-direction: column;
   align-items: stretch;
   width: 50%;
@@ -510,4 +526,246 @@
   align-self: center;
   margin-top: 17px;
   font-size: 14px;
+}
+
+
+/*reservation format*/
+/* Add these styles to your Dashboard.module.css */
+
+.dashboardHeader {
+  color: #000;
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  position: relative;
+  right: -45px; /* To match your existing dashboard4 style */
+}
+
+.restaurantPrompt {
+  color: #000;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.restaurantList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.restaurantItem {
+  background-color: #fff;
+  border: 1px solid #e8ebec;
+  border-radius: 14px;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.restaurantItem:hover {
+  background-color: #f5f5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.restaurantName {
+  font-weight: 600;
+  font-size: 16px;
+  color: #0e2840;
+}
+
+
+/*back button at Restaurant owner Dashboard*/
+.backButton {
+  background-color: #ffcc00;
+  color: black;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease;
+  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.backButton:hover {
+  background-color: #ffcc00;
+}
+
+
+/* Sidebar*/
+/* === Sidebar Styles === */
+.sidebar {
+  width: 250px;
+  background-color: #112240;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-top-left-radius: 30px;
+  border-bottom-left-radius: 30px;
+  z-index: 10; /* Ensures it stays on top */
+}
+
+/* === Layout Wrapper for Consistent Sidebar === */
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar container if you wrap it in a div */
+.sidebarWrapper {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+/* Main content beside the sidebar */
+.mainContent {
+  flex-grow: 1;
+  margin-left: 250px;
+  padding: 40px;
+  background-color: #fff;
+}
+
+.pageWrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #d9d9d9; /* Match Restaurant page */
+}
+
+.pageContent {
+  flex-grow: 1;
+  background-color: #fff;
+  border-top-right-radius: 31px;
+  border-bottom-right-radius: 31px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.dashboardContainer {
+  display: flex;
+  background-color: #d9d9d9; /* outer gray */
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.cardWrapper {
+  display: flex;
+  width: 100%;
+  max-width: 1400px;
+  background-color: #fff;
+  border-radius: 31px;
+  overflow: hidden;
+  min-height: 90vh;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Add these styles to your CSS file */
+
+.container {
+  min-height: 100vh; /* Changed from 'screen' to '100vh' for proper unit */
+  background-color: #fff;
+  display: flex;
+  border-radius: 31px;
+  padding-right: 58px;
+  overflow: hidden;
+}
+
+/* White background for the entire content area */
+.content-wrapper {
+  display: flex;
+  width: 100%;
+  background-color: #fff; /* White background for both columns */
+  border-radius: 31px; /* Match container's border radius */
+}
+
+/* Taskbar (navigation) styles with white background */
+.taskbar {
+  background-color: #0e2840;
+  border-radius: 30px;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 20px; /* Added margin to create space from white background */
+  padding: 151px 40px 47px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Dashboard content area with white background */
+.dashboard-content {
+  background-color: #fff;
+  width: 100%;
+  padding: 20px;
+  border-radius: 30px;
+  margin: 20px; /* Added margin to create space from white background */
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Update your media queries */
+@media (width <= 991px) {
+  .container {
+    padding-right: 20px;
+  }
+  
+  .content-wrapper {
+    flex-direction: column;
+  }
+  
+  .taskbar,
+  .dashboard-content {
+    margin: 10px;
+    width: calc(100% - 20px);
+  }
+  
+  .taskbar {
+    padding-top: 100px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+
+.dashboardContainer {
+  display: flex;
+  background-color: #ffffff; /* pure white */
+  min-height: 100vh;
+}
+
+.mainContent {
+  flex-grow: 1;
+  background-color: #fff;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #112240;
+  height: 100vh;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-top-left-radius: 30px;
+  border-bottom-left-radius: 30px;
 }

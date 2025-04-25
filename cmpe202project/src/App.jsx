@@ -14,6 +14,10 @@ import { ReservationProvider } from "./context/ReservationContext";
 import "./App.css";
 import BookingPage from "./pages/BookingPage";
 
+// 👇 Manager Imports
+import ManagerDashboard from "./Manager/ManagerDashboard";
+import ManagerRestaurants from "./ManagerRest/ManagerRestaurants";
+
 function App() {
   return (
     <BrowserRouter>
@@ -31,13 +35,21 @@ function App() {
           <Route path="restaurant/:name" element={<RestaurantPage />} />
           <Route path="booking" element={<BookingPage />} />
         </Route>
+
         <Route path="/" element={<Layout />}>
           <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<SignUpPage />} />
+
+          {/* Admin Routes */}
           <Route path="admin/dashboard" element={<Dashboard />} />
           <Route path="admin/approve" element={<ApproveNewRestaurant />} />
           <Route path="admin/restaurants" element={<RemoveRest />} />
+
+          {/* ✅ Manager Routes */}
+          <Route path="manager/dashboard" element={<ManagerDashboard />} />
+          <Route path="manager/restaurants" element={<ManagerRestaurants />} />
         </Route>
+
         <Route path="*" element={<NoPage />} />
       </Routes>
     </BrowserRouter>
