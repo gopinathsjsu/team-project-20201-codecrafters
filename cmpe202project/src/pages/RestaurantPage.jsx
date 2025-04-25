@@ -163,6 +163,8 @@ const RestaurantPage = () => {
               <TimeSlotsComponent
                 timeSlots={restaurantData.timeSlots}
                 name={restaurantData.name}
+                id={restaurantData.id}
+                address={`${restaurantData?.address}, ${restaurantData?.city}, ${restaurantData?.state} ${restaurantData?.zip}`}
               />
             </div>
             <div className="booked-times">
