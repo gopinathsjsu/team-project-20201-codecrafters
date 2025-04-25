@@ -1,25 +1,42 @@
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/CustomerNavBar.css";
-import { useNavigate } from "react-router-dom";
-import searchIcon from "../assets/searchIcon.svg";
 
 const CustomerNavBar = () => {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/"); // Redirect to homepage after logout
+  };
 
   return (
     <nav className="customer-navbar">
-      <div className="logo-container" onClick={() => navigate("/")}>
-        Logo
+      <div className="navbar-logo">
+        <Link to="/">Restaurant Finder</Link>
       </div>
-      <div className="search-login-container">
-        {/* <div className="search-bar">
-          <img src={searchIcon} alt="search icon" />
-          <input type="text" placeholder="Search..." className="search-input" />
-          <button className="search-button">Search</button>
-        </div> */}
-        <button className="login-btn" onClick={() => navigate("/login")}>
-          Login
-        </button>
+
+      <div className="navbar-links">
+        <Link to="/">Home</Link>
+        <Link to="/search">Search</Link>
+        {user ? (
+          <>
+            <Link to="/reservations">My Reservations</Link>
+            <div className="user-menu">
+              <button onClick={handleLogout} className="logout-btn">
+                Logout
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="auth-buttons">
+            <Link to="/login" className="login-btn">
+              Login
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   );
