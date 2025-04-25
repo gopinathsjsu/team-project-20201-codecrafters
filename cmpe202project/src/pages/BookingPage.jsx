@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { ReservationContext } from "../context/ReservationContext";
 import "../styles/BookingPage.css";
 import RestaurantImage from "../assets/restaurant-example.png";
+import { confirmReservation } from "../utils/apiCalls";
 
 const BookingPage = () => {
   const {
@@ -12,7 +13,7 @@ const BookingPage = () => {
     setNumberOfGuests,
   } = useContext(ReservationContext);
   const location = useLocation();
-  const { name } = location.state || {};
+  const { name, address, id } = location.state || {};
 
   useEffect(() => {
     if (numberOfGuests === "") {
@@ -38,12 +39,16 @@ const BookingPage = () => {
 
   const handleBookingSubmit = (e) => {
     e.preventDefault();
-    console.log("Booking confirmed for:", {
-      name,
-      date: reservationDate,
-      time: reservationTime,
-      guests: numberOfGuests,
-    });
+    let combinedDateTime = new Date(`${reservationDate}T${reservationTime}`);
+
+    // Format the request according to the required structure
+    let bookingRequest = {
+      dateTime: combinedDateTime.toISOString(),
+      partySize: parseInt(numberOfGuests, 10),
+    };
+
+    const response = confirmReservation(id, bookingRequest);
+    console.log("Booking confirmed:", response);
   };
 
   return (
@@ -69,6 +74,7 @@ const BookingPage = () => {
               <span>{numberOfGuests} people</span>
             </div>
           </div>
+          <div>{`🗺️${address}`}</div>
         </div>
       </div>
       <div className="email-phone-container">
