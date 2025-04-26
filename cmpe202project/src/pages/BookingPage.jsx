@@ -22,7 +22,13 @@ const BookingPage = () => {
   }, [numberOfGuests, setNumberOfGuests]);
 
   // Format the date as "Month Day, Year"
-  const formattedDate = new Date(reservationDate).toLocaleDateString("en-US", {
+  const [year, month, day] = reservationDate.split("-");
+  const localDate = new Date(
+    parseInt(year),
+    parseInt(month) - 1,
+    parseInt(day)
+  );
+  const formattedDate = localDate.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -37,18 +43,32 @@ const BookingPage = () => {
     hour12: true,
   });
 
-  const handleBookingSubmit = (e) => {
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    let combinedDateTime = new Date(`${reservationDate}T${reservationTime}`);
 
-    // Format the request according to the required structure
-    let bookingRequest = {
-      dateTime: combinedDateTime.toISOString(),
-      partySize: parseInt(numberOfGuests, 10),
-    };
+    try {
+      const [year, month, day] = reservationDate.split("-");
+      const [hours, minutes] = reservationTime.split(":");
 
-    const response = confirmReservation(id, bookingRequest);
-    console.log("Booking confirmed:", response);
+      const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}:00`;
+
+      // console.log("Formatted DateTime:", formattedDateTime);
+
+      const bookingRequest = {
+        dateTime: formattedDateTime,
+        partySize: parseInt(numberOfGuests, 10),
+      };
+
+      // console.log("Sending booking request:", bookingRequest);
+
+      const response = await confirmReservation(id, bookingRequest);
+      console.log("Booking confirmed:", response);
+
+      alert("Reservation confirmed successfully!");
+    } catch (error) {
+      console.error("Booking failed:", error);
+      alert("Failed to confirm reservation. Please try again.");
+    }
   };
 
   return (
