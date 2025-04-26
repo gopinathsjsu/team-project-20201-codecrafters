@@ -67,4 +67,59 @@ const reviewRestaurant = async (id, reviewData) => {
   }
 };
 
-export { getRestaurants, getRestaurantById, reviewRestaurant };
+const getRestaurantReviews = async (id) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/api/restaurants/${id}/reviews`
+    );
+    console.log("Fetched reviews:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Error fetching reviews for restaurant with ID ${id}:`,
+      error
+    );
+    return [];
+  }
+};
+
+const confirmReservation = async (id, reservationData) => {
+  try {
+    console.log("Confirming reservation with data:", reservationData, id);
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error("Authentication required to confirm a reservation");
+    }
+
+    const formattedReservationData = {
+      dateTime: reservationData.dateTime,
+      partySize: reservationData.partySize,
+    };
+
+    const response = await axios.post(
+      `${BASE_URL}/api/restaurants/${id}/reservations`,
+      formattedReservationData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    // Improve error logging to see more details
+    console.error("Error confirming reservation:", error);
+    console.error("Response data:", error.response?.data);
+    throw error;
+  }
+};
+
+export {
+  getRestaurants,
+  getRestaurantById,
+  reviewRestaurant,
+  confirmReservation,
+  getRestaurantReviews,
+};
