@@ -88,7 +88,7 @@ const TimeSlotsComponent = ({
         <span
           key={index}
           className="time-slot"
-          onClick={() => handleReservation(time)}
+          onClick={(event) => handleReservation(time, event)}
         >
           {time}
         </span>
