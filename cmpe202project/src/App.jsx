@@ -18,6 +18,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 import ManagerDashboard from "./Manager/ManagerDashboard";
 import ManagerRestaurants from "./ManagerRest/ManagerRestaurants";
+import ReservationsPage from "./pages/ReservationsPage";
 
 function App() {
   return (
@@ -36,7 +37,22 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="search" element={<SearchResultsPage />} />
             <Route path="restaurant/:id" element={<RestaurantPage />} />
-            <Route path="booking" element={<BookingPage />} />
+            <Route
+              path="booking"
+              element={
+                <ProtectedRoute role="USER">
+                  <BookingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="reservations"
+              element={
+                <ProtectedRoute role="USER">
+                  <ReservationsPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Auth routes */}
