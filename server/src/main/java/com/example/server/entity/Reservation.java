@@ -23,13 +23,15 @@ public class Reservation {
     private String id;
 
     @DBRef
+    @JsonIgnore
     private UserInfo user;
 
     @DBRef
+    @JsonIgnore
     private Restaurant restaurant;
 
     private LocalDateTime dateTime; // formatted as "yyyy-MM-dd'T'HH:mm:ss"
-    
+
     private int partySize;
 
     ReservationStatus status;
