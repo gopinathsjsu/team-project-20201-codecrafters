@@ -6,8 +6,11 @@ import { useNavigate } from "react-router-dom";
 import TrendUp from "../assets/trend-up.svg";
 import "../styles/RestaurantPage.css";
 import TimeSlotsComponent from "../components/TimeSlotsComponent";
-import { getRestaurantById } from "../utils/apiCalls";
-import { reviewRestaurant } from "../utils/apiCalls";
+import {
+  getRestaurantById,
+  getRestaurantReviews,
+  reviewRestaurant,
+} from "../utils/apiCalls";
 import HoursOfOperation from "../components/HoursOfOperation";
 
 const RestaurantPage = () => {
@@ -75,17 +78,36 @@ const RestaurantPage = () => {
   }, [location.state, navigate, location.pathname]);
 
   // Rest of your component remains the same, but now uses the state variables
-  const handleSubmitReview = (e) => {
+  const handleSubmitReview = async (e) => {
     e.preventDefault();
-    if (selectedRating === 0) {
-      alert("Please select a rating before submitting your review.");
-      return;
-    }
-    const response = reviewRestaurant(restaurantData.id, {
-      rating: selectedRating,
-      comment: reviewText.trim(),
-    });
-    console.log("Review submitted:", response);
+    // if (selectedRating === 0) {
+    //   alert("Please select a rating before submitting your review.");
+    //   return;
+    // }
+    // const response = await reviewRestaurant(restaurantData.id, {
+    //   rating: selectedRating,
+    //   comment: reviewText.trim(),
+    // });
+
+    // if (response) {
+    //   alert("Review submitted successfully!");
+    //   const updatedData = await getRestaurantReviews(restaurantData.id);
+    //   console.log(
+    //     "Updated restaurant data after review submission:",
+    //     updatedData
+    //   );
+    //   let averageRating = 0;
+    //   if (updatedData?.reviews?.length > 0) {
+    //     averageRating =
+    //       updatedData.reviews.reduce((sum, review) => sum + review.rating, 0) /
+    //       updatedData.reviews.length;
+    //   }
+    //   setRestaurantData((prevData) => ({
+    //     ...prevData,
+    //     reviews: updatedData.reviews,
+    //     rating: averageRating,
+    //   }));
+    // }
   };
 
   const handleReviewTextChange = (e) => {
