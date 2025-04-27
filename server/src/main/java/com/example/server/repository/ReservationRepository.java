@@ -32,5 +32,6 @@ public interface ReservationRepository extends MongoRepository<Reservation, Stri
 
     @Query(value = "{ 'restaurant.$id': { $in: ?0 } }", delete = true)
     long deleteAllByRestaurantIds(List<ObjectId> restaurantIds);
-    List<Reservation> findAllByStatusAndDateTimeBefore(ReservationStatus status, LocalDateTime dateTime);
-}
+    
+    @Query("{ 'status' : ?0, 'dateTime' : { $lte: ?1 } }")
+    List<Reservation> findAllByStatusAndDateTimeLessThanEqual(ReservationStatus status, LocalDateTime dateTime);}
