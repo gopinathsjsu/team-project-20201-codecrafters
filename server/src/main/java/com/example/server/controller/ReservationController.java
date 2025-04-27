@@ -9,6 +9,11 @@ import com.example.server.entity.ReservationStatus;
 import com.example.server.entity.Restaurant;
 import com.example.server.entity.UserInfo;
 import com.example.server.service.ReservationService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +34,11 @@ public class ReservationController {
     // User book a reservation
     @PostMapping("/restaurants/{restaurantId}/reservations")
     @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Create a reservation", description = "Users can create a reservation for a restaurant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Reservation created successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     public ResponseEntity<String> createReservation(@AuthenticationPrincipal UserInfoUserDetails userDetails,
             @PathVariable String restaurantId,
             @RequestBody ReservationCreateDTO dto) {
@@ -41,6 +51,11 @@ public class ReservationController {
     // Managers get their reservations from a restaurant
     @GetMapping("/restaurants/{restaurantId}/reservations")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
+    @Operation(summary = "Get reservations by restaurant", description = "Managers or Admins can view reservations for their restaurant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservations retrieved successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     public ResponseEntity<List<ReservationResponseDTO>> getAllByRestaurant(@PathVariable String restaurantId,
             @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         UserInfo user = userDetails.getUserInfo();
@@ -57,6 +72,12 @@ public class ReservationController {
     // Managers can view a single reservation of their restaurant
     @GetMapping("/restaurants/{restaurantId}/reservations/{reservationId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
+    @Operation(summary = "Get a single reservation by restaurant", description = "Managers or Admins can view specific reservation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservation retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Reservation not found"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     public ResponseEntity<ReservationResponseDTO> getReservation(@PathVariable String restaurantId,
             @PathVariable String reservationId) {
         Reservation reservation = reservationService.findByIdAndRestaurantId(reservationId, restaurantId)
@@ -72,7 +93,13 @@ public class ReservationController {
 
     // Update reservation
     @PutMapping("/restaurants/{restaurantId}/reservations/{reservationId}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Update reservation status", description = "Users only can cancel")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservation updated successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "404", description = "Reservation not found")
+    })
     public ResponseEntity<?> updateReservation(@AuthenticationPrincipal UserInfo user,
             @PathVariable String restaurantId,
             @PathVariable String reservationId,
@@ -93,6 +120,12 @@ public class ReservationController {
     // restaurant
     @DeleteMapping("/restaurants/{restaurantId}/reservations/{id}")
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @Operation(summary = "Delete a reservation", description = "Only managers of the restaurant can delete the reservation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservation deleted successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "404", description = "Reservation not found")
+    })
     public ResponseEntity<?> deleteReservation(@PathVariable String id,
             @PathVariable String restaurantId,
             @AuthenticationPrincipal UserInfoUserDetails userDetails) {
@@ -112,6 +145,11 @@ public class ReservationController {
     // Users can access their reservations
     @GetMapping("/reservations")
     @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Get all reservations by user", description = "Users can view all their reservations")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservations retrieved successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     public ResponseEntity<List<ReservationResponseDTO>> getAllByUserId(
             @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         UserInfo user = userDetails.getUserInfo();
@@ -131,16 +169,21 @@ public class ReservationController {
     // Users can see a single reservation
     @GetMapping("/reservations/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
+    @Operation(summary = "Get reservation by ID", description = "View a specific reservation by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservation retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Reservation not found"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     public ResponseEntity<ReservationResponseDTO> getReservationById(@PathVariable String id) {
         return reservationService.findById(id)
-            .map(res -> new ReservationResponseDTO(
-                    res.getUser().getEmail(),
-                    res.getRestaurant().getId(),
-                    res.getDateTime(),
-                    res.getPartySize()
-            ))
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+                .map(res -> new ReservationResponseDTO(
+                        res.getUser().getEmail(),
+                        res.getRestaurant().getId(),
+                        res.getDateTime(),
+                        res.getPartySize()))
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
 }
