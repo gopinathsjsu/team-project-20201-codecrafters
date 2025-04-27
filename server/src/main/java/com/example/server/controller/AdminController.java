@@ -18,6 +18,10 @@ import com.example.server.config.UserInfoUserDetails;
 import com.example.server.entity.Restaurant;
 import com.example.server.service.RestaurantService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 @RestController
 @RequestMapping("/api/admin/restaurants")
 public class AdminController {
@@ -26,6 +30,11 @@ public class AdminController {
 
     @DeleteMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete restaurants", description = "Requires role: ADMIN")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted restaurants"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     public ResponseEntity<String> deleteRestaurants(
             @RequestBody List<String> ids,
             @AuthenticationPrincipal UserInfoUserDetails userDetails) {
@@ -35,6 +44,11 @@ public class AdminController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get all not approved restaurants", description = "Requires role: ADMIN")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved restaurants"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     public ResponseEntity<List<Restaurant>> getRestaurants() {
         List<Restaurant> restaurants = restaurantService.getAllNotApprovedRestaurants();
         return ResponseEntity.ok(restaurants);
@@ -42,6 +56,11 @@ public class AdminController {
 
     @PutMapping("/approve")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Approve or disapprove restaurants", description = "Requires role: ADMIN")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully approved/disapproved restaurants"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     public ResponseEntity<List<Restaurant>> approveRestaurant(@RequestBody List<String> ids,
             @RequestParam boolean approved) {
         List<Restaurant> restaurant = restaurantService.approveRestaurants(ids, approved);

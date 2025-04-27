@@ -29,6 +29,9 @@ public class Review {
     @DBRef @JsonIgnore
     private Restaurant restaurant;
 
+    @DBRef @JsonIgnore
+    private Reservation reservation;
+
     private int rating;
 
     private String comment;
