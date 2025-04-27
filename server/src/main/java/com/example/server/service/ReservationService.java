@@ -166,8 +166,8 @@ public class ReservationService {
     @Scheduled(cron = "0 0/30 * * * *")
     public void autoCompleteReservations() {
         List<Reservation> list = reservationRepository
-                .findAllByStatusAndDateTimeBefore(ReservationStatus.PENDING, LocalDateTime.now());
-                System          .out.println("Auto-completing reservations: " + list.size());
+                .findAllByStatusAndDateTimeLessThanEqual(ReservationStatus.PENDING, LocalDateTime.now());
+        System.out.println("Auto-completing reservations: " + list.size() + " at " + LocalDateTime.now());
         for (Reservation r : list) {
             r.setStatus(ReservationStatus.COMPLETED);
         }

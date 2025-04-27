@@ -25,4 +25,6 @@ public class RefreshToken {
 
     @DBRef  
     private UserInfo userInfo;
+
+    private String deviceInfo;
 }
