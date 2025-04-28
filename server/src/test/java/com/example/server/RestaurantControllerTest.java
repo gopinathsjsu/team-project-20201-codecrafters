@@ -23,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -55,21 +57,18 @@ public class RestaurantControllerTest {
         mongoTemplate.dropCollection(Restaurant.class);
         mongoTemplate.insert(createUserByEmailAndRole("admin@example.com", "RESTAURANT_MANAGER"));
         mongoTemplate.insert(createUserByEmailAndRole("admin1@example.com", "RESTAURANT_MANAGER"));
+        mongoTemplate.insert(createUserByEmailAndRole("user@example.com", "USER"));
         mongoTemplate.insert(createUserByEmailAndRole("test@example.com", "USER"));
 
-        Map<DayOfWeek, TimeInterval> hours1 = Map.of(
-                DayOfWeek.MONDAY, new TimeInterval("11:00", "22:00"),
-                DayOfWeek.TUESDAY, new TimeInterval("11:00", "22:00")
-        );
-
-        Map<DayOfWeek, TimeInterval> hours2 = Map.of(
-                DayOfWeek.FRIDAY, new TimeInterval("12:00", "23:00"),
-                DayOfWeek.SATURDAY, new TimeInterval("12:00", "23:00")
-        );
+        Map<DayOfWeek, TimeInterval> hours1 = new EnumMap<>(DayOfWeek.class);
+        TimeInterval openHours = new TimeInterval("09:00", "21:00");
+        for (DayOfWeek day : DayOfWeek.values()) {
+            hours1.put(day, openHours);
+        }
 
         Restaurant r1 = new Restaurant(
                 null,
-                "1",
+                "64d1f0c2a1b3e5f4c0d7a8b9",
                 "Mama's Italian Kitchen",
                 "Cozy Italian spot with homemade pasta and wine.",
                 "123 Olive Street",
@@ -91,7 +90,7 @@ public class RestaurantControllerTest {
 
         Restaurant r2 = new Restaurant(
                 null,
-                "2",
+                "5fa1c2d3e4b5a6c7d8e9f012",
                 "Sakura Sushi",
                 "Modern sushi bar with fresh sashimi and sake.",
                 "456 Cherry Blossom Ave",
@@ -104,7 +103,7 @@ public class RestaurantControllerTest {
                 40,
                 4.8,
                 200,
-                hours2,
+                hours1,
                 true,
                 List.of("https://example.com/sushi1.jpg"),
                 LocalDateTime.now(),
@@ -295,6 +294,25 @@ public class RestaurantControllerTest {
                 .andExpect(status().is4xxClientError());
     }
 
+    @Test
+    public void userCanBookAReservation() throws Exception {
+        String token = getToken("user@example.com", "password");
+        assertNotNull(token);
+
+        String json = """
+                {
+                  "dateTime": "2025-05-01T18:30:00",
+                  "partySize": 4
+                }
+                """;
+
+        mvc.perform(post("/api/restaurants/64d1f0c2a1b3e5f4c0d7a8b9/reservations")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated());
+    }
+
     private String createRestaurantResponse(String token) throws Exception {
 
         MockMultipartFile image = new MockMultipartFile(
@@ -377,4 +395,5 @@ public class RestaurantControllerTest {
         user.getRoles().add(role);
         return user;
     }
+
 }
