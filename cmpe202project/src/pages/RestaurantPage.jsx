@@ -12,6 +12,7 @@ import {
   reviewRestaurant,
 } from "../utils/apiCalls";
 import HoursOfOperation from "../components/HoursOfOperation";
+import { useAuth } from "../context/AuthContext";
 
 const RestaurantPage = () => {
   const location = useLocation();
@@ -19,13 +20,15 @@ const RestaurantPage = () => {
   const [selectedRating, setSelectedRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const { user } = useAuth();
 
   // Create state for restaurant data
   const [restaurantData, setRestaurantData] = useState({
     id: location.state?.id || "",
     name: location.state?.name || "",
     rating: location.state?.rating || 0,
-    reviews: location.state?.reviews || 0,
+    reviews: location.state?.reviews || [],
     cuisine: location.state?.cuisine || "",
     bookedTimes: location.state?.bookedTimes || 0,
     timeSlots: location.state?.timeSlots || [],
@@ -41,6 +44,10 @@ const RestaurantPage = () => {
   });
 
   useEffect(() => {
+    console.log(restaurantData);
+  }, [restaurantData]);
+
+  useEffect(() => {
     if (location.state === null || !location.state.id) {
       const fetchRestaurant = async () => {
         const restaurantId = location.pathname.split("/").pop().trim();
@@ -53,7 +60,7 @@ const RestaurantPage = () => {
             id: fetchedData.id || "",
             name: fetchedData.name || "",
             rating: fetchedData.averageRating || 0, // Map averageRating to rating
-            reviews: fetchedData.totalReviews || 0, // Map totalReviews to reviews
+            reviews: fetchedData.totalReviews || [], // Map totalReviews to reviews
             cuisine: fetchedData.cuisine || "",
             bookedTimes: fetchedData.bookedTimes || 0, // Default if not available
             timeSlots: fetchedData.timeSlots || [], // Default if not available
@@ -77,37 +84,58 @@ const RestaurantPage = () => {
     }
   }, [location.state, navigate, location.pathname]);
 
+  useEffect(() => {
+    // Fetch reviews when restaurantData.id changes
+    const fetchReviews = async () => {
+      if (restaurantData.id) {
+        const reviewsData = await getRestaurantReviews(restaurantData.id);
+        let averageRating = 0;
+        reviewsData.forEach((review) => {
+          averageRating += review.rating || 0;
+        });
+        averageRating /= reviewsData.length || 1;
+        setRestaurantData((prevData) => ({
+          ...prevData,
+          reviews: reviewsData || [],
+          rating: averageRating || 0,
+        }));
+        console.log("Fetched reviews data:", reviewsData);
+      }
+    };
+    fetchReviews();
+  }, [restaurantData.id]);
+
   // Rest of your component remains the same, but now uses the state variables
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    // if (selectedRating === 0) {
-    //   alert("Please select a rating before submitting your review.");
-    //   return;
-    // }
-    // const response = await reviewRestaurant(restaurantData.id, {
-    //   rating: selectedRating,
-    //   comment: reviewText.trim(),
-    // });
+    if (selectedRating === 0) {
+      alert("Please select a rating before submitting your review.");
+      return;
+    }
+    const response = await reviewRestaurant(restaurantData.id, {
+      rating: selectedRating,
+      comment: reviewText.trim(),
+    });
 
-    // if (response) {
-    //   alert("Review submitted successfully!");
-    //   const updatedData = await getRestaurantReviews(restaurantData.id);
-    //   console.log(
-    //     "Updated restaurant data after review submission:",
-    //     updatedData
-    //   );
-    //   let averageRating = 0;
-    //   if (updatedData?.reviews?.length > 0) {
-    //     averageRating =
-    //       updatedData.reviews.reduce((sum, review) => sum + review.rating, 0) /
-    //       updatedData.reviews.length;
-    //   }
-    //   setRestaurantData((prevData) => ({
-    //     ...prevData,
-    //     reviews: updatedData.reviews,
-    //     rating: averageRating,
-    //   }));
-    // }
+    if (response) {
+      alert("Review submitted successfully!");
+      const updatedData = await getRestaurantReviews(restaurantData.id);
+      console.log(
+        "Updated restaurant data after review submission:",
+        updatedData
+      );
+      let averageRating = 0;
+      if (updatedData?.reviews?.length > 0) {
+        averageRating =
+          updatedData.reviews.reduce((sum, review) => sum + review.rating, 0) /
+          updatedData.reviews.length;
+      }
+      setRestaurantData((prevData) => ({
+        ...prevData,
+        reviews: updatedData.reviews,
+        rating: averageRating,
+      }));
+    }
   };
 
   const handleReviewTextChange = (e) => {
@@ -139,7 +167,10 @@ const RestaurantPage = () => {
           <div className="rating-container">
             <div className="star-rating">
               <span className="rating-value">
-                {restaurantData.reviews > 0 ? restaurantData.rating : ""}{" "}
+                {Array.isArray(restaurantData.reviews) &&
+                restaurantData.reviews.length > 0
+                  ? restaurantData.rating.toFixed(1)
+                  : ""}{" "}
               </span>
               {[...Array(5)].map((_, index) => (
                 <span
@@ -147,18 +178,19 @@ const RestaurantPage = () => {
                   className="star"
                   style={{
                     color:
-                      index < Math.floor(restaurantData.rating)
+                      index < Math.round(restaurantData.rating)
                         ? "#D33223"
                         : "#ccc",
                   }}
                 >
-                  {index < Math.floor(restaurantData.rating) ? "★" : "☆"}
+                  {index < Math.round(restaurantData.rating) ? "★" : "☆"}
                 </span>
               ))}
             </div>
             <div className="reviews">
-              {restaurantData.reviews > 0
-                ? `${restaurantData.reviews} reviews`
+              {Array.isArray(restaurantData.reviews) &&
+              restaurantData.reviews.length > 0
+                ? `${restaurantData.reviews.length} reviews`
                 : "No reviews yet"}
             </div>
           </div>
@@ -234,12 +266,12 @@ const RestaurantPage = () => {
                           className="star"
                           style={{
                             color:
-                              i < Math.floor(review.rating)
+                              i < Math.round(review.rating)
                                 ? "#D33223"
                                 : "#ccc",
                           }}
                         >
-                          {i < Math.floor(review.rating) ? "★" : "☆"}
+                          {i < Math.round(review.rating) ? "★" : "☆"}
                         </span>
                       ))}
                     </div>
@@ -278,31 +310,47 @@ const RestaurantPage = () => {
       {/* Leave a review */}
       <div className="leave-review-container">
         <h2>Leave a review</h2>
-        <form className="leave-review-form" onSubmit={handleSubmitReview}>
-          <div className="review-rating">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <span
-                key={star}
-                className={`star ${
-                  (hoveredRating || selectedRating) >= star ? "filled" : "empty"
-                }`}
-                onClick={() => handleStarClick(star)}
-                onMouseEnter={() => handleStarHover(star)}
-                onMouseLeave={handleStarMouseLeave}
-              >
-                &#9733;
-              </span>
-            ))}
+        {user ? (
+          <form className="leave-review-form" onSubmit={handleSubmitReview}>
+            <div className="review-rating">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  className={`star ${
+                    (hoveredRating || selectedRating) >= star
+                      ? "filled"
+                      : "empty"
+                  }`}
+                  onClick={() => handleStarClick(star)}
+                  onMouseEnter={() => handleStarHover(star)}
+                  onMouseLeave={handleStarMouseLeave}
+                >
+                  &#9733;
+                </span>
+              ))}
+            </div>
+            <textarea
+              placeholder="Write your review here..."
+              className="review-textarea"
+              onChange={handleReviewTextChange}
+              value={reviewText}
+            ></textarea>
+            <button className="submit-review-btn" type="submit">
+              Submit Review
+            </button>
+          </form>
+        ) : (
+          <div className="login-to-review">
+            <button
+              className="login-btn"
+              onClick={() =>
+                navigate("/login", { state: { from: location.pathname } })
+              }
+            >
+              Log in to review
+            </button>
           </div>
-          <textarea
-            placeholder="Write your review here..."
-            className="review-textarea"
-            onChange={handleReviewTextChange}
-          ></textarea>
-          <button className="submit-review-btn" type="submit">
-            Submit Review
-          </button>
-        </form>
+        )}
       </div>
     </div>
   );
