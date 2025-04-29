@@ -2,8 +2,25 @@ import axios from "axios";
 import { BASE_URL } from "../config/api.js";
 
 const getAuthToken = () => {
-  const user = JSON.parse(sessionStorage.getItem("user") || "{}");
-  return user.accessToken;
+  try {
+    const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+    if (!user.accessToken) {
+      return null;
+    }
+    return user.accessToken;
+  } catch (error) {
+    console.error("Error parsing user data from session storage:", error);
+    return null;
+  }
+};
+
+// Consider a more centralized auth check
+const checkAuthentication = () => {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("Authentication required for this operation");
+  }
+  return token;
 };
 
 const getRestaurants = async () => {
@@ -34,7 +51,7 @@ const reviewRestaurant = async (id, reviewData) => {
     }
 
     // Get the authentication token
-    const token = getAuthToken();
+    const token = checkAuthentication();
     if (!token) {
       throw new Error("Authentication required to submit a review");
     }
@@ -86,7 +103,7 @@ const getRestaurantReviews = async (id) => {
 const confirmReservation = async (id, reservationData) => {
   try {
     console.log("Confirming reservation with data:", reservationData, id);
-    const token = getAuthToken();
+    const token = checkAuthentication();
     if (!token) {
       throw new Error("Authentication required to confirm a reservation");
     }
