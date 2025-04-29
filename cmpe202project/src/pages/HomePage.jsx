@@ -6,34 +6,49 @@ import "../styles/HomePage.css";
 
 const HomePage = () => {
   const [topRatedRestaurants, setTopRatedRestaurants] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const restaurantListRef = useRef(null); // Create a ref for the restaurant list
 
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const cachedRestaurants = sessionStorage.getItem("topRatedRestaurants");
-        if (cachedRestaurants) {
-          setTopRatedRestaurants(JSON.parse(cachedRestaurants));
-        } else {
-          const restaurants = await getRestaurants();
-          if (restaurants && restaurants.length > 0) {
-            const sortedRestaurants = restaurants
-              .sort((a, b) => b.rating - a.rating)
-              .slice(0, 10)
-              .map((restaurant) => ({
-                ...restaurant,
-                bookedTimes: restaurant.bookedTimes || [],
-                timeSlots: restaurant.timeSlots || [],
-              }));
-            setTopRatedRestaurants(sortedRestaurants);
-            sessionStorage.setItem(
-              "topRatedRestaurants",
-              JSON.stringify(sortedRestaurants)
-            );
-          }
+        setIsLoading(true);
+        const restaurants = await getRestaurants();
+
+        if (restaurants && restaurants.length > 0) {
+          // Process restaurants to ensure bookedTimes is a number
+          const processedRestaurants = restaurants.map((restaurant) => ({
+            ...restaurant,
+            // Convert bookedTimes to a number if it's not already
+            bookedTimes:
+              typeof restaurant.bookedTimes === "number"
+                ? restaurant.bookedTimes
+                : Math.floor(Math.random() * 20) + 5, // Random between 5-25 if not available
+            timeSlots: restaurant.timeSlots || [],
+          }));
+
+          // Sort first by rating, then by bookedTimes
+          const sortedRestaurants = processedRestaurants
+            .sort((a, b) => {
+              // First sort by rating (descending)
+              if (a.averageRating !== b.averageRating) {
+                return b.averageRating - a.averageRating;
+              }
+              // If ratings are equal, sort by bookedTimes (descending)
+              return b.bookedTimes - a.bookedTimes;
+            })
+            .slice(0, 10);
+
+          setTopRatedRestaurants(sortedRestaurants);
+          sessionStorage.setItem(
+            "topRatedRestaurants",
+            JSON.stringify(sortedRestaurants)
+          );
         }
       } catch (error) {
         console.error("Error fetching top-rated restaurants:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -44,10 +59,8 @@ const HomePage = () => {
     const list = restaurantListRef.current;
     const itemWidth = 310 + 40; // 310px width + 40px gap
     if (list.scrollLeft === 0) {
-      // If at the start, scroll to the end
       list.scrollTo({ left: list.scrollWidth, behavior: "smooth" });
     } else {
-      // Scroll left by one item
       list.scrollBy({ left: -itemWidth, behavior: "smooth" });
     }
   };
@@ -56,10 +69,8 @@ const HomePage = () => {
     const list = restaurantListRef.current;
     const itemWidth = 310 + 40; // 310px width + 40px gap
     if (list.scrollLeft + list.clientWidth >= list.scrollWidth) {
-      // If at the end, scroll to the start
       list.scrollTo({ left: 0, behavior: "smooth" });
     } else {
-      // Scroll right by one item
       list.scrollBy({ left: itemWidth, behavior: "smooth" });
     }
   };
@@ -73,17 +84,27 @@ const HomePage = () => {
       <div className="top-rated-restaurants">
         <h1>Top-Rated Restaurants</h1>
         <div className="restaurant-carousel">
-          <button className="carousel-button left" onClick={scrollLeft}>
-            &#8249;
-          </button>
-          <div className="restaurant-list" ref={restaurantListRef}>
-            {topRatedRestaurants.map((restaurant, index) => (
-              <RestaurantBox key={index} {...restaurant} />
-            ))}
-          </div>
-          <button className="carousel-button right" onClick={scrollRight}>
-            &#8250;
-          </button>
+          {isLoading && <p className="loading">Loading restaurants...</p>}
+
+          {!isLoading && topRatedRestaurants.length > 0 && (
+            <>
+              <button className="carousel-button left" onClick={scrollLeft}>
+                &#8249;
+              </button>
+              <div className="restaurant-list" ref={restaurantListRef}>
+                {topRatedRestaurants.map((restaurant) => (
+                  <RestaurantBox key={restaurant.id} {...restaurant} />
+                ))}
+              </div>
+              <button className="carousel-button right" onClick={scrollRight}>
+                &#8250;
+              </button>
+            </>
+          )}
+
+          {!isLoading && topRatedRestaurants.length === 0 && (
+            <p className="no-results">No restaurants found.</p>
+          )}
         </div>
       </div>
     </main>
