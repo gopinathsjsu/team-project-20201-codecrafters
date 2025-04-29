@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/RestaurantBox.css";
 import RestaurantImage from "../assets/restaurant-example.png";
 import TrendUp from "../assets/trend-up.svg";
 import { useNavigate } from "react-router-dom";
 import TimeSlotsComponent from "./TimeSlotsComponent";
+import { getRestaurantReviews } from "../utils/apiCalls";
 
 const RestaurantBox = ({
   id,
   name,
-  rating,
-  reviews,
+  rating: initialRating,
   cuisine,
   bookedTimes,
   timeSlots,
@@ -17,6 +17,38 @@ const RestaurantBox = ({
   ...otherProps
 }) => {
   const navigate = useNavigate();
+  const [reviewsData, setReviewsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [calculatedRating, setCalculatedRating] = useState(initialRating);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getRestaurantReviews(id);
+        if (response && Array.isArray(response)) {
+          setReviewsData(response);
+
+          // Calculate average rating from reviews if available
+          if (response.length > 0) {
+            const avgRating =
+              response.reduce((sum, review) => sum + review.rating, 0) /
+              response.length;
+            setCalculatedRating(avgRating);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchReviews();
+    }
+    console.log(bookedTimes);
+  }, [id, initialRating]);
 
   const handleClick = (event) => {
     // Only navigate if the click didn't start from a time-slot
@@ -25,8 +57,8 @@ const RestaurantBox = ({
         state: {
           id,
           name,
-          rating,
-          reviews,
+          rating: calculatedRating,
+          reviews: reviewsData,
           cuisine,
           bookedTimes,
           timeSlots,
@@ -35,6 +67,9 @@ const RestaurantBox = ({
       });
     }
   };
+
+  // Use reviewsData length for review count
+  const reviewCount = reviewsData.length;
 
   return (
     <div
@@ -54,21 +89,28 @@ const RestaurantBox = ({
         <h2 className="restaurant-name">{name}</h2>
         <div className="rating-container">
           <div className="star-rating">
-            <span className="rating-value">{reviews > 0 ? rating : ""} </span>
+            <span className="rating-value">
+              {reviewCount > 0 ? calculatedRating.toFixed(1) : ""}{" "}
+            </span>
             {[...Array(5)].map((_, index) => (
               <span
                 key={index}
                 className="star"
                 style={{
-                  color: index < Math.floor(rating) ? "#D33223" : "#ccc",
+                  color:
+                    index < Math.round(calculatedRating) ? "#D33223" : "#ccc",
                 }}
               >
-                {index < Math.floor(rating) ? "★" : "☆"}
+                {index < Math.round(calculatedRating) ? "★" : "☆"}
               </span>
             ))}
           </div>
           <div className="reviews">
-            {reviews > 0 ? `${reviews} reviews` : "No reviews yet"}
+            {isLoading
+              ? "Loading reviews..."
+              : reviewCount > 0
+              ? `${reviewCount} reviews`
+              : "No reviews yet"}
           </div>
         </div>
         <p className="restaurant-cuisine">{cuisine}</p>
