@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 import TimeSlotsComponent from "./TimeSlotsComponent";
 import { getRestaurantReviews } from "../utils/apiCalls";
 
+// Create a cache outside the component to persist across renders
+const reviewsCache = {};
+
 const RestaurantBox = ({
   id,
   name,
@@ -24,18 +27,40 @@ const RestaurantBox = ({
   useEffect(() => {
     const fetchReviews = async () => {
       try {
+        // Check if we already have fresh data in cache (less than 5 minutes old)
+        const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+        if (
+          reviewsCache[id] &&
+          Date.now() - reviewsCache[id].timestamp < CACHE_TTL
+        ) {
+          setReviewsData(reviewsCache[id].data);
+          setCalculatedRating(reviewsCache[id].avgRating);
+          setIsLoading(false);
+          return;
+        }
+
         setIsLoading(true);
         const response = await getRestaurantReviews(id);
-        if (response && Array.isArray(response)) {
-          setReviewsData(response);
 
-          // Calculate average rating from reviews if available
+        if (response && Array.isArray(response)) {
+          // Calculate average rating
+          let avgRating = initialRating;
           if (response.length > 0) {
-            const avgRating =
+            avgRating =
               response.reduce((sum, review) => sum + review.rating, 0) /
               response.length;
-            setCalculatedRating(avgRating);
           }
+
+          // Store in state
+          setReviewsData(response);
+          setCalculatedRating(avgRating);
+
+          // Store in cache for future use
+          reviewsCache[id] = {
+            data: response,
+            avgRating,
+            timestamp: Date.now(),
+          };
         }
       } catch (error) {
         console.error("Error fetching reviews:", error);
@@ -48,7 +73,7 @@ const RestaurantBox = ({
       fetchReviews();
     }
     console.log(bookedTimes);
-  }, [id, initialRating]);
+  }, [id]); // Only depend on id, not initialRating
 
   const handleClick = (event) => {
     // Only navigate if the click didn't start from a time-slot
