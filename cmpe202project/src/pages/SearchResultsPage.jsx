@@ -41,32 +41,6 @@ const SearchResultsPage = () => {
     setFilteredRestaurants(sortedRestaurants); // Initialize filtered with all restaurants
   };
 
-  // Fetch restaurants and filter based on search term
-  // const getRestaurantsData = async () => {
-  //   const allRestaurants = await getRestaurants();
-
-  //   // First, filter to only include restaurants that match the searchTerm
-  //   let filteredResults = allRestaurants;
-
-  //   if (searchTerm && searchTerm.trim() !== "") {
-  //     const term = searchTerm.toLowerCase().trim();
-  //     filteredResults = allRestaurants.filter(
-  //       (restaurant) =>
-  //         restaurant.name.toLowerCase().includes(term) ||
-  //         restaurant.cuisine.toLowerCase().includes(term)
-  //     );
-  //   }
-
-  //   // Then sort the filtered results (optional)
-  //   const sortedRestaurants = filteredResults.sort((a, b) => {
-  //     // Sort by rating for matched results
-  //     return b.rating - a.rating;
-  //   });
-
-  //   setRestaurants(sortedRestaurants);
-  //   setFilteredRestaurants(sortedRestaurants);
-  // };
-
   // Apply all filters to restaurants
   const applyFilters = () => {
     let filtered = [...restaurants];
@@ -88,9 +62,9 @@ const SearchResultsPage = () => {
     // Filter by rating
     if (selectedRatings.length > 0) {
       filtered = filtered.filter((restaurant) => {
-        // Round the rating to the nearest integer for comparison
-        const roundedRating = Math.round(restaurant.rating);
-        return selectedRatings.includes(roundedRating.toString());
+        // Get the lowest selected rating as the threshold
+        const minRating = Math.min(...selectedRatings.map(Number));
+        return restaurant.averageRating >= minRating;
       });
     }
 
