@@ -4,6 +4,7 @@ import { ReservationContext } from "../context/ReservationContext";
 import "../styles/BookingPage.css";
 import RestaurantImage from "../assets/restaurant-example.png";
 import { confirmReservation } from "../utils/apiCalls";
+import { useNavigate } from "react-router-dom";
 
 const BookingPage = () => {
   const {
@@ -14,6 +15,7 @@ const BookingPage = () => {
   } = useContext(ReservationContext);
   const location = useLocation();
   const { name, address, id } = location.state || {};
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (numberOfGuests === "") {
@@ -21,26 +23,26 @@ const BookingPage = () => {
     }
   }, [numberOfGuests, setNumberOfGuests]);
 
-  // Format the date as "Month Day, Year"
+  // For displaying the date in Pacific Time
   const [year, month, day] = reservationDate.split("-");
-  const localDate = new Date(
-    parseInt(year),
-    parseInt(month) - 1,
-    parseInt(day)
-  );
+
+  // Create a date in Pacific Time zone
+  const localDate = new Date(`${year}-${month}-${day}T12:00:00-07:00`); // -07:00 is Pacific Time offset
   const formattedDate = localDate.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
+    timeZone: "America/Los_Angeles",
   });
 
-  // Format the time as "hh:mm AM/PM"
+  // Format the time in Pacific Time
   const formattedTime = new Date(
     `1970-01-01T${reservationTime}`
   ).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
+    timeZone: "America/Los_Angeles",
   });
 
   const handleBookingSubmit = async (e) => {
@@ -52,19 +54,20 @@ const BookingPage = () => {
 
       const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}:00`;
 
-      // console.log("Formatted DateTime:", formattedDateTime);
+      console.log("Formatted DateTime for API:", formattedDateTime);
 
       const bookingRequest = {
         dateTime: formattedDateTime,
         partySize: parseInt(numberOfGuests, 10),
       };
 
-      // console.log("Sending booking request:", bookingRequest);
+      console.log("Sending booking request:", bookingRequest);
 
       const response = await confirmReservation(id, bookingRequest);
       console.log("Booking confirmed:", response);
 
       alert("Reservation confirmed successfully!");
+      navigate("/reservations");
     } catch (error) {
       console.error("Booking failed:", error);
       alert("Failed to confirm reservation. Please try again.");
