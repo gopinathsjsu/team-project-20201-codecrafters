@@ -11,6 +11,13 @@ const TimeSlotsComponent = ({
   const navigate = useNavigate();
   const { setReservationTime } = useContext(ReservationContext);
 
+  // Helper function to convert any date to Pacific Time
+  const toPacificTime = (date) => {
+    return new Date(
+      date.toLocaleString("en-US", { timeZone: "America/Los_Angeles" })
+    );
+  };
+
   const handleReservation = (timeString, event) => {
     // Stop event propagation to prevent parent onClick handlers from firing
     if (event) {
@@ -27,6 +34,9 @@ const TimeSlotsComponent = ({
       hours = "00";
     }
 
+    // Ensure hours and minutes are properly formatted
+    hours = String(hours).padStart(2, "0");
+
     const formattedTime = `${hours}:${minutes}`;
 
     setReservationTime(formattedTime); // Set the time in 24-hour format
@@ -35,19 +45,23 @@ const TimeSlotsComponent = ({
         name,
         address,
         id,
+        timeZone: "America/Los_Angeles", // Pass timezone info to booking page
       },
     });
   };
 
   // Generate default time slots when none are provided
   const generateDefaultTimeSlots = () => {
+    // Get current time in Pacific Time
     const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
+    const pacificNow = toPacificTime(now);
+
+    const currentHour = pacificNow.getHours();
+    const currentMinute = pacificNow.getMinutes();
 
     // Round up to next 30-minute interval
     const minutesToAdd = (30 - (currentMinute % 30)) % 30;
-    const baseTime = new Date(now);
+    const baseTime = new Date(pacificNow);
     baseTime.setMinutes(currentMinute + minutesToAdd);
     if (minutesToAdd === 0) {
       // If we're exactly on a 30-minute mark, add 30 minutes
@@ -68,6 +82,7 @@ const TimeSlotsComponent = ({
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
+        timeZone: "America/Los_Angeles",
       });
     };
 
