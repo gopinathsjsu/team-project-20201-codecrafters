@@ -23,7 +23,7 @@ const HomePage = () => {
             bookedTimes:
               typeof restaurant.bookedTimes === "number"
                 ? restaurant.bookedTimes
-                : Math.floor(Math.random() * 20) + 5, // Random between 5-25 if not available
+                : 0,
             timeSlots: restaurant.timeSlots || [],
           }));
 

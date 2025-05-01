@@ -7,6 +7,7 @@ const TimeSlotsComponent = ({
   name,
   address = "",
   id = "",
+  hours = {},
 }) => {
   const navigate = useNavigate();
   const { setReservationTime } = useContext(ReservationContext);
@@ -15,6 +16,79 @@ const TimeSlotsComponent = ({
   const toPacificTime = (date) => {
     return new Date(
       date.toLocaleString("en-US", { timeZone: "America/Los_Angeles" })
+    );
+  };
+
+  // Check if restaurant is open today
+  const isRestaurantOpen = () => {
+    const pacificNow = toPacificTime(new Date());
+
+    const days = [
+      "SUNDAY",
+      "MONDAY",
+      "TUESDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "FRIDAY",
+      "SATURDAY",
+    ];
+    const today = days[pacificNow.getDay()];
+
+    // Check if hours exist for today
+    if (!hours || !hours[today] || !hours[today].start || !hours[today].end) {
+      return false; // Closed if no hours defined
+    }
+
+    return true;
+  };
+
+  // Check if a time slot is within operating hours
+  const isTimeSlotAvailable = (timeSlot) => {
+    // Get current date in Pacific time
+    const pacificNow = toPacificTime(new Date());
+
+    // Get day of week as string (e.g., "MONDAY")
+    const days = [
+      "SUNDAY",
+      "MONDAY",
+      "TUESDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "FRIDAY",
+      "SATURDAY",
+    ];
+    const today = days[pacificNow.getDay()];
+
+    // Check if hours exist for today
+    if (!hours || !hours[today] || !hours[today].start || !hours[today].end) {
+      return false; // Closed if no hours defined
+    }
+
+    // Parse time slot (e.g., "7:30 PM")
+    const [time, period] = timeSlot.split(" ");
+    let [slotHours, slotMinutes] = time.split(":").map(Number);
+
+    // Convert to 24-hour format
+    if (period === "PM" && slotHours !== 12) {
+      slotHours += 12;
+    } else if (period === "AM" && slotHours === 12) {
+      slotHours = 0;
+    }
+
+    // Parse operating hours
+    const [openHours, openMinutes] = hours[today].start.split(":").map(Number);
+    const [closeHours, closeMinutes] = hours[today].end.split(":").map(Number);
+
+    // Convert all to minutes for comparison
+    const slotTimeInMinutes = slotHours * 60 + slotMinutes;
+    const openTimeInMinutes = openHours * 60 + openMinutes;
+    const closeTimeInMinutes = closeHours * 60 + closeMinutes;
+
+    // Check if time slot is within operating hours
+    // Allow slots up to 1 hour before closing
+    return (
+      slotTimeInMinutes >= openTimeInMinutes &&
+      slotTimeInMinutes <= closeTimeInMinutes - 60
     );
   };
 
@@ -45,7 +119,7 @@ const TimeSlotsComponent = ({
         name,
         address,
         id,
-        timeZone: "America/Los_Angeles", // Pass timezone info to booking page
+        timeZone: "America/Los_Angeles",
       },
     });
   };
@@ -68,46 +142,49 @@ const TimeSlotsComponent = ({
       baseTime.setMinutes(baseTime.getMinutes() + 30);
     }
 
-    // Create 30 minutes after base time
-    const thirtyMinLater = new Date(baseTime);
-    thirtyMinLater.setMinutes(baseTime.getMinutes() + 30);
+    const timeSlots = [];
+    for (let i = 0; i < 3; i++) {
+      const slotTime = new Date(baseTime);
+      slotTime.setMinutes(baseTime.getMinutes() + i * 30);
 
-    // Create 60 minutes after base time
-    const sixtyMinLater = new Date(baseTime);
-    sixtyMinLater.setMinutes(baseTime.getMinutes() + 60);
-
-    // Format the times as strings (e.g., "7:30 PM")
-    const formatTimeSlot = (date) => {
-      return date.toLocaleTimeString("en-US", {
+      const formattedTime = slotTime.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
         timeZone: "America/Los_Angeles",
       });
-    };
 
-    return [
-      formatTimeSlot(baseTime),
-      formatTimeSlot(thirtyMinLater),
-      formatTimeSlot(sixtyMinLater),
-    ];
+      timeSlots.push(formattedTime);
+    }
+
+    return timeSlots;
   };
 
-  // Use provided time slots or generate default ones
-  const displayTimeSlots =
-    timeSlots.length > 0 ? timeSlots : generateDefaultTimeSlots();
+  // Get all available time slots
+  const availableTimeSlots = isRestaurantOpen()
+    ? (timeSlots.length > 0 ? timeSlots : generateDefaultTimeSlots()).filter(
+        isTimeSlotAvailable
+      )
+    : [];
+
+  // Check if restaurant is closed (no available time slots)
+  const isClosed = availableTimeSlots.length === 0;
 
   return (
     <div className="availability">
-      {displayTimeSlots.map((time, index) => (
-        <span
-          key={index}
-          className="time-slot"
-          onClick={(event) => handleReservation(time, event)}
-        >
-          {time}
-        </span>
-      ))}
+      {isClosed ? (
+        <span className="closed-message">Closed Today</span>
+      ) : (
+        availableTimeSlots.map((time, index) => (
+          <span
+            key={index}
+            className="time-slot"
+            onClick={(event) => handleReservation(time, event)}
+          >
+            {time}
+          </span>
+        ))
+      )}
     </div>
   );
 };

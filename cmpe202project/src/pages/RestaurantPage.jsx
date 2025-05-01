@@ -275,6 +275,7 @@ const RestaurantPage = () => {
                 name={restaurantData.name}
                 id={restaurantData.id}
                 address={`${restaurantData?.address}, ${restaurantData?.city}, ${restaurantData?.state} ${restaurantData?.zip}`}
+                hours={restaurantData.hours}
               />
             </div>
             <div className="booked-times">
