@@ -123,3 +123,12 @@
 .restaurant-box-horizontal .restaurant-name{
     margin: 0;
 }
+
+.closed-message {
+    color: #d32f2f;
+    font-weight: 500;
+    padding: 8px 12px;
+    background-color: #ffebee;
+    border-radius: 10px;
+    display: inline-block;
+}

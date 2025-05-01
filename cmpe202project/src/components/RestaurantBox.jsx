@@ -139,7 +139,13 @@ const RestaurantBox = ({
               : "No reviews yet"}
           </div>
         </div>
-        <p className="restaurant-cuisine">{cuisine}</p>
+        {horizontal ? (
+          <p className="restaurant-cuisine">
+            {`${cuisine} | 🗺️${otherProps.address}, ${otherProps.city}, ${otherProps.state}`}
+          </p>
+        ) : (
+          <p className="restaurant-cuisine">{cuisine}</p>
+        )}
         <div className="booked-times">
           <img src={TrendUp} alt="Trend Up" className="trend-icon" />
           Booked {bookedTimes} times today
@@ -149,6 +155,7 @@ const RestaurantBox = ({
           name={name}
           id={id}
           address={`${otherProps?.address}, ${otherProps?.city}, ${otherProps?.state} ${otherProps?.zip}`}
+          hours={otherProps?.hours}
         />
       </div>
     </div>
