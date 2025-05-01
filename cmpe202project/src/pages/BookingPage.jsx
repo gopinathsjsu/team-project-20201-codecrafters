@@ -52,7 +52,10 @@ const BookingPage = () => {
       const [year, month, day] = reservationDate.split("-");
       const [hours, minutes] = reservationTime.split(":");
 
-      const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}:00`;
+      const formattedHours = hours.padStart(2, "0");
+      const formattedMinutes = minutes.padStart(2, "0");
+
+      const formattedDateTime = `${year}-${month}-${day}T${formattedHours}:${formattedMinutes}:00`;
 
       console.log("Formatted DateTime for API:", formattedDateTime);
 
