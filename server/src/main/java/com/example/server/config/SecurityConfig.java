@@ -54,6 +54,7 @@ public class SecurityConfig {
 
                                 // Public restaurant APIs
                                 "/api/restaurants/search",
+                                "/api/restaurants",
                                 "/api/restaurants/{id:[a-fA-F0-9]{24}}",
                                 "/api/restaurants/{id:[a-fA-F0-9]{24}}/availability",
                                 "/api/restaurants/{restaurantId:[a-fA-F0-9]{24}}/reviews")

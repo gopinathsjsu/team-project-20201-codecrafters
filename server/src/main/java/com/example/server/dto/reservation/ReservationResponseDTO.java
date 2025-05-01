@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservationResponseDTO {
+    private String id;
     private String email;
     private String restaurantId;
     private LocalDateTime dateTime; // formatted as "yyyy-MM-dd'T'HH:mm:ss"
