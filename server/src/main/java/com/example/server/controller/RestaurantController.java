@@ -18,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/restaurants")
@@ -30,12 +31,18 @@ public class RestaurantController {
     }
 
     @GetMapping
-        @Operation(summary = "Get all approved restaurants", description = "Retrieve a list of all approved restaurants")
+    @Operation(summary = "Get all approved restaurants", description = "Retrieve a list of all approved restaurants")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List retrieved successfully")
     })
-    public List<Restaurant> getAllRestaurants() {
-        return restaurantService.getAllApprovedRestaurants();
+    public List<RestaurantAndAvailableSeatDTO> getAllRestaurants() {
+        List<Restaurant> approvedRestaurants = restaurantService.getAllApprovedRestaurants();
+
+        List<RestaurantAndAvailableSeatDTO> result = approvedRestaurants.stream()
+                .map(restaurant -> restaurantService.getAvailableSeatsByTime(restaurant.getId()))
+                .collect(Collectors.toList());
+
+        return result;
     }
 
     @GetMapping("/search")
@@ -49,7 +56,10 @@ public class RestaurantController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String cuisine) {
         List<Restaurant> result = restaurantService.search(name, state, city, cuisine);
-        return ResponseEntity.ok(result);
+        List<RestaurantAndAvailableSeatDTO> dtoList = result.stream()
+                .map(restaurant -> restaurantService.getAvailableSeatsByTime(restaurant.getId()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtoList);
     }
 
     @GetMapping("/{id}")
@@ -58,9 +68,13 @@ public class RestaurantController {
             @ApiResponse(responseCode = "200", description = "Restaurant retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Restaurant not found")
     })
-    public ResponseEntity<?> getRestaurant(@PathVariable String id) {
-        Restaurant restaurant = restaurantService.getRestaurantById(id);
-        return ResponseEntity.ok(restaurant);
+    public ResponseEntity<RestaurantAndAvailableSeatDTO> getRestaurant(@PathVariable String id) {
+        try {
+            RestaurantAndAvailableSeatDTO dto = restaurantService.getAvailableSeatsByTime(id);
+            return ResponseEntity.ok(dto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @GetMapping("/me")
@@ -70,7 +84,8 @@ public class RestaurantController {
             @ApiResponse(responseCode = "200", description = "Restaurants retrieved successfully"),
             @ApiResponse(responseCode = "403", description = "Access denied")
     })
-    public ResponseEntity<List<Restaurant>> getRestaurantByUser(@AuthenticationPrincipal UserInfoUserDetails userDetails) {
+    public ResponseEntity<List<Restaurant>> getRestaurantByUser(
+            @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         List<Restaurant> restaurant = restaurantService.getRestaurantByOwner(userDetails.getUserInfo());
         return ResponseEntity.ok(restaurant);
     }
@@ -115,8 +130,8 @@ public class RestaurantController {
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
     public ResponseEntity<Restaurant> updateRestaurant(@PathVariable String id,
-                                                       @Valid @ModelAttribute RestaurantUpdateDTO dto,
-                                                       @AuthenticationPrincipal UserInfoUserDetails userDetails) {
+            @Valid @ModelAttribute RestaurantUpdateDTO dto,
+            @AuthenticationPrincipal UserInfoUserDetails userDetails) {
         Restaurant updatedRestaurant = restaurantService
                 .updateRestaurant(id, dto, userDetails.getUserInfo());
         return ResponseEntity.status(HttpStatus.OK).body(updatedRestaurant);

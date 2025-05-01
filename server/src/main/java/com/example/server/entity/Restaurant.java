@@ -67,6 +67,8 @@ public class Restaurant {
     @Min(value = 0)
     private int totalReviews;
 
+    private int costRating;
+
     private Map<DayOfWeek, TimeInterval> hours;
 
     private boolean approved;
