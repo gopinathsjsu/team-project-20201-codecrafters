@@ -131,37 +131,38 @@ const ReservationsPage = () => {
     fetchReservations();
   }, [navigate, isAuthenticated, user]);
 
-  const cancelReservation = async (compositeId) => {
+  const cancelReservation = async (reservation) => {
+    console.log("Canceling reservation with ID:", reservation);
     // Extract restaurant ID, date, and time from the composite ID
-    const [restaurantId, date, time] = compositeId.split("-");
+    // const [restaurantId, date, time] = compositeId.split("-");
 
-    if (!restaurantId || !date || !time) {
-      alert("Invalid reservation information");
-      return;
-    }
+    // if (!restaurantId || !date || !time) {
+    //   alert("Invalid reservation information");
+    //   return;
+    // }
 
-    if (window.confirm("Are you sure you want to cancel this reservation?")) {
-      try {
-        const token = sessionStorage.getItem("authToken");
+    // if (window.confirm("Are you sure you want to cancel this reservation?")) {
+    //   try {
+    //     const token = sessionStorage.getItem("authToken");
 
-        await axios.delete(`${BASE_URL}/api/reservations`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          data: {
-            restaurantId: restaurantId,
-            date: date,
-            time: time,
-          },
-        });
+    //     await axios.delete(`${BASE_URL}/api/reservations`, {
+    //       headers: {
+    //         Authorization: `Bearer ${token}`,
+    //       },
+    //       data: {
+    //         restaurantId: restaurantId,
+    //         date: date,
+    //         time: time,
+    //       },
+    //     });
 
-        // Update the list after cancellation
-        setReservations(reservations.filter((res) => res.id !== compositeId));
-      } catch (err) {
-        console.error("Error canceling reservation:", err);
-        alert("Failed to cancel reservation. Please try again.");
-      }
-    }
+    //     // Update the list after cancellation
+    //     setReservations(reservations.filter((res) => res.id !== compositeId));
+    //   } catch (err) {
+    //     console.error("Error canceling reservation:", err);
+    //     alert("Failed to cancel reservation. Please try again.");
+    //   }
+    // }
   };
 
   // Filter reservations based on active tab
@@ -304,7 +305,7 @@ const ReservationsPage = () => {
                   </button>
                   <button
                     className="cancel-btn"
-                    onClick={() => cancelReservation(reservation.id)}
+                    onClick={() => cancelReservation(reservation)}
                   >
                     Cancel
                   </button>
