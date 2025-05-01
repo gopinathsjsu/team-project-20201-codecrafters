@@ -69,7 +69,7 @@ public class RestaurantControllerTest {
 
         Restaurant r1 = new Restaurant(
                 null,
-                "1",
+                "661f4a1b9c4e88f64a1f7b01",
                 "Mama's Italian Kitchen",
                 "Cozy Italian spot with homemade pasta and wine.",
                 "123 Olive Street",
@@ -91,7 +91,7 @@ public class RestaurantControllerTest {
 
         Restaurant r2 = new Restaurant(
                 null,
-                "2",
+                "661f4a2d1c9d8be0aa37b843",
                 "Sakura Sushi",
                 "Modern sushi bar with fresh sashimi and sake.",
                 "456 Cherry Blossom Ave",
@@ -346,7 +346,7 @@ public class RestaurantControllerTest {
                         .param("hours[TUESDAY].end", "22:00")
                         .with(request -> {
                             request.setMethod("PUT");  // 👈 Force it to be PUT
-                            request.addHeader("Authorization", "Bearer  " + token);
+                            request.addHeader("Authorization", "Bearer " + token);
                             return request;
                         }))
                 .andExpect(status().isOk())
