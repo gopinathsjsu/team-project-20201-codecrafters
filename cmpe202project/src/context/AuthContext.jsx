@@ -128,6 +128,7 @@ export const AuthProvider = ({ children }) => {
 
     // Clear axios default header
     delete axios.defaults.headers.common["Authorization"];
+    window.location.href = "/";
   };
 
   // Check if the user is authenticated
