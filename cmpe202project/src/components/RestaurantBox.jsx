@@ -72,7 +72,6 @@ const RestaurantBox = ({
     if (id) {
       fetchReviews();
     }
-    console.log(bookedTimes);
   }, [id]); // Only depend on id, not initialRating
 
   const handleClick = (event) => {
@@ -105,7 +104,9 @@ const RestaurantBox = ({
     >
       <div className="image-container">
         <img
-          src={RestaurantImage}
+          src={
+            otherProps?.imageUrls ? otherProps?.imageUrls[0] : RestaurantImage
+          }
           alt="Restaurant"
           className="restaurant-image"
         />
