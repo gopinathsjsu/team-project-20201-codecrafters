@@ -9,6 +9,10 @@ import com.example.server.entity.UserInfo;
 import com.example.server.config.UserInfoUserDetails;
 import com.example.server.service.ReviewService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,6 +27,12 @@ public class ReviewController {
     // Create Review
     @PostMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
+        @Operation(summary = "Create a review", description = "Allows a user to create a review for a restaurant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Review created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid rating value"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     public ResponseEntity<?> createReview(@AuthenticationPrincipal UserInfoUserDetails userDetails,
                                           @PathVariable String restaurantId,
                                           @RequestBody ReviewRequestDTO dto) {
@@ -39,6 +49,11 @@ public class ReviewController {
 
     // Get all reviews
     @GetMapping
+    @Operation(summary = "Get all reviews for a restaurant", description = "Retrieve all reviews for a given restaurant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reviews retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Restaurant not found")
+    })
     public ResponseEntity<?> getReviews(@PathVariable String restaurantId) {
         return ResponseEntity.ok(reviewService.getReviewsByRestaurant(restaurantId));
     }
@@ -46,6 +61,12 @@ public class ReviewController {
     // Update review
     @PutMapping("/{reviewId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
+    @Operation(summary = "Update a review", description = "Allows a user to update their review for a restaurant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Review updated successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "404", description = "Review not found")
+    })
     public ResponseEntity<?> updateReview(@AuthenticationPrincipal UserInfoUserDetails userDetails,
                                           @PathVariable String restaurantId,
                                           @PathVariable String reviewId,
@@ -58,6 +79,12 @@ public class ReviewController {
     // Delete review
     @DeleteMapping("/{reviewId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
+    @Operation(summary = "Delete a review", description = "Allows a user to delete their review for a restaurant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Review deleted successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "404", description = "Review not found")
+    })
     public ResponseEntity<?> deleteReview(@AuthenticationPrincipal UserInfoUserDetails userDetails,
                                           @PathVariable String restaurantId,
                                           @PathVariable String reviewId) {

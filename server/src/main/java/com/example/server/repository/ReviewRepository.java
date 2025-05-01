@@ -19,4 +19,6 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
     @Query(value = "{ 'restaurant.$id': { $in: ?0 } }", delete = true)
     void deleteAllByRestaurantIds(List<ObjectId> restaurantIds);
 
+    boolean existsByReservation_IdAndUser_Id(String reservationId, String userId);
+
 }

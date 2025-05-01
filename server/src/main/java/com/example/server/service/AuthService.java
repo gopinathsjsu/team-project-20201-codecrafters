@@ -22,13 +22,13 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
-    public JwtResponse authenticate(AuthRequest authRequest) {
+    public JwtResponse authenticate(AuthRequest authRequest, String deviceInfo){
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
 
             if (authentication.isAuthenticated()) {
-                RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.getEmail());
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.getEmail(), deviceInfo);
                 String accessToken = jwtService.generateToken(authRequest.getEmail());
                 return new JwtResponse(authRequest.getEmail(), accessToken, refreshToken.getToken(), refreshToken.getUserInfo().getRoles());
             } else {
