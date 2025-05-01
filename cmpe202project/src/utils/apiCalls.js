@@ -89,7 +89,6 @@ const getRestaurantReviews = async (id) => {
     const response = await axios.get(
       `${BASE_URL}/api/restaurants/${id}/reviews`
     );
-    console.log("Fetched reviews:", response.data);
     return response.data;
   } catch (error) {
     console.error(
@@ -102,7 +101,6 @@ const getRestaurantReviews = async (id) => {
 
 const confirmReservation = async (id, reservationData) => {
   try {
-    console.log("Confirming reservation with data:", reservationData, id);
     const token = checkAuthentication();
     if (!token) {
       throw new Error("Authentication required to confirm a reservation");
