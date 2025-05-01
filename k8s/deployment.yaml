@@ -20,6 +20,8 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: TZ
+              value: "America/Los_Angeles"
             - name: MONGODB_URI
               valueFrom:
                 secretKeyRef:

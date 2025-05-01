@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -20,11 +23,14 @@ public class Review {
     @Id
     private String id;
 
-    @DBRef
+    @DBRef @JsonIgnore
     private UserInfo user;
 
-    @DBRef
+    @DBRef @JsonIgnore
     private Restaurant restaurant;
+
+    @DBRef @JsonIgnore
+    private Reservation reservation;
 
     private int rating;
 

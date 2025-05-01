@@ -2,9 +2,12 @@ package com.example.server.service;
 
 import com.example.server.dto.review.ReviewRequestDTO;
 import com.example.server.dto.review.ReviewRespondDTO;
+import com.example.server.entity.Reservation;
+import com.example.server.entity.ReservationStatus;
 import com.example.server.entity.Restaurant;
 import com.example.server.entity.Review;
 import com.example.server.entity.UserInfo;
+import com.example.server.repository.ReservationRepository;
 import com.example.server.repository.RestaurantRepository;
 import com.example.server.repository.ReviewRepository;
 import com.example.server.repository.UserInfoRepository;
@@ -35,6 +38,9 @@ public class ReviewService {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    private ReservationRepository reservationRepository;
+
     // Create Review
     public Review createReview(String userId, String restaurantId, int rating, String comment) {
         UserInfo user = userInfoRepository.findById(userId)
@@ -43,9 +49,19 @@ public class ReviewService {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found"));
 
+        Reservation reservation = reservationRepository.findTopByUser_IdAndRestaurant_IdAndStatusOrderByDateTimeDesc(
+                userId, restaurantId, ReservationStatus.COMPLETED)
+                .orElseThrow(() -> new RuntimeException("No completed reservation found for review"));
+
+        if (reviewRepository.existsByReservation_IdAndUser_Id(reservation.getId(), userId)) {
+            throw new RuntimeException("You have already reviewed this reservation");
+        }
+
+
         Review review = new Review();
         review.setUser(user);
         review.setRestaurant(restaurant);
+        review.setReservation(reservation);
         review.setRating(rating);
         review.setComment(comment);
 
@@ -61,14 +77,13 @@ public class ReviewService {
     public List<ReviewRespondDTO> getReviewsByRestaurant(String restaurantId) {
         List<Review> reviews = reviewRepository.findByRestaurant_Id(restaurantId);
         return reviews.stream()
-            .map(r -> new ReviewRespondDTO(
-                    r.getUser().getEmail(),
-                    r.getRating(),
-                    r.getComment(),
-                    r.getCreatedAt(),
-                    r.getUpdatedAt()
-            ))
-            .collect(Collectors.toList());
+                .map(r -> new ReviewRespondDTO(
+                        r.getUser().getEmail(),
+                        r.getRating(),
+                        r.getComment(),
+                        r.getCreatedAt(),
+                        r.getUpdatedAt()))
+                .collect(Collectors.toList());
     }
 
     // Get all reviews by user
