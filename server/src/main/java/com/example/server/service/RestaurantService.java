@@ -94,6 +94,7 @@ public class RestaurantService {
         restaurant.setUserInfo(userInfo);
         restaurant.setAverageRating(0.0);
         restaurant.setTotalReviews(0);
+        restaurant.setCostRating(dto.getCostRating());
         restaurant.setApproved(false);
         return restaurant;
     }
@@ -119,6 +120,7 @@ public class RestaurantService {
         restaurant.setCuisine(dto.getCuisine());
         restaurant.setCapacity(dto.getCapacity());
         restaurant.setAverageRating(dto.getAverageRating());
+        restaurant.setCostRating(dto.getCostRating());
         restaurant.setHours(dto.getHours());
         restaurant.setTotalReviews(dto.getTotalReviews());
 
