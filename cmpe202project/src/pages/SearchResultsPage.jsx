@@ -18,6 +18,54 @@ const SearchResultsPage = () => {
   const [selectedPrices, setSelectedPrices] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [selectedLocations, setSelectedLocations] = useState([]);
+  const [showOpenOnly, setShowOpenOnly] = useState(false);
+
+  // Check if a restaurant is currently open
+  const isRestaurantOpen = (restaurant) => {
+    if (!restaurant.hours) return false;
+
+    const now = new Date();
+    const pacificTime = new Date(
+      now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" })
+    );
+
+    const dayIndex = pacificTime.getDay();
+    const days = [
+      "SUNDAY",
+      "MONDAY",
+      "TUESDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "FRIDAY",
+      "SATURDAY",
+    ];
+    const today = days[dayIndex];
+
+    // Check if restaurant has hours for today
+    if (!restaurant.hours[today]) return false;
+
+    const { start, end } = restaurant.hours[today];
+    if (!start || !end) return false;
+
+    // Parse hours
+    const [startHours, startMinutes] = start.split(":").map(Number);
+    const [endHours, endMinutes] = end.split(":").map(Number);
+
+    // Get current hours and minutes
+    const currentHours = pacificTime.getHours();
+    const currentMinutes = pacificTime.getMinutes();
+
+    // Convert to minutes for easier comparison
+    const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+    const openTimeInMinutes = startHours * 60 + startMinutes;
+    const closeTimeInMinutes = endHours * 60 + endMinutes;
+
+    // Check if current time is within operating hours
+    return (
+      currentTimeInMinutes >= openTimeInMinutes &&
+      currentTimeInMinutes <= closeTimeInMinutes
+    );
+  };
 
   // Fetch restaurants data and sort based on search term
   const getRestaurantsData = async () => {
@@ -75,6 +123,11 @@ const SearchResultsPage = () => {
       );
     }
 
+    // Filter by open status
+    if (showOpenOnly) {
+      filtered = filtered.filter(isRestaurantOpen);
+    }
+
     setFilteredRestaurants(filtered);
   };
 
@@ -122,12 +175,23 @@ const SearchResultsPage = () => {
     }
   };
 
+  // Handle open now filter change
+  const handleOpenNowChange = (e) => {
+    setShowOpenOnly(e.target.checked);
+  };
+
   // Apply filters whenever any filter changes
   useEffect(() => {
     if (restaurants.length > 0) {
       applyFilters();
     }
-  }, [selectedCuisines, selectedPrices, selectedRatings, selectedLocations]);
+  }, [
+    selectedCuisines,
+    selectedPrices,
+    selectedRatings,
+    selectedLocations,
+    showOpenOnly,
+  ]);
 
   useEffect(() => {
     if (restaurants.length > 0) {
@@ -161,6 +225,17 @@ const SearchResultsPage = () => {
       </div>
       <div className="search-results-container">
         <div className="filters-container">
+          {/* Add Open Now filter at the top for visibility */}
+          <div className="filter-item open-now-filter">
+            <label className="special-filter">
+              <input
+                type="checkbox"
+                checked={showOpenOnly}
+                onChange={handleOpenNowChange}
+              />
+              <span className="open-indicator">Open Now</span>
+            </label>
+          </div>
           <ul className="filter-item">
             <li className="filter-type">Type of Cuisine</li>
             {allCuisines?.map((cuisine, index) => (
@@ -280,9 +355,26 @@ const SearchResultsPage = () => {
         <div className="results-container">
           {searchTerm && <h2>{`Results for "${searchTerm}"`}</h2>}
           <div className="restaurant-list">
-            {filteredRestaurants.map((restaurant, index) => (
-              <RestaurantBox horizontal={true} key={index} {...restaurant} />
-            ))}
+            {filteredRestaurants.length > 0 ? (
+              filteredRestaurants.map((restaurant, index) => (
+                <RestaurantBox horizontal={true} key={index} {...restaurant} />
+              ))
+            ) : (
+              <div className="no-results">
+                <p>No restaurants match your current filters.</p>
+                <button
+                  onClick={() => {
+                    setSelectedCuisines([]);
+                    setSelectedPrices([]);
+                    setSelectedRatings([]);
+                    setSelectedLocations([]);
+                    setShowOpenOnly(false);
+                  }}
+                >
+                  Clear all filters
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
