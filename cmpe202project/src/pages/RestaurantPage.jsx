@@ -22,6 +22,9 @@ const RestaurantPage = () => {
   const [reviewText, setReviewText] = useState("");
   const [showAllReviews, setShowAllReviews] = useState(false);
   const { user } = useAuth();
+  const [userReview, setUserReview] = useState(null);
+  const [isEditingReview, setIsEditingReview] = useState(false);
+  const [imageUrls, setImageUrls] = useState([]);
 
   // Create state for restaurant data
   const [restaurantData, setRestaurantData] = useState({
@@ -44,7 +47,7 @@ const RestaurantPage = () => {
   });
 
   useEffect(() => {
-    console.log(restaurantData);
+    console.log("data: ", restaurantData);
   }, [restaurantData]);
 
   useEffect(() => {
@@ -89,52 +92,98 @@ const RestaurantPage = () => {
     const fetchReviews = async () => {
       if (restaurantData.id) {
         const reviewsData = await getRestaurantReviews(restaurantData.id);
-        let averageRating = 0;
+
+        // Calculate average rating correctly
+        let totalRating = 0;
         reviewsData.forEach((review) => {
-          averageRating += review.rating || 0;
+          totalRating += review.rating || 0;
         });
-        averageRating /= reviewsData.length || 1;
+        const averageRating =
+          reviewsData.length > 0 ? totalRating / reviewsData.length : 0;
+
+        // Update restaurant data with reviews and calculated average
         setRestaurantData((prevData) => ({
           ...prevData,
           reviews: reviewsData || [],
-          rating: averageRating || 0,
+          rating: averageRating,
         }));
+
+        // Check if current user has already submitted a review
+        if (user && user.email) {
+          const existingReview = reviewsData.find(
+            (review) => review.email === user.email
+          );
+
+          if (existingReview) {
+            setUserReview(existingReview);
+            setSelectedRating(existingReview.rating || 0);
+            setReviewText(existingReview.comment || "");
+            setIsEditingReview(true);
+          } else {
+            setUserReview(null);
+            setSelectedRating(0);
+            setReviewText("");
+            setIsEditingReview(false);
+          }
+        }
+
         console.log("Fetched reviews data:", reviewsData);
       }
     };
-    fetchReviews();
-  }, [restaurantData.id]);
 
-  // Rest of your component remains the same, but now uses the state variables
+    fetchReviews();
+  }, [restaurantData.id, user]);
+
   const handleSubmitReview = async (e) => {
     e.preventDefault();
+
     if (selectedRating === 0) {
       alert("Please select a rating before submitting your review.");
       return;
     }
-    const response = await reviewRestaurant(restaurantData.id, {
-      rating: selectedRating,
-      comment: reviewText.trim(),
-    });
 
-    if (response) {
-      alert("Review submitted successfully!");
-      const updatedData = await getRestaurantReviews(restaurantData.id);
-      console.log(
-        "Updated restaurant data after review submission:",
-        updatedData
-      );
-      let averageRating = 0;
-      if (updatedData?.reviews?.length > 0) {
-        averageRating =
-          updatedData.reviews.reduce((sum, review) => sum + review.rating, 0) /
-          updatedData.reviews.length;
+    try {
+      const response = await reviewRestaurant(restaurantData.id, {
+        rating: selectedRating,
+        comment: reviewText.trim(),
+      });
+
+      if (response) {
+        // Fetch updated reviews
+        const updatedReviews = await getRestaurantReviews(restaurantData.id);
+
+        // Calculate new average
+        let totalRating = 0;
+        updatedReviews.forEach((review) => {
+          totalRating += review.rating || 0;
+        });
+        const newAverageRating =
+          updatedReviews.length > 0 ? totalRating / updatedReviews.length : 0;
+
+        // Update state with new data
+        setRestaurantData((prevData) => ({
+          ...prevData,
+          reviews: updatedReviews,
+          rating: newAverageRating,
+        }));
+
+        // Update user review status
+        setUserReview({
+          email: user.email,
+          rating: selectedRating,
+          comment: reviewText.trim(),
+        });
+        setIsEditingReview(true);
+
+        alert(
+          isEditingReview
+            ? "Your review has been updated!"
+            : "Review submitted successfully!"
+        );
       }
-      setRestaurantData((prevData) => ({
-        ...prevData,
-        reviews: updatedData.reviews,
-        rating: averageRating,
-      }));
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Failed to submit review. Please try again.");
     }
   };
 
@@ -157,7 +206,14 @@ const RestaurantPage = () => {
   return (
     <div className="restaurant-page">
       <div className="restaurant-image-container">
-        <img src={RestaurantImage} alt="Restaurant" />
+        <img
+          src={
+            restaurantData?.imageUrls.length > 0
+              ? restaurantData?.imageUrls[0]
+              : RestaurantImage
+          }
+          alt="Restaurant"
+        />
         <button className="see-all-photos-btn">See all photos</button>
       </div>
       {/* Restaurant info */}
@@ -230,17 +286,43 @@ const RestaurantPage = () => {
       </div>
       {/* All Photos */}
       <div className="photos-container">
-        <h2>23 Photos</h2>
+        <h2>
+          {restaurantData?.imageUrls.length > 0
+            ? `${restaurantData.imageUrls.length} `
+            : ""}
+          Photos
+        </h2>
         <div className="photos-grid">
           <div className="photo-thumbnail">
-            <img src={RestaurantImage} alt="Photo 1" />
+            <img
+              src={
+                restaurantData?.imageUrls.length > 0
+                  ? restaurantData?.imageUrls[0]
+                  : RestaurantImage
+              }
+              alt="Photo 1"
+            />
           </div>
           <div className="right-photos">
             <div className="photo-thumbnail">
-              <img src={RestaurantImage} alt="Photo 2" />
+              <img
+                src={
+                  restaurantData?.imageUrls.length > 0
+                    ? restaurantData?.imageUrls[1]
+                    : RestaurantImage
+                }
+                alt="Photo 2"
+              />
             </div>
             <div className="photo-thumbnail">
-              <img src={RestaurantImage} alt="Photo 3" />
+              <img
+                src={
+                  restaurantData?.imageUrls[2]
+                    ? restaurantData?.imageUrls[2]
+                    : RestaurantImage
+                }
+                alt="Photo 3"
+              />
               <button className="see-all-photos-btn">See all photos</button>
             </div>
           </div>
@@ -309,9 +391,15 @@ const RestaurantPage = () => {
       </div>
       {/* Leave a review */}
       <div className="leave-review-container">
-        <h2>Leave a review</h2>
+        <h2>{isEditingReview ? "Update your review" : "Leave a review"}</h2>
         {user ? (
           <form className="leave-review-form" onSubmit={handleSubmitReview}>
+            {isEditingReview && (
+              <p className="editing-message">
+                You've already reviewed this restaurant. You can update your
+                review below.
+              </p>
+            )}
             <div className="review-rating">
               {[1, 2, 3, 4, 5].map((star) => (
                 <span
@@ -336,7 +424,7 @@ const RestaurantPage = () => {
               value={reviewText}
             ></textarea>
             <button className="submit-review-btn" type="submit">
-              Submit Review
+              {isEditingReview ? "Update Review" : "Submit Review"}
             </button>
           </form>
         ) : (
