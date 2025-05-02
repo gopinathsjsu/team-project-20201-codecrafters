@@ -82,9 +82,15 @@
   gap: 1.5rem;
 }
 
-.restaurant-info {
+.reservations-page .restaurant-info {
   flex: 1;
   min-width: 250px;
+  cursor: pointer;
+}
+
+.reservations-page .restaurant-info:hover {
+  color: #D33223;
+  transition: color 0.2s;
 }
 
 .restaurant-info h2 {
@@ -109,7 +115,7 @@
 .reservation-actions {
   display: flex;
   gap: 1rem;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .modify-btn,
