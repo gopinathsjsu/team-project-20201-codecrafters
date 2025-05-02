@@ -25,6 +25,8 @@ const RestaurantPage = () => {
   const [userReview, setUserReview] = useState(null);
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [imageUrls, setImageUrls] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Create state for restaurant data
   const [restaurantData, setRestaurantData] = useState({
@@ -53,20 +55,43 @@ const RestaurantPage = () => {
   useEffect(() => {
     if (location.state === null || !location.state.id) {
       const fetchRestaurant = async () => {
-        const restaurantId = location.pathname.split("/").pop().trim();
-        console.log("Fetching restaurant with ID:", restaurantId);
-        const fetchedData = await getRestaurantById(restaurantId);
-        if (fetchedData) {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+          const restaurantId = location.pathname.split("/").pop().trim();
+          console.log("Fetching restaurant with ID:", restaurantId);
+
+          // Validate restaurant ID
+          if (!restaurantId) {
+            throw new Error("Invalid restaurant ID");
+          }
+
+          const fetchedData = await getRestaurantById(restaurantId);
+
+          // Check if fetchedData contains an error property
+          if (fetchedData.error) {
+            throw new Error(
+              fetchedData.message || "Failed to load restaurant details"
+            );
+          }
+
+          // Check if we got valid restaurant data
+          if (!fetchedData || !fetchedData.id) {
+            throw new Error("Restaurant not found");
+          }
+
           console.log("Fetched restaurant data:", fetchedData);
+
           // Update state with fetched data
           setRestaurantData({
             id: fetchedData.id || "",
             name: fetchedData.name || "",
-            rating: fetchedData.averageRating || 0, // Map averageRating to rating
-            reviews: fetchedData.totalReviews || [], // Map totalReviews to reviews
+            rating: fetchedData.averageRating || 0,
+            reviews: fetchedData.totalReviews || [],
             cuisine: fetchedData.cuisine || "",
-            bookedTimes: fetchedData.bookedTimes || 0, // Default if not available
-            timeSlots: fetchedData.timeSlots || [], // Default if not available
+            bookedTimes: fetchedData.bookedTimes || 0,
+            timeSlots: fetchedData.timeSlots || [],
             description: fetchedData.description || "",
             address: fetchedData.address || "",
             city: fetchedData.city || "",
@@ -77,12 +102,13 @@ const RestaurantPage = () => {
             hours: fetchedData.hours || {},
             imageUrls: fetchedData.imageUrls || [],
           });
-        } else {
-          console.log("No restaurant data found for ID:", restaurantId);
-          // Optionally redirect to 404 page
-          // navigate("/not-found");
+        } catch (err) {
+          navigate("/not-found");
+        } finally {
+          setIsLoading(false);
         }
       };
+
       fetchRestaurant();
     }
   }, [location.state, navigate, location.pathname]);
