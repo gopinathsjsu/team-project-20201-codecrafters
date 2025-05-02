@@ -73,26 +73,69 @@ const SearchResultsPage = () => {
   };
 
   // Process restaurant data when API response is received
+  // Update the sorting logic in the allRestaurants useEffect
   useEffect(() => {
     if (allRestaurants && Array.isArray(allRestaurants)) {
       const validRestaurants = allRestaurants.filter((r) => r && r.id);
 
-      const sortedRestaurants = validRestaurants.sort((a, b) => {
-        const aMatches =
-          (a.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ??
-            false) ||
-          (a.cuisine?.toLowerCase().includes(searchTerm?.toLowerCase()) ??
-            false);
-        const bMatches =
-          (b.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ??
-            false) ||
-          (b.cuisine?.toLowerCase().includes(searchTerm?.toLowerCase()) ??
-            false);
+      // Skip sorting if no search term
+      if (!searchTerm || searchTerm.trim() === "") {
+        setRestaurants(validRestaurants);
+        setFilteredRestaurants(validRestaurants);
+        return;
+      }
 
-        if (aMatches && !bMatches) return -1;
-        if (!aMatches && bMatches) return 1;
-        return 0;
+      const searchTermLower = searchTerm.toLowerCase();
+
+      const sortedRestaurants = validRestaurants.sort((a, b) => {
+        let aScore = 0;
+        const aNameLower = a.name?.toLowerCase() || "";
+        const aCuisineLower = a.cuisine?.toLowerCase() || "";
+
+        // Exact name match (highest priority)
+        if (aNameLower === searchTermLower) aScore = 100;
+        // Name starts with search term (high priority)
+        else if (aNameLower.startsWith(searchTermLower)) aScore = 75;
+        // Name contains search term (medium priority)
+        else if (aNameLower.includes(searchTermLower)) aScore = 50;
+        // Cuisine contains search term (low priority)
+        else if (aCuisineLower.includes(searchTermLower)) aScore = 25;
+
+        // Calculate match score for restaurant B
+        let bScore = 0;
+        const bNameLower = b.name?.toLowerCase() || "";
+        const bCuisineLower = b.cuisine?.toLowerCase() || "";
+
+        // Exact name match (highest priority)
+        if (bNameLower === searchTermLower) bScore = 100;
+        // Name starts with search term (high priority)
+        else if (bNameLower.startsWith(searchTermLower)) bScore = 75;
+        // Name contains search term (medium priority)
+        else if (bNameLower.includes(searchTermLower)) bScore = 50;
+        // Cuisine contains search term (low priority)
+        else if (bCuisineLower.includes(searchTermLower)) bScore = 25;
+
+        // Sort by score (higher score first)
+        if (aScore !== bScore) {
+          return bScore - aScore;
+        }
+
+        // If scores are the same, sort alphabetically by name
+        return aNameLower.localeCompare(bNameLower);
       });
+
+      console.log("Sorted restaurants based on search term:", searchTerm);
+
+      // Add debug info about the first few sorted restaurants
+      const debugInfo = sortedRestaurants.slice(0, 5).map((r) => ({
+        name: r.name,
+        match: r.name?.toLowerCase().includes(searchTermLower) ? "Yes" : "No",
+        exactMatch: r.name?.toLowerCase() === searchTermLower ? "Yes" : "No",
+        startsWithMatch: r.name?.toLowerCase().startsWith(searchTermLower)
+          ? "Yes"
+          : "No",
+      }));
+      console.table(debugInfo);
 
       setRestaurants(sortedRestaurants);
       setFilteredRestaurants(sortedRestaurants);
