@@ -21,8 +21,8 @@ const ReservationsPage = () => {
         `${BASE_URL}/api/restaurants/${restaurantId}`
       );
       return {
-        name: response.data.name,
-        address: `${response.data.address}, ${response.data.city}, ${response.data.state} ${response.data.zip}`,
+        name: response.data.restaurant.name,
+        address: `${response.data.restaurant.address}, ${response.data.restaurant.city}, ${response.data.restaurant.state} ${response.data.restaurant.zip}`,
       };
     } catch (err) {
       console.error(
