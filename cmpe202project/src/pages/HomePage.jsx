@@ -1,59 +1,54 @@
 import React, { useEffect, useState, useRef } from "react";
 import RestaurantBox from "../components/RestaurantBox";
 import SearchComponent from "../components/SearchComponent";
-import { getRestaurants } from "../utils/apiCalls";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { getRestaurants, useApiCall } from "../utils/apiCalls";
 import "../styles/HomePage.css";
 
 const HomePage = () => {
   const [topRatedRestaurants, setTopRatedRestaurants] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const restaurantListRef = useRef(null); // Create a ref for the restaurant list
+  const restaurantListRef = useRef(null);
 
+  // Use the API hook to fetch restaurants with loading state
+  const { data: allRestaurants, isLoading, error } = useApiCall(getRestaurants);
+
+  // Process and sort restaurants when the data changes
   useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        setIsLoading(true);
-        const restaurants = await getRestaurants();
+    if (allRestaurants && allRestaurants.length > 0) {
+      // Process restaurants to ensure bookedTimes is a number
+      const processedRestaurants = allRestaurants
+        .filter((restaurant) => restaurant && restaurant.id) // Filter out invalid restaurants
+        .map((restaurant) => ({
+          ...restaurant,
+          // Convert bookedTimes to a number if it's not already
+          bookedTimes:
+            typeof restaurant.bookedTimes === "number"
+              ? restaurant.bookedTimes
+              : 0,
+          timeSlots: restaurant.timeSlots || [],
+          // Ensure we have a valid rating
+          averageRating: parseFloat(restaurant.averageRating || 0),
+        }));
 
-        if (restaurants && restaurants.length > 0) {
-          // Process restaurants to ensure bookedTimes is a number
-          const processedRestaurants = restaurants.map((restaurant) => ({
-            ...restaurant,
-            // Convert bookedTimes to a number if it's not already
-            bookedTimes:
-              typeof restaurant.bookedTimes === "number"
-                ? restaurant.bookedTimes
-                : 0,
-            timeSlots: restaurant.timeSlots || [],
-          }));
+      // Sort first by rating, then by bookedTimes
+      const sortedRestaurants = processedRestaurants
+        .sort((a, b) => {
+          // First sort by rating (descending)
+          if (a.averageRating !== b.averageRating) {
+            return b.averageRating - a.averageRating;
+          }
+          // If ratings are equal, sort by bookedTimes (descending)
+          return b.bookedTimes - a.bookedTimes;
+        })
+        .slice(0, 10);
 
-          // Sort first by rating, then by bookedTimes
-          const sortedRestaurants = processedRestaurants
-            .sort((a, b) => {
-              // First sort by rating (descending)
-              if (a.averageRating !== b.averageRating) {
-                return b.averageRating - a.averageRating;
-              }
-              // If ratings are equal, sort by bookedTimes (descending)
-              return b.bookedTimes - a.bookedTimes;
-            })
-            .slice(0, 10);
-
-          setTopRatedRestaurants(sortedRestaurants);
-          sessionStorage.setItem(
-            "topRatedRestaurants",
-            JSON.stringify(sortedRestaurants)
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching top-rated restaurants:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchRestaurants();
-  }, []);
+      setTopRatedRestaurants(sortedRestaurants);
+      sessionStorage.setItem(
+        "topRatedRestaurants",
+        JSON.stringify(sortedRestaurants)
+      );
+    }
+  }, [allRestaurants]);
 
   const scrollLeft = () => {
     const list = restaurantListRef.current;
@@ -84,16 +79,39 @@ const HomePage = () => {
       <div className="top-rated-restaurants">
         <h1>Top-Rated Restaurants</h1>
         <div className="restaurant-carousel">
-          {isLoading && <p className="loading">Loading restaurants...</p>}
+          {/* Show loading spinner while loading */}
+          {isLoading && (
+            <div className="loading-container">
+              <LoadingSpinner size="large" text="Loading top restaurants..." />
+            </div>
+          )}
 
-          {!isLoading && topRatedRestaurants.length > 0 && (
+          {/* Show error message if there's an error */}
+          {error && (
+            <div className="error-message">
+              <p>Error loading restaurants: {error}</p>
+              <button onClick={() => window.location.reload()}>
+                Try Again
+              </button>
+            </div>
+          )}
+
+          {/* Show restaurants when loaded */}
+          {!isLoading && !error && topRatedRestaurants.length > 0 && (
             <>
               <button className="carousel-button left" onClick={scrollLeft}>
                 &#8249;
               </button>
               <div className="restaurant-list" ref={restaurantListRef}>
                 {topRatedRestaurants.map((restaurant) => (
-                  <RestaurantBox key={restaurant.id} {...restaurant} />
+                  <RestaurantBox
+                    key={
+                      restaurant.id
+                        ? `restaurant-${restaurant.id}`
+                        : `restaurant-${Math.random()}`
+                    }
+                    {...restaurant}
+                  />
                 ))}
               </div>
               <button className="carousel-button right" onClick={scrollRight}>
@@ -102,8 +120,11 @@ const HomePage = () => {
             </>
           )}
 
-          {!isLoading && topRatedRestaurants.length === 0 && (
-            <p className="no-results">No restaurants found.</p>
+          {/* Show empty state when no restaurants */}
+          {!isLoading && !error && topRatedRestaurants.length === 0 && (
+            <div className="no-results">
+              <p>No restaurants found.</p>
+            </div>
           )}
         </div>
       </div>
