@@ -1,14 +1,11 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ReservationContext } from "../context/ReservationContext";
 import SearchIcon from "../assets/searchIcon.svg";
 
-const SearchComponent = ({
-  horizontal = false,
-  showSearch = true,
-  onSearch,
-}) => {
+const SearchComponent = ({ horizontal = false, showSearch = true }) => {
   const navigate = useNavigate();
+  const [currentTerm, setCurrentTerm] = useState("");
   const {
     reservationDate,
     setReservationDate,
@@ -16,7 +13,6 @@ const SearchComponent = ({
     setReservationTime,
     numberOfGuests,
     setNumberOfGuests,
-    searchTerm,
     setSearchTerm,
   } = useContext(ReservationContext);
 
@@ -42,14 +38,14 @@ const SearchComponent = ({
     setReservationTime(localTime);
   }, []);
 
-  const handleMakeReservation = (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
+    setSearchTerm(currentTerm);
     navigate("/search", {
       state: {
         reservationDate,
         reservationTime,
         numberOfGuests,
-        searchTerm,
       },
     });
   };
@@ -59,7 +55,7 @@ const SearchComponent = ({
       className={`reservation-form ${
         horizontal ? "reservation-form-horizontal" : ""
       }`}
-      onSubmit={handleMakeReservation}
+      onSubmit={handleSearch}
     >
       <div className="reservation-input-group">
         <input
@@ -92,15 +88,11 @@ const SearchComponent = ({
             type="text"
             placeholder="Search restaurant"
             className="reservation-input"
-            value={searchTerm}
+            value={currentTerm}
             maxLength={25}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => setCurrentTerm(e.target.value)}
           />
-          <button
-            type="submit"
-            className="reservation-button"
-            onClick={onSearch}
-          >
+          <button type="submit" className="reservation-button">
             Search
           </button>
         </div>
