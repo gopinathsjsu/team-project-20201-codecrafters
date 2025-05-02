@@ -6,13 +6,15 @@
 
 .search-component-container{
     margin: 20px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .search-results-container{
     display: flex;
     flex-direction: row;
     color: black;
-
 }
 
 .filters-container{
@@ -70,4 +72,35 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+.view-toggle {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #333;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.view-toggle-btn:hover {
+  background-color: #e9ecef;
+  transform: translateY(-1px);
+}
+
+.view-toggle-btn .toggle-icon {
+  margin-right: 8px;
+  font-size: 18px;
 }

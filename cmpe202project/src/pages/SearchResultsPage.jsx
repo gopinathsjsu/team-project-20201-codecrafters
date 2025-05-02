@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { ReservationContext } from "../context/ReservationContext";
 import SearchComponent from "../components/SearchComponent";
 import RestaurantBox from "../components/RestaurantBox";
+import RestaurantMap from "../components/RestaurantMap"; // Import the new component
 import { getRestaurants } from "../utils/apiCalls";
 import "../styles/SearchResultsPage.css";
 
@@ -12,15 +13,16 @@ const SearchResultsPage = () => {
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [allCuisines, setAllCuisines] = useState([]);
   const [allLocations, setAllLocations] = useState([]);
-
-  // Filter states
   const [selectedCuisines, setSelectedCuisines] = useState([]);
   const [selectedPrices, setSelectedPrices] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [showOpenOnly, setShowOpenOnly] = useState(false);
+  const [viewMode, setViewMode] = useState("list");
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Check if a restaurant is currently open
+  // Restaurant "open now" check function
   const isRestaurantOpen = (restaurant) => {
     if (!restaurant.hours) return false;
 
@@ -41,37 +43,31 @@ const SearchResultsPage = () => {
     ];
     const today = days[dayIndex];
 
-    // Check if restaurant has hours for today
     if (!restaurant.hours[today]) return false;
 
     const { start, end } = restaurant.hours[today];
     if (!start || !end) return false;
 
-    // Parse hours
     const [startHours, startMinutes] = start.split(":").map(Number);
     const [endHours, endMinutes] = end.split(":").map(Number);
 
-    // Get current hours and minutes
     const currentHours = pacificTime.getHours();
     const currentMinutes = pacificTime.getMinutes();
 
-    // Convert to minutes for easier comparison
     const currentTimeInMinutes = currentHours * 60 + currentMinutes;
     const openTimeInMinutes = startHours * 60 + startMinutes;
     const closeTimeInMinutes = endHours * 60 + endMinutes;
 
-    // Check if current time is within operating hours
     return (
       currentTimeInMinutes >= openTimeInMinutes &&
       currentTimeInMinutes <= closeTimeInMinutes
     );
   };
 
-  // Fetch restaurants data and sort based on search term
+  // Get restaurant data
   const getRestaurantsData = async () => {
     const allRestaurants = await getRestaurants();
 
-    // Sort restaurants based on whether they match the searchTerm
     const sortedRestaurants = allRestaurants.sort((a, b) => {
       const aMatches =
         a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -86,44 +82,38 @@ const SearchResultsPage = () => {
     });
 
     setRestaurants(sortedRestaurants);
-    setFilteredRestaurants(sortedRestaurants); // Initialize filtered with all restaurants
+    setFilteredRestaurants(sortedRestaurants);
   };
 
-  // Apply all filters to restaurants
+  // Apply filters function
   const applyFilters = () => {
     let filtered = [...restaurants];
 
-    // Filter by cuisine
     if (selectedCuisines.length > 0) {
       filtered = filtered.filter((restaurant) =>
         selectedCuisines.includes(restaurant.cuisine)
       );
     }
 
-    // Filter by price range
     if (selectedPrices.length > 0) {
       filtered = filtered.filter((restaurant) =>
         selectedPrices.includes(restaurant.priceRange)
       );
     }
 
-    // Filter by rating
     if (selectedRatings.length > 0) {
       filtered = filtered.filter((restaurant) => {
-        // Get the lowest selected rating as the threshold
         const minRating = Math.min(...selectedRatings.map(Number));
         return restaurant.averageRating >= minRating;
       });
     }
 
-    // Filter by location
     if (selectedLocations.length > 0) {
       filtered = filtered.filter((restaurant) =>
         selectedLocations.includes(restaurant.city)
       );
     }
 
-    // Filter by open status
     if (showOpenOnly) {
       filtered = filtered.filter(isRestaurantOpen);
     }
@@ -131,7 +121,7 @@ const SearchResultsPage = () => {
     setFilteredRestaurants(filtered);
   };
 
-  // Handle checkbox changes for cuisine filter
+  // Filter change handlers
   const handleCuisineChange = (e) => {
     const { value, checked } = e.target;
     if (checked) {
@@ -143,7 +133,6 @@ const SearchResultsPage = () => {
     }
   };
 
-  // Handle checkbox changes for price filter
   const handlePriceChange = (e) => {
     const { value, checked } = e.target;
     if (checked) {
@@ -153,7 +142,6 @@ const SearchResultsPage = () => {
     }
   };
 
-  // Handle checkbox changes for rating filter
   const handleRatingChange = (e) => {
     const { value, checked } = e.target;
     if (checked) {
@@ -163,7 +151,6 @@ const SearchResultsPage = () => {
     }
   };
 
-  // Handle checkbox changes for location filter
   const handleLocationChange = (e) => {
     const { value, checked } = e.target;
     if (checked) {
@@ -175,12 +162,20 @@ const SearchResultsPage = () => {
     }
   };
 
-  // Handle open now filter change
   const handleOpenNowChange = (e) => {
     setShowOpenOnly(e.target.checked);
   };
 
-  // Apply filters whenever any filter changes
+  // Clear all filters handler
+  const clearAllFilters = () => {
+    setSelectedCuisines([]);
+    setSelectedPrices([]);
+    setSelectedRatings([]);
+    setSelectedLocations([]);
+    setShowOpenOnly(false);
+  };
+
+  // Apply filters when filter criteria change
   useEffect(() => {
     if (restaurants.length > 0) {
       applyFilters();
@@ -193,6 +188,7 @@ const SearchResultsPage = () => {
     showOpenOnly,
   ]);
 
+  // Extract unique cuisines and locations
   useEffect(() => {
     if (restaurants.length > 0) {
       const cuisines = new Set();
@@ -208,12 +204,44 @@ const SearchResultsPage = () => {
     }
   }, [restaurants]);
 
+  // Initial data fetch
   useEffect(() => {
     if (numberOfGuests === "") {
       setNumberOfGuests(1);
     }
     getRestaurantsData();
   }, [numberOfGuests, setNumberOfGuests]);
+
+  // Load Google Maps API
+  useEffect(() => {
+    if (
+      !window.google &&
+      !document.querySelector('script[src*="maps.googleapis"]')
+    ) {
+      setIsLoading(true);
+      const googleMapScript = document.createElement("script");
+      googleMapScript.src = `https://maps.googleapis.com/maps/api/js?key=${
+        import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+      }&libraries=places&loading=async&callback=initMap`;
+      googleMapScript.async = true;
+      googleMapScript.defer = true;
+
+      // Set up callback function
+      window.initMap = () => {
+        setMapLoaded(true);
+        setIsLoading(false);
+      };
+
+      document.head.appendChild(googleMapScript);
+    } else if (window.google) {
+      setMapLoaded(true);
+    }
+  }, []);
+
+  // Toggle view mode
+  const toggleViewMode = (mode) => {
+    setViewMode(mode);
+  };
 
   return (
     <main className="search-container">
@@ -222,10 +250,25 @@ const SearchResultsPage = () => {
           horizontal={true}
           onSearch={() => getRestaurantsData()}
         />
+        <div className="view-toggle">
+          <button
+            className="view-toggle-btn"
+            onClick={() => toggleViewMode(viewMode === "list" ? "map" : "list")}
+          >
+            {viewMode === "list" ? (
+              <>
+                <span className="toggle-icon">🗺️</span> Switch to Map View
+              </>
+            ) : (
+              <>
+                <span className="toggle-icon">📋</span> Switch to List View
+              </>
+            )}
+          </button>
+        </div>
       </div>
       <div className="search-results-container">
         <div className="filters-container">
-          {/* Add Open Now filter at the top for visibility */}
           <div className="filter-item open-now-filter">
             <label className="special-filter">
               <input
@@ -354,28 +397,33 @@ const SearchResultsPage = () => {
         </div>
         <div className="results-container">
           {searchTerm && <h2>{`Results for "${searchTerm}"`}</h2>}
-          <div className="restaurant-list">
-            {filteredRestaurants.length > 0 ? (
-              filteredRestaurants.map((restaurant, index) => (
-                <RestaurantBox horizontal={true} key={index} {...restaurant} />
-              ))
-            ) : (
-              <div className="no-results">
-                <p>No restaurants match your current filters.</p>
-                <button
-                  onClick={() => {
-                    setSelectedCuisines([]);
-                    setSelectedPrices([]);
-                    setSelectedRatings([]);
-                    setSelectedLocations([]);
-                    setShowOpenOnly(false);
-                  }}
-                >
-                  Clear all filters
-                </button>
-              </div>
-            )}
-          </div>
+          {viewMode === "list" ? (
+            <div className="restaurant-list">
+              {filteredRestaurants.length > 0 ? (
+                filteredRestaurants.map((restaurant, index) => (
+                  <RestaurantBox
+                    horizontal={true}
+                    key={index}
+                    {...restaurant}
+                  />
+                ))
+              ) : (
+                <div className="no-results">
+                  <p>No restaurants match your current filters.</p>
+                  <button onClick={clearAllFilters}>Clear all filters</button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <RestaurantMap
+              restaurants={filteredRestaurants}
+              isRestaurantOpen={isRestaurantOpen}
+              mapLoaded={mapLoaded}
+              onClearFilters={clearAllFilters}
+              isLoading={isLoading}
+              setIsLoading={setIsLoading}
+            />
+          )}
         </div>
       </div>
     </main>
