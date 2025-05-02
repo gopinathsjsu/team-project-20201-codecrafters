@@ -1,93 +1,78 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import RestaurantBox from "../components/RestaurantBox";
 import SearchComponent from "../components/SearchComponent";
+import { getRestaurants } from "../utils/apiCalls";
 import "../styles/HomePage.css";
 
 const HomePage = () => {
-  // Simulate fetching top-rated restaurants
-  const getTopRatedRestaurants = () => {
-    return [
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-      {
-        name: "Sushi Palace",
-        rating: 4.7,
-        reviews: 2100,
-        cuisine: "Japanese • Sushi",
-        bookedTimes: 20,
-        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
-      },
-      {
-        name: "Taco Haven",
-        rating: 4.2,
-        reviews: 2100,
-        cuisine: "Mexican • Tacos",
-        bookedTimes: 10,
-        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
-      },
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-      {
-        name: "Sushi Palace",
-        rating: 4.7,
-        reviews: 2100,
-        cuisine: "Japanese • Sushi",
-        bookedTimes: 20,
-        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
-      },
-      {
-        name: "Taco Haven",
-        rating: 4.2,
-        reviews: 2100,
-        cuisine: "Mexican • Tacos",
-        bookedTimes: 10,
-        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
-      },
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-      {
-        name: "Sushi Palace",
-        rating: 4.7,
-        reviews: 2100,
-        cuisine: "Japanese • Sushi",
-        bookedTimes: 20,
-        timeSlots: ["5:30 PM", "6:00 PM", "7:30 PM"],
-      },
-      {
-        name: "Taco Haven",
-        rating: 4.2,
-        reviews: 2100,
-        cuisine: "Mexican • Tacos",
-        bookedTimes: 10,
-        timeSlots: ["12:00 PM", "1:00 PM", "2:00 PM"],
-      },
-      {
-        name: "Fina Ristorante",
-        rating: 4.5,
-        reviews: 2100,
-        cuisine: "Italian • Seafood • Mediterranean",
-        bookedTimes: 15,
-        timeSlots: ["6:30 PM", "7:00 PM", "8:00 PM"],
-      },
-    ];
+  const [topRatedRestaurants, setTopRatedRestaurants] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const restaurantListRef = useRef(null); // Create a ref for the restaurant list
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        setIsLoading(true);
+        const restaurants = await getRestaurants();
+
+        if (restaurants && restaurants.length > 0) {
+          // Process restaurants to ensure bookedTimes is a number
+          const processedRestaurants = restaurants.map((restaurant) => ({
+            ...restaurant,
+            // Convert bookedTimes to a number if it's not already
+            bookedTimes:
+              typeof restaurant.bookedTimes === "number"
+                ? restaurant.bookedTimes
+                : 0,
+            timeSlots: restaurant.timeSlots || [],
+          }));
+
+          // Sort first by rating, then by bookedTimes
+          const sortedRestaurants = processedRestaurants
+            .sort((a, b) => {
+              // First sort by rating (descending)
+              if (a.averageRating !== b.averageRating) {
+                return b.averageRating - a.averageRating;
+              }
+              // If ratings are equal, sort by bookedTimes (descending)
+              return b.bookedTimes - a.bookedTimes;
+            })
+            .slice(0, 10);
+
+          setTopRatedRestaurants(sortedRestaurants);
+          sessionStorage.setItem(
+            "topRatedRestaurants",
+            JSON.stringify(sortedRestaurants)
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching top-rated restaurants:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
+
+  const scrollLeft = () => {
+    const list = restaurantListRef.current;
+    const itemWidth = 310 + 40; // 310px width + 40px gap
+    if (list.scrollLeft === 0) {
+      list.scrollTo({ left: list.scrollWidth, behavior: "smooth" });
+    } else {
+      list.scrollBy({ left: -itemWidth, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = () => {
+    const list = restaurantListRef.current;
+    const itemWidth = 310 + 40; // 310px width + 40px gap
+    if (list.scrollLeft + list.clientWidth >= list.scrollWidth) {
+      list.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
+      list.scrollBy({ left: itemWidth, behavior: "smooth" });
+    }
   };
 
   return (
@@ -99,51 +84,27 @@ const HomePage = () => {
       <div className="top-rated-restaurants">
         <h1>Top-Rated Restaurants</h1>
         <div className="restaurant-carousel">
-          <button
-            className="carousel-button left"
-            onClick={() => {
-              const list = document.querySelector(".restaurant-list");
-              const itemWidth = 310 + 40; // 310px width + 40px gap
-              if (list.scrollLeft === 0) {
-                // If at the start, scroll to the end
-                list.scrollTo({ left: list.scrollWidth, behavior: "smooth" });
-              } else {
-                // Scroll left by one item
-                list.scrollBy({ left: -itemWidth, behavior: "smooth" });
-              }
-            }}
-          >
-            &#8249;
-          </button>
-          <div className="restaurant-list">
-            {getTopRatedRestaurants().map((restaurant, index) => (
-              <RestaurantBox
-                key={index}
-                name={restaurant.name}
-                rating={restaurant.rating}
-                reviews={restaurant.reviews}
-                cuisine={restaurant.cuisine}
-                bookedTimes={restaurant.bookedTimes}
-                timeSlots={restaurant.timeSlots}
-              />
-            ))}
-          </div>
-          <button
-            className="carousel-button right"
-            onClick={() => {
-              const list = document.querySelector(".restaurant-list");
-              const itemWidth = 310 + 40; // 310px width + 40px gap
-              if (list.scrollLeft + list.clientWidth >= list.scrollWidth) {
-                // If at the end, scroll to the start
-                list.scrollTo({ left: 0, behavior: "smooth" });
-              } else {
-                // Scroll right by one item
-                list.scrollBy({ left: itemWidth, behavior: "smooth" });
-              }
-            }}
-          >
-            &#8250;
-          </button>
+          {isLoading && <p className="loading">Loading restaurants...</p>}
+
+          {!isLoading && topRatedRestaurants.length > 0 && (
+            <>
+              <button className="carousel-button left" onClick={scrollLeft}>
+                &#8249;
+              </button>
+              <div className="restaurant-list" ref={restaurantListRef}>
+                {topRatedRestaurants.map((restaurant) => (
+                  <RestaurantBox key={restaurant.id} {...restaurant} />
+                ))}
+              </div>
+              <button className="carousel-button right" onClick={scrollRight}>
+                &#8250;
+              </button>
+            </>
+          )}
+
+          {!isLoading && topRatedRestaurants.length === 0 && (
+            <p className="no-results">No restaurants found.</p>
+          )}
         </div>
       </div>
     </main>

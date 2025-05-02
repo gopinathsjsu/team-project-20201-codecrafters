@@ -56,6 +56,15 @@
     gap: 20px;
     justify-content: center;
     align-items: center;
+    position: relative;
+}
+
+.search-and-submit img{
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 4px;
+    z-index: 0;
 }
 
 .search-and-submit input, .search-and-submit button{
@@ -66,6 +75,7 @@
 
 .search-and-submit input{
     padding: 0 10px;
+    padding-left: 25px;
 }
 
 .reservation-button{

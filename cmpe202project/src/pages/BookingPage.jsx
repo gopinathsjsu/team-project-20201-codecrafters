@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 import { ReservationContext } from "../context/ReservationContext";
 import "../styles/BookingPage.css";
 import RestaurantImage from "../assets/restaurant-example.png";
+import { confirmReservation } from "../utils/apiCalls";
+import { useNavigate } from "react-router-dom";
 
 const BookingPage = () => {
   const {
@@ -12,7 +14,8 @@ const BookingPage = () => {
     setNumberOfGuests,
   } = useContext(ReservationContext);
   const location = useLocation();
-  const { name } = location.state || {};
+  const { name, address, id } = location.state || {};
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (numberOfGuests === "") {
@@ -20,30 +23,58 @@ const BookingPage = () => {
     }
   }, [numberOfGuests, setNumberOfGuests]);
 
-  // Format the date as "Month Day, Year"
-  const formattedDate = new Date(reservationDate).toLocaleDateString("en-US", {
+  // For displaying the date in Pacific Time
+  const [year, month, day] = reservationDate.split("-");
+
+  // Create a date in Pacific Time zone
+  const localDate = new Date(`${year}-${month}-${day}T12:00:00-07:00`); // -07:00 is Pacific Time offset
+  const formattedDate = localDate.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
+    timeZone: "America/Los_Angeles",
   });
 
-  // Format the time as "hh:mm AM/PM"
+  // Format the time in Pacific Time
   const formattedTime = new Date(
     `1970-01-01T${reservationTime}`
   ).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
+    timeZone: "America/Los_Angeles",
   });
 
-  const handleBookingSubmit = (e) => {
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    console.log("Booking confirmed for:", {
-      name,
-      date: reservationDate,
-      time: reservationTime,
-      guests: numberOfGuests,
-    });
+
+    try {
+      const [year, month, day] = reservationDate.split("-");
+      const [hours, minutes] = reservationTime.split(":");
+
+      const formattedHours = hours.padStart(2, "0");
+      const formattedMinutes = minutes.padStart(2, "0");
+
+      const formattedDateTime = `${year}-${month}-${day}T${formattedHours}:${formattedMinutes}:00`;
+
+      console.log("Formatted DateTime for API:", formattedDateTime);
+
+      const bookingRequest = {
+        dateTime: formattedDateTime,
+        partySize: parseInt(numberOfGuests, 10),
+      };
+
+      console.log("Sending booking request:", bookingRequest);
+
+      const response = await confirmReservation(id, bookingRequest);
+      console.log("Booking confirmed:", response);
+
+      alert("Reservation confirmed successfully!");
+      navigate("/reservations");
+    } catch (error) {
+      console.error("Booking failed:", error);
+      alert("Failed to confirm reservation. Please try again.");
+    }
   };
 
   return (
@@ -69,6 +100,7 @@ const BookingPage = () => {
               <span>{numberOfGuests} people</span>
             </div>
           </div>
+          <div>{`🗺️${address}`}</div>
         </div>
       </div>
       <div className="email-phone-container">

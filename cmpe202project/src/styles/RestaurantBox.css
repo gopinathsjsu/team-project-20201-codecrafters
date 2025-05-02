@@ -45,12 +45,14 @@
 }
 
 .star{
-    font-size: larger;
+    font-size: x-large;
     color: #D33223;
 }
 
 .reviews{
     align-self: center;
+    translate: 0 2px;
+    margin-left: 5px;
 }
 
 .restaurant-cuisine{
@@ -111,6 +113,7 @@
 .restaurant-box-horizontal .image-container{
     width: 30%;
     height: 220px;
+    min-width: 200px;
 }
 
 .restaurant-box-horizontal .availability{
@@ -119,4 +122,13 @@
 
 .restaurant-box-horizontal .restaurant-name{
     margin: 0;
+}
+
+.closed-message {
+    color: #d32f2f;
+    font-weight: 500;
+    padding: 8px 12px;
+    background-color: #ffebee;
+    border-radius: 10px;
+    display: inline-block;
 }
