@@ -1,15 +1,27 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/CustomerNavBar.css";
 
 const CustomerNavBar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate("/"); // Redirect to homepage after logout
+  };
+
+  const handleLoginClick = (e) => {
+    // Save current path to localStorage before navigating to login
+    if (
+      location.pathname !== "/login" &&
+      location.pathname !== "/signup" &&
+      !location.pathname.includes("forgot-password")
+    ) {
+      localStorage.setItem("loginReferrer", location.pathname);
+    }
   };
 
   return (
@@ -32,7 +44,7 @@ const CustomerNavBar = () => {
           </>
         ) : (
           <div className="auth-buttons">
-            <Link to="/login" className="login-btn">
+            <Link to="/login" onClick={handleLoginClick} className="login-btn">
               Login
             </Link>
           </div>

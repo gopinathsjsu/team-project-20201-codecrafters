@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
@@ -14,7 +14,29 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [previousPage, setPreviousPage] = useState("/");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedReferrer = localStorage.getItem("loginReferrer");
+
+    if (savedReferrer) {
+      setPreviousPage(savedReferrer);
+      localStorage.removeItem("loginReferrer");
+    } else {
+      const docReferrer = document.referrer;
+      if (docReferrer && docReferrer.includes(window.location.origin)) {
+        const path = new URL(docReferrer).pathname;
+        if (
+          path !== "/login" &&
+          path !== "/signup" &&
+          !path.includes("forgot-password")
+        ) {
+          setPreviousPage(path);
+        }
+      }
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -102,8 +124,11 @@ function LoginForm() {
           } else if (user.role.includes("RESTAURANT_MANAGER")) {
             navigate("/manager/dashboard");
           } else {
-            console.log("Regular user - redirecting to home");
-            navigate("/");
+            console.log(
+              "Regular user - redirecting to previous page:",
+              previousPage
+            );
+            navigate(previousPage);
           }
         }
         // Check if role is an array
@@ -113,8 +138,11 @@ function LoginForm() {
           } else if (user.role.includes("RESTAURANT_MANAGER")) {
             navigate("/manager/dashboard");
           } else {
-            console.log("Regular user - redirecting to home");
-            navigate("/");
+            console.log(
+              "Regular user - redirecting to previous page:",
+              previousPage
+            );
+            navigate(previousPage);
           }
         }
         // Handle the specific case you're encountering
@@ -130,8 +158,11 @@ function LoginForm() {
           } else if (roleStr.includes("RESTAURANT_MANAGER")) {
             navigate("/manager/dashboard");
           } else {
-            console.log("Defaulting to regular user - redirecting to home");
-            navigate("/");
+            console.log(
+              "Defaulting to regular user - redirecting to previous page:",
+              previousPage
+            );
+            navigate(previousPage);
           }
         }
       } else {
