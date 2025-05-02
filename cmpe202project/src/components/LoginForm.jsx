@@ -58,6 +58,8 @@ function LoginForm() {
         refreshToken,
         role,
       };
+      console.log("Login response:", response.data);
+      console.log("User object:", user);
       // Store token and user info based on rememberMe preference
       const storage = rememberMe ? localStorage : sessionStorage;
       storage.setItem("authToken", user.accessToken);
@@ -69,14 +71,87 @@ function LoginForm() {
       // Set default authorization header for future requests
       axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
-      // Redirect logic - enhanced with email check as fallback
-      if (user?.role?.includes("ADMIN")) {
-        navigate("/admin/dashboard");
-      } else if (user?.role?.includes("RESTAURANT_MANAGER")) {
-        navigate("/manager/dashboard");
+      // Add this after setting the user in storage
+      console.log("User role type:", typeof user.role, "Value:", user.role);
+
+      // More detailed inspection to understand the role format
+      console.log("Role inspection:", {
+        isArray: Array.isArray(user.role),
+        stringified: JSON.stringify(user.role),
+        constructor: user.role.constructor.name,
+        prototype: Object.prototype.toString.call(user.role),
+      });
+
+      // Then replace your redirect logic with this more robust version
+      if (user && user.role) {
+        // Check if role is a string representation of an array like "['ROLE']"
+        if (
+          typeof user.role === "object" &&
+          !Array.isArray(user.role) &&
+          user.role.toString().includes("RESTAURANT_MANAGER")
+        ) {
+          console.log("Detected RESTAURANT_MANAGER role (special case)");
+          navigate("/manager/dashboard");
+          return;
+        }
+
+        // Check if role is a string
+        if (typeof user.role === "string") {
+          if (user.role.includes("ADMIN")) {
+            navigate("/admin/dashboard");
+          } else if (user.role.includes("RESTAURANT_MANAGER")) {
+            navigate("/manager/dashboard");
+          } else {
+            console.log("Regular user - redirecting to home");
+            navigate("/");
+          }
+        }
+        // Check if role is an array
+        else if (Array.isArray(user.role)) {
+          if (user.role.includes("ADMIN")) {
+            navigate("/admin/dashboard");
+          } else if (user.role.includes("RESTAURANT_MANAGER")) {
+            navigate("/manager/dashboard");
+          } else {
+            console.log("Regular user - redirecting to home");
+            navigate("/");
+          }
+        }
+        // Handle the specific case you're encountering
+        else {
+          console.warn("Unexpected role format:", user.role);
+
+          // Try to convert the role to a useful format
+          const roleStr = user.role.toString();
+          console.log("Role as string:", roleStr);
+
+          if (roleStr.includes("ADMIN")) {
+            navigate("/admin/dashboard");
+          } else if (roleStr.includes("RESTAURANT_MANAGER")) {
+            navigate("/manager/dashboard");
+          } else {
+            console.log("Defaulting to regular user - redirecting to home");
+            navigate("/");
+          }
+        }
       } else {
+        console.error("User or user role is undefined");
         navigate("/");
       }
+
+      // Force navigation if react-router navigate doesn't work
+      setTimeout(() => {
+        console.log("Checking if navigation occurred...");
+
+        if (
+          window.location.pathname !== "/manager/dashboard" &&
+          window.location.pathname !== "/admin/dashboard" &&
+          user.role.toString().includes("RESTAURANT_MANAGER")
+        ) {
+          console.log("Fallback navigation to manager dashboard");
+          window.location.href = "/manager/dashboard";
+        }
+      }, 1000);
     } catch (err) {
       let errorMessage = "Login failed. Please check your credentials.";
 

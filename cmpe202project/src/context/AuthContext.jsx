@@ -43,15 +43,21 @@ export const AuthProvider = ({ children }) => {
           originalRequest._retry = true;
 
           try {
-            // Try to refresh the token
-            const response = await axios.post(`${BASE_URL}/refresh`, {
+            const response = await axios.post(`${BASE_URL}/refreshToken`, {
               refreshToken: user.refreshToken,
             });
 
-            const { accessToken, refreshToken } = response.data;
+            const accessToken = response.data.token;
 
-            // Update user in state and storage
-            const newUser = { ...user, accessToken, refreshToken };
+            if (!accessToken) {
+              console.error("Invalid refresh response:", response.data);
+              logout();
+              return Promise.reject(
+                new Error("Invalid token refresh response")
+              );
+            }
+
+            const newUser = { ...user, accessToken };
             const storage = localStorage.getItem("user")
               ? localStorage
               : sessionStorage;
@@ -70,7 +76,7 @@ export const AuthProvider = ({ children }) => {
             originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
             return axios(originalRequest);
           } catch (refreshError) {
-            // If refresh token fails, logout user
+            console.error("Token refresh failed:", refreshError);
             logout();
             return Promise.reject(refreshError);
           }
