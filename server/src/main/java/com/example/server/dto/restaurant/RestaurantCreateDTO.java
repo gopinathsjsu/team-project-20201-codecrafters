@@ -53,6 +53,6 @@ public class RestaurantCreateDTO {
 
 
     @Min(value = 1, message = "Cost rating must be at least 1")
-    @Max(value = 4, message = "Cost rating must be at most 5")
+    @Max(value = 4, message = "Cost rating must be at most 4")
     private int costRating;
 }

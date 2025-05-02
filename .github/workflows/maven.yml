@@ -24,7 +24,7 @@ jobs:
     env:
       PROJECT_ID: cmpe202-456801
       CLUSTER_NAME: cmpe202
-      CLUSTER_ZONE: us-west1
+      CLUSTER_ZONE: us-central1
       SPRING_PROFILES_ACTIVE: production
 
     steps:
