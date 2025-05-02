@@ -56,16 +56,61 @@
 
 .restaurant-details .cuisine{
     margin: 10px;
+    transform: translateY(2px);
 }
 
 .restaurant-details .rating-container{
     font-size: larger;
 }
 
+.restaurant-address{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+.restaurant-hours{
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    border: #0E2840 1px solid;
+    border-radius: 10px;
+    padding: 20px;
+    margin-right: 20px;
+    font-size: larger;
+    align-self: center;
+}
+
+.current-status {
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  .open-now {
+    color: green;
+  }
+  
+  .closed-now {
+    color: #D33223;
+  }
+  
+  .today {
+    background-color: rgba(211, 50, 35, 0.1);
+    padding: 5px;
+    border-radius: 4px;
+  }
+  
+  .today-marker {
+    font-style: italic;
+    color: #D33223;
+  }
+
 .description-and-reservation{
     display: flex;
     margin-top: 30px;
-    justify-content: center;
+    justify-content: space-between;
     width: 100%;
 }
 
@@ -77,8 +122,9 @@
 }
 
 .description-and-reservation .reservation{
-    width: max-content;
-    padding: 25px;
+    width: 25%;
+    padding: 30px;
+    margin-right: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -110,14 +156,14 @@
 .photos-grid{
     display: flex;
     width: 95%;
-    height: 350px;
+    height: 500px;
     gap: 10px;
 }
 
 .photos-grid > :first-child{
-    width: 55%;
+    width: 130%;
     min-width: 500px;
-    height: 350px;
+    height: 100%;
     overflow: hidden;
 }
 

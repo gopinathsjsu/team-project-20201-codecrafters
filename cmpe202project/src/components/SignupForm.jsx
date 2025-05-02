@@ -51,7 +51,9 @@ function SignupForm() {
         console.error("Response Data:", error.response.data);
         alert(
           "Signup failed:\n" +
-            "Status: " + error.response.status + "\n" +
+            "Status: " +
+            error.response.status +
+            "\n" +
             "Details: " +
             (typeof error.response.data === "string"
               ? error.response.data
@@ -118,7 +120,7 @@ function SignupForm() {
             required
           >
             <option value="">Select Role</option>
-            <option value="CUSTOMER">Customer</option>
+            <option value="USER">Customer</option>
             <option value="RESTAURANT_MANAGER">Restaurant Owner</option>
           </select>
 
