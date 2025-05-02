@@ -2,13 +2,21 @@ import React, { useContext, useEffect, useState } from "react";
 import { ReservationContext } from "../context/ReservationContext";
 import SearchComponent from "../components/SearchComponent";
 import RestaurantBox from "../components/RestaurantBox";
-import RestaurantMap from "../components/RestaurantMap"; // Import the new component
-import { getRestaurants } from "../utils/apiCalls";
+import RestaurantMap from "../components/RestaurantMap";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { getRestaurants, useApiCall } from "../utils/apiCalls";
 import "../styles/SearchResultsPage.css";
 
 const SearchResultsPage = () => {
   const { numberOfGuests, searchTerm, setNumberOfGuests } =
     useContext(ReservationContext);
+
+  const {
+    data: allRestaurants,
+    isLoading: isDataLoading,
+    error,
+  } = useApiCall(getRestaurants);
+
   const [restaurants, setRestaurants] = useState([]);
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [allCuisines, setAllCuisines] = useState([]);
@@ -20,7 +28,7 @@ const SearchResultsPage = () => {
   const [showOpenOnly, setShowOpenOnly] = useState(false);
   const [viewMode, setViewMode] = useState("list");
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isMapLoading, setIsMapLoading] = useState(false);
 
   // Restaurant "open now" check function
   const isRestaurantOpen = (restaurant) => {
@@ -64,26 +72,32 @@ const SearchResultsPage = () => {
     );
   };
 
-  // Get restaurant data
-  const getRestaurantsData = async () => {
-    const allRestaurants = await getRestaurants();
+  // Process restaurant data when API response is received
+  useEffect(() => {
+    if (allRestaurants && Array.isArray(allRestaurants)) {
+      const validRestaurants = allRestaurants.filter((r) => r && r.id);
 
-    const sortedRestaurants = allRestaurants.sort((a, b) => {
-      const aMatches =
-        a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        a.cuisine.toLowerCase().includes(searchTerm.toLowerCase());
-      const bMatches =
-        b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.cuisine.toLowerCase().includes(searchTerm.toLowerCase());
+      const sortedRestaurants = validRestaurants.sort((a, b) => {
+        const aMatches =
+          (a.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ??
+            false) ||
+          (a.cuisine?.toLowerCase().includes(searchTerm?.toLowerCase()) ??
+            false);
+        const bMatches =
+          (b.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ??
+            false) ||
+          (b.cuisine?.toLowerCase().includes(searchTerm?.toLowerCase()) ??
+            false);
 
-      if (aMatches && !bMatches) return -1;
-      if (!aMatches && bMatches) return 1;
-      return 0;
-    });
+        if (aMatches && !bMatches) return -1;
+        if (!aMatches && bMatches) return 1;
+        return 0;
+      });
 
-    setRestaurants(sortedRestaurants);
-    setFilteredRestaurants(sortedRestaurants);
-  };
+      setRestaurants(sortedRestaurants);
+      setFilteredRestaurants(sortedRestaurants);
+    }
+  }, [allRestaurants, searchTerm]);
 
   // Apply filters function
   const applyFilters = () => {
@@ -209,7 +223,6 @@ const SearchResultsPage = () => {
     if (numberOfGuests === "") {
       setNumberOfGuests(1);
     }
-    getRestaurantsData();
   }, [numberOfGuests, setNumberOfGuests]);
 
   // Load Google Maps API
@@ -218,7 +231,7 @@ const SearchResultsPage = () => {
       !window.google &&
       !document.querySelector('script[src*="maps.googleapis"]')
     ) {
-      setIsLoading(true);
+      setIsMapLoading(true);
       const googleMapScript = document.createElement("script");
       googleMapScript.src = `https://maps.googleapis.com/maps/api/js?key=${
         import.meta.env.VITE_GOOGLE_MAPS_API_KEY
@@ -229,7 +242,7 @@ const SearchResultsPage = () => {
       // Set up callback function
       window.initMap = () => {
         setMapLoaded(true);
-        setIsLoading(false);
+        setIsMapLoading(false);
       };
 
       document.head.appendChild(googleMapScript);
@@ -246,10 +259,7 @@ const SearchResultsPage = () => {
   return (
     <main className="search-container">
       <div className="search-component-container">
-        <SearchComponent
-          horizontal={true}
-          onSearch={() => getRestaurantsData()}
-        />
+        <SearchComponent horizontal={true} />
         <div className="view-toggle">
           <button
             className="view-toggle-btn"
@@ -267,6 +277,7 @@ const SearchResultsPage = () => {
           </button>
         </div>
       </div>
+
       <div className="search-results-container">
         <div className="filters-container">
           <div className="filter-item open-now-filter">
@@ -397,32 +408,61 @@ const SearchResultsPage = () => {
         </div>
         <div className="results-container">
           {searchTerm && <h2>{`Results for "${searchTerm}"`}</h2>}
-          {viewMode === "list" ? (
-            <div className="restaurant-list">
-              {filteredRestaurants.length > 0 ? (
-                filteredRestaurants.map((restaurant, index) => (
-                  <RestaurantBox
-                    horizontal={true}
-                    key={index}
-                    {...restaurant}
-                  />
-                ))
-              ) : (
-                <div className="no-results">
-                  <p>No restaurants match your current filters.</p>
-                  <button onClick={clearAllFilters}>Clear all filters</button>
-                </div>
-              )}
+
+          {/* Loading spinner */}
+          {isDataLoading && (
+            <div className="loading-container">
+              <LoadingSpinner size="large" text="Finding restaurants..." />
             </div>
-          ) : (
-            <RestaurantMap
-              restaurants={filteredRestaurants}
-              isRestaurantOpen={isRestaurantOpen}
-              mapLoaded={mapLoaded}
-              onClearFilters={clearAllFilters}
-              isLoading={isLoading}
-              setIsLoading={setIsLoading}
-            />
+          )}
+
+          {/* Error message */}
+          {error && (
+            <div className="error-message">
+              <p>Error loading restaurants: {error}</p>
+              <button onClick={() => window.location.reload()}>
+                Try Again
+              </button>
+            </div>
+          )}
+
+          {/* Show content when loaded */}
+          {!isDataLoading && !error && (
+            <>
+              {viewMode === "list" ? (
+                <div className="restaurant-list">
+                  {filteredRestaurants.length > 0 ? (
+                    filteredRestaurants.map((restaurant, index) => (
+                      <RestaurantBox
+                        horizontal={true}
+                        key={
+                          restaurant.id
+                            ? `restaurant-${restaurant.id}`
+                            : `restaurant-${index}`
+                        }
+                        {...restaurant}
+                      />
+                    ))
+                  ) : (
+                    <div className="no-results">
+                      <p>No restaurants match your current filters.</p>
+                      <button onClick={clearAllFilters}>
+                        Clear all filters
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <RestaurantMap
+                  restaurants={filteredRestaurants}
+                  isRestaurantOpen={isRestaurantOpen}
+                  mapLoaded={mapLoaded}
+                  onClearFilters={clearAllFilters}
+                  isLoading={isMapLoading}
+                  setIsLoading={setIsMapLoading}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
