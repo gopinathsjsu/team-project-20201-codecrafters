@@ -12,6 +12,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReviewRespondDTO {
+    private String id;
+    private String restaurantId;
+    private String userId;
     private String email;
     private int rating;
     private String comment;

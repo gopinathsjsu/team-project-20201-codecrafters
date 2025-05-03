@@ -57,7 +57,9 @@ public class SecurityConfig {
                                 "/api/restaurants",
                                 "/api/restaurants/{id:[a-fA-F0-9]{24}}",
                                 "/api/restaurants/{id:[a-fA-F0-9]{24}}/availability",
-                                "/api/restaurants/{restaurantId:[a-fA-F0-9]{24}}/reviews")
+                                "/api/restaurants/{restaurantId:[a-fA-F0-9]{24}}/reviews",
+                                "/api/restaurants/{restaurantId:[a-fA-F0-9]{24}}/reservations/time-range",
+                                "/api/reservations/time-range")
                         .permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

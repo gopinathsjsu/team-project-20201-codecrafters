@@ -18,7 +18,9 @@ public interface ReservationRepository extends MongoRepository<Reservation, Stri
 
     List<Reservation> findByUser_Id(String userId);
 
-    List<Reservation> findAllByDateTimeBetween(LocalDateTime start, LocalDateTime end);
+List<Reservation> findAllByDateTimeBetween(LocalDateTime start, LocalDateTime end);
+
+List<Reservation> findAllByRestaurant_IdAndDateTimeBetween(String restaurantId, LocalDateTime start, LocalDateTime end);
 
     List<Reservation> findAllByRestaurant_IdAndDateTime(String restaurantId, LocalDateTime dateTime);
 
@@ -27,8 +29,6 @@ public interface ReservationRepository extends MongoRepository<Reservation, Stri
     boolean existsByUser_IdAndRestaurant_IdAndStatus(String userId, String restaurantId, ReservationStatus status);
 
     Optional<Reservation> findByIdAndUser(String id, UserInfo user);
-
-    Optional<Reservation> findByIdAndRestaurant(String id, Restaurant restaurant);
 
     @Query(value = "{ 'restaurant.$id': { $in: ?0 } }", delete = true)
     long deleteAllByRestaurantIds(List<ObjectId> restaurantIds);
