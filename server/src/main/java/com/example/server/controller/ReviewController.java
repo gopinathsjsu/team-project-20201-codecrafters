@@ -27,15 +27,15 @@ public class ReviewController {
     // Create Review
     @PostMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RESTAURANT_MANAGER')")
-        @Operation(summary = "Create a review", description = "Allows a user to create a review for a restaurant")
+    @Operation(summary = "Create a review", description = "Allows a user to create a review for a restaurant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Review created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid rating value"),
             @ApiResponse(responseCode = "403", description = "Access denied")
     })
     public ResponseEntity<?> createReview(@AuthenticationPrincipal UserInfoUserDetails userDetails,
-                                          @PathVariable String restaurantId,
-                                          @RequestBody ReviewRequestDTO dto) {
+            @PathVariable String restaurantId,
+            @RequestBody ReviewRequestDTO dto) {
         UserInfo user = userDetails.getUserInfo();
 
         if (dto.getRating() < 1 || dto.getRating() > 5) {
@@ -68,9 +68,9 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", description = "Review not found")
     })
     public ResponseEntity<?> updateReview(@AuthenticationPrincipal UserInfoUserDetails userDetails,
-                                          @PathVariable String restaurantId,
-                                          @PathVariable String reviewId,
-                                          @RequestBody ReviewRequestDTO dto) {
+            @PathVariable String restaurantId,
+            @PathVariable String reviewId,
+            @RequestBody ReviewRequestDTO dto) {
         UserInfo user = userDetails.getUserInfo();
         Review updatedReview = reviewService.updateReview(user.getId(), restaurantId, reviewId, dto);
         return ResponseEntity.ok(updatedReview);
@@ -86,8 +86,8 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", description = "Review not found")
     })
     public ResponseEntity<?> deleteReview(@AuthenticationPrincipal UserInfoUserDetails userDetails,
-                                          @PathVariable String restaurantId,
-                                          @PathVariable String reviewId) {
+            @PathVariable String restaurantId,
+            @PathVariable String reviewId) {
         UserInfo user = userDetails.getUserInfo();
         reviewService.deleteReview(user.getId(), restaurantId, reviewId);
         return ResponseEntity.noContent().build();

@@ -96,10 +96,13 @@ public class ReservationService {
     }
 
     public Optional<Reservation> findByIdAndRestaurantId(String id, String restaurantId) {
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
-        return reservationRepository.findByIdAndRestaurant(id, restaurant);
+        return reservationRepository.findById(id)
+            .filter(reservation -> reservation.getRestaurant().getId().equals(restaurantId))
+            .or(() -> {
+                throw new RuntimeException("The reservation does not belong to this restaurant");
+            });
     }
+    
 
     public List<Reservation> findAllByRestaurantId(String restaurantId, String userId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
@@ -108,7 +111,6 @@ public class ReservationService {
         if (!restaurant.getUserInfo().getId().equals(userId)) {
             throw new RuntimeException("User is not authorized to access this resource");
         }
-
         return reservationRepository.findByRestaurant_Id(restaurantId);
     }
 
@@ -123,9 +125,6 @@ public class ReservationService {
         });
     }
 
-    public List<Reservation> findAllByDateBetween(LocalDateTime startDate, LocalDateTime endDate) {
-        return reservationRepository.findAllByDateTimeBetween(startDate, endDate);
-    }
 
     public List<Reservation> getUpcomingReservations(String restaurantId) {
         LocalDateTime now = LocalDateTime.now();
@@ -174,4 +173,12 @@ public class ReservationService {
         reservationRepository.saveAll(list);
     }
 
+    public List<Reservation> findByTimeRange(LocalDateTime start, LocalDateTime end) {
+        return reservationRepository.findAllByDateTimeBetween(start, end);
+    }
+    
+    public List<Reservation> findByRestaurantAndTimeRange(
+        String restaurantId, LocalDateTime start, LocalDateTime end) {
+        return reservationRepository.findAllByRestaurant_IdAndDateTimeBetween(restaurantId, start, end);
+    }
 }

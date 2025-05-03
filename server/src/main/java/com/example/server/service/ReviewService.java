@@ -78,6 +78,9 @@ public class ReviewService {
         List<Review> reviews = reviewRepository.findByRestaurant_Id(restaurantId);
         return reviews.stream()
                 .map(r -> new ReviewRespondDTO(
+                        r.getId(),
+                        r.getRestaurant().getId(),
+                        r.getUser().getId(),
                         r.getUser().getEmail(),
                         r.getRating(),
                         r.getComment(),
@@ -87,9 +90,21 @@ public class ReviewService {
     }
 
     // Get all reviews by user
-    public List<Review> getReviewsByUser(String userId) {
-        return reviewRepository.findByUser_Id(userId);
+    public List<ReviewRespondDTO> getReviewsByUser(String userId) {
+        List<Review> reviews = reviewRepository.findByUser_Id(userId);
+        return reviews.stream()
+                .map(r -> new ReviewRespondDTO(
+                    r.getId(),
+                    r.getRestaurant().getId(),
+                    r.getUser().getId(),
+                    r.getUser().getEmail(),
+                    r.getRating(),
+                    r.getComment(),
+                    r.getCreatedAt(),
+                    r.getUpdatedAt()))
+                .collect(Collectors.toList());
     }
+    
 
     // Update Review
     public Review updateReview(String userId, String restaurantId, String reviewId, ReviewRequestDTO dto) {
@@ -106,7 +121,6 @@ public class ReviewService {
 
         // Update rating after update
         updateRestaurantRating(review.getRestaurant());
-
         return updated;
     }
 
