@@ -76,7 +76,7 @@ public class ReservationService {
         reservation.setStatus(ReservationStatus.PENDING);
         reservationRepository.save(reservation);
         // Send reservation message to RabbitMQ
-        sendConfirmationSms("+18777804236", reservation);
+        sendConfirmationSms("+18777804236", reservation, ReservationStatus.PENDING);
         return reservation;
     }
 
@@ -97,20 +97,15 @@ public class ReservationService {
 
     public Optional<Reservation> findByIdAndRestaurantId(String id, String restaurantId) {
         return reservationRepository.findById(id)
-            .filter(reservation -> reservation.getRestaurant().getId().equals(restaurantId))
-            .or(() -> {
-                throw new RuntimeException("The reservation does not belong to this restaurant");
-            });
+                .filter(reservation -> reservation.getRestaurant().getId().equals(restaurantId))
+                .or(() -> {
+                    throw new RuntimeException("The reservation does not belong to this restaurant");
+                });
     }
-    
 
     public List<Reservation> findAllByRestaurantId(String restaurantId, String userId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
-
-        if (!restaurant.getUserInfo().getId().equals(userId)) {
-            throw new RuntimeException("User is not authorized to access this resource");
-        }
         return reservationRepository.findByRestaurant_Id(restaurantId);
     }
 
@@ -121,10 +116,10 @@ public class ReservationService {
     public void updateStatus(String id, ReservationStatus status) {
         reservationRepository.findById(id).ifPresent(reservation -> {
             reservation.setStatus(status);
+            sendConfirmationSms("+18777804236", reservation, status);
             reservationRepository.save(reservation);
         });
     }
-
 
     public List<Reservation> getUpcomingReservations(String restaurantId) {
         LocalDateTime now = LocalDateTime.now();
@@ -148,14 +143,26 @@ public class ReservationService {
         return totalGuest + reservationCreateDTO.getPartySize() <= restaurant.getCapacity();
     }
 
-    private void sendConfirmationSms(String toPhoneNumber, Reservation reservation) {
+    private void sendConfirmationSms(String toPhoneNumber, Reservation reservation, ReservationStatus status) {
         String formattedDate = reservation.getDateTime().toLocalDate().format(DATE_FORMATTER);
         String formattedTime = reservation.getDateTime().toLocalTime().format(TIME_FORMATTER);
 
-        String message = String.format(
-                "Hi %s, your reservation on %s at %s for %d people is created.",
-                reservation.getUser().getEmail(), formattedDate, formattedTime, reservation.getPartySize());
+        String message;
 
+        switch (status) {
+            case PENDING:
+                message = String.format(
+                        "Hi %s, your reservation on %s at %s for %d people is created.",
+                        reservation.getUser().getEmail(), formattedDate, formattedTime, reservation.getPartySize());
+                break;
+            case CANCELLED:
+                message = String.format(
+                        "Hi %s, your reservation on %s at %s for %d people has been cancelled.",
+                        reservation.getUser().getEmail(), formattedDate, formattedTime, reservation.getPartySize());
+                break;
+            default:
+                message = "Hi, there is an update regarding your reservation.";
+        }
         Message.creator(
                 new PhoneNumber(toPhoneNumber),
                 new PhoneNumber(fromPhoneNumber),
@@ -176,9 +183,9 @@ public class ReservationService {
     public List<Reservation> findByTimeRange(LocalDateTime start, LocalDateTime end) {
         return reservationRepository.findAllByDateTimeBetween(start, end);
     }
-    
+
     public List<Reservation> findByRestaurantAndTimeRange(
-        String restaurantId, LocalDateTime start, LocalDateTime end) {
+            String restaurantId, LocalDateTime start, LocalDateTime end) {
         return reservationRepository.findAllByRestaurant_IdAndDateTimeBetween(restaurantId, start, end);
     }
 }
