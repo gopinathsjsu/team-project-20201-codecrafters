@@ -18,24 +18,25 @@ function RestaurantTable() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(
-        `${BASE_URL}/api/restaurants`
-      );
+      const response = await fetch(`${BASE_URL}/api/restaurants`);
       if (!response.ok) {
         throw new Error("Failed to fetch restaurants");
       }
       const data = await response.json();
-      const formattedData = data.map((restaurant, index) => ({
-        id: restaurant.id || index + 1,
-        name: restaurant.name || "Unnamed Restaurant",
-        location: restaurant.address || "Location not specified",
-        phone: restaurant.phone || "No phone provided",
-        selected: false,
-      }));
+      const formattedData = data.map((item, index) => {
+        const restaurant = item.restaurant || {};
+        return {
+          id: restaurant.id || index + 1,
+          name: restaurant.name || "Unnamed Restaurant",
+          location: restaurant.address || "Location not specified",
+          phone: restaurant.phone || "No phone provided",
+          selected: false,
+        };
+      });
       setRestaurants(formattedData);
+      setLoading(false);
     } catch (err) {
-      setError(err.message);
-    } finally {
+      setError(err.message || "Failed to fetch restaurants");
       setLoading(false);
     }
   };
