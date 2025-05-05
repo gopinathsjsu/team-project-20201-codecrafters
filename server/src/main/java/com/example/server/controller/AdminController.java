@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.server.config.UserInfoUserDetails;
+import com.example.server.dto.reservation.ReservationResponseDTO;
 import com.example.server.entity.Restaurant;
+import com.example.server.service.ReservationService;
 import com.example.server.service.RestaurantService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +29,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 public class AdminController {
     @Autowired
     private RestaurantService restaurantService;
+
+    @Autowired
+    private ReservationService reservationService;
 
     @DeleteMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -65,6 +70,17 @@ public class AdminController {
             @RequestParam boolean approved) {
         List<Restaurant> restaurant = restaurantService.approveRestaurants(ids, approved);
         return ResponseEntity.ok(restaurant);
+    }
+
+    @GetMapping("/reservations")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get all reservations", description = "Admin can monitor all reservations in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Fetched Reservations successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<List<ReservationResponseDTO>> getReservations() {
+        return ResponseEntity.ok(reservationService.findAll());
     }
 
 }
