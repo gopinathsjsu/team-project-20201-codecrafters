@@ -32,18 +32,6 @@ public class ReservationController {
         @Autowired
         private ReservationService reservationService;
 
-        @GetMapping("/reservations")
-        @PreAuthorize("hasRole('ADMIN')")
-        @Operation(summary = "Get all reservations", description = "Admin can monitor all reservations in the system")
-        @ApiResponses(value = {
-                @ApiResponse(responseCode = "200", description = "Fetched Reservations successfully"),
-                @ApiResponse(responseCode = "403", description = "Access denied")
-        })
-        public ResponseEntity<List<ReservationResponseDTO>> getReservations() {
-                return ResponseEntity.ok(reservationService.findAll());
-        }
-
-
         // User book a reservation
         @PostMapping("/restaurants/{restaurantId}/reservations")
         @PreAuthorize("hasRole('USER')")
