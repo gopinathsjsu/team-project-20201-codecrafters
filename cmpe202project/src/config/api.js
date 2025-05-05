@@ -1,1 +1,1 @@
-export const BASE_URL = "https://team-project-20201-codecrafters-production.up.railway.app";
+export const BASE_URL = "http://34.27.137.104/"";
