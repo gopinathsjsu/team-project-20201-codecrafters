@@ -179,16 +179,25 @@ function ReservationTable() {
                 </div>
               </div>
               
+                
               <div className={styles.tableCell} style={{ width: '160px', color: "#000000" }}>
-                {new Date(reservation.dateTime).toLocaleString([], {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
+                <div className={styles.dateTimeCell}>
+                  <div className={styles.datePart}>
+                    {new Date(reservation.dateTime).toLocaleDateString([], {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </div>
+                  <div className={styles.timePart}>
+                    {new Date(reservation.dateTime).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                </div>
               </div>
-              
+                            
               <div className={styles.tableCell} style={{ width: '90px', color: "#000000" }}>
                 {reservation.partySize}
               </div>
