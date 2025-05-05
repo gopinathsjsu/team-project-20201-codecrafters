@@ -1,5 +1,6 @@
 package com.example.server.service;
 
+import com.example.server.dto.reservation.ReservationResponseDTO;
 import com.example.server.exception.ResourceNotFoundException;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
@@ -24,6 +25,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -187,5 +189,18 @@ public class ReservationService {
     public List<Reservation> findByRestaurantAndTimeRange(
             String restaurantId, LocalDateTime start, LocalDateTime end) {
         return reservationRepository.findAllByRestaurant_IdAndDateTimeBetween(restaurantId, start, end);
+    }
+
+    public List<ReservationResponseDTO> findAll() {
+        return reservationRepository.findAll().stream().map(r -> {
+            ReservationResponseDTO reservation = new ReservationResponseDTO();
+            reservation.setId(r.getId());
+            reservation.setEmail(r.getUser().getEmail());
+            reservation.setRestaurantId(r.getRestaurant().getId());
+            reservation.setDateTime(r.getDateTime());
+            reservation.setPartySize(r.getPartySize());
+            reservation.setStatus(r.getStatus());
+            return reservation;
+        }).collect(Collectors.toList());
     }
 }
