@@ -916,7 +916,6 @@
 
 
 /* table format */
-/* Add to your Dashboard.module.css */
 .tableWrapper {
   width: 100%;
   overflow-x: auto;
@@ -994,4 +993,27 @@
   .reservationsTable {
     min-width: 1100px;
   }
+}
+
+/* Add to your Dashboard.module.css */
+.dateTimeCell {
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+}
+
+.datePart {
+  font-size: 0.9em;
+}
+
+.timePart {
+  font-size: 0.85em;
+  color: #666;
+}
+
+/* Ensure table cells don't wrap */
+.tableCell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
