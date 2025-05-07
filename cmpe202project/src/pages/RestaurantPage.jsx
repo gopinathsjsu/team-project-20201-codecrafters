@@ -11,6 +11,7 @@ import {
   getRestaurantReviews,
   reviewRestaurant,
   deleteReview,
+  updateReview,
 } from "../utils/apiCalls";
 import HoursOfOperation from "../components/HoursOfOperation";
 import { useAuth } from "../context/AuthContext";
@@ -172,10 +173,25 @@ const RestaurantPage = () => {
     }
 
     try {
-      const response = await reviewRestaurant(restaurantData.id, {
+      let response;
+
+      // Review data to send
+      const reviewData = {
         rating: selectedRating,
         comment: reviewText.trim(),
-      });
+      };
+
+      if (isEditingReview && userReview && userReview.id) {
+        // Update existing review
+        response = await updateReview(
+          restaurantData.id,
+          userReview.id,
+          reviewData
+        );
+      } else {
+        // Create new review
+        response = await reviewRestaurant(restaurantData.id, reviewData);
+      }
 
       if (response) {
         // Fetch updated reviews
@@ -198,6 +214,7 @@ const RestaurantPage = () => {
 
         // Update user review status
         setUserReview({
+          ...userReview,
           email: user.email,
           rating: selectedRating,
           comment: reviewText.trim(),
