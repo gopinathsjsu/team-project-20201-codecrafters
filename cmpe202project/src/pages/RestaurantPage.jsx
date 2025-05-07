@@ -10,6 +10,7 @@ import {
   getRestaurantById,
   getRestaurantReviews,
   reviewRestaurant,
+  deleteReview,
 } from "../utils/apiCalls";
 import HoursOfOperation from "../components/HoursOfOperation";
 import { useAuth } from "../context/AuthContext";
@@ -68,6 +69,7 @@ const RestaurantPage = () => {
           }
 
           const fetchedData = await getRestaurantById(restaurantId);
+          console.log("Fetched data:", fetchedData);
 
           // Check if fetchedData contains an error property
           if (fetchedData.error) {
@@ -118,6 +120,7 @@ const RestaurantPage = () => {
     const fetchReviews = async () => {
       if (restaurantData.id) {
         const reviewsData = await getRestaurantReviews(restaurantData.id);
+        console.log("raw reviews data:", reviewsData);
 
         // Calculate average rating correctly
         let totalRating = 0;
@@ -210,6 +213,51 @@ const RestaurantPage = () => {
     } catch (error) {
       console.error("Error submitting review:", error);
       alert("Failed to submit review. Please try again.");
+    }
+  };
+
+  const handleDeleteReview = async () => {
+    if (!userReview || !userReview.id) {
+      alert("Cannot delete review: Review ID not found");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete your review?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await deleteReview(restaurantData.id, userReview.id);
+
+      // Fetch updated reviews after deletion
+      const updatedReviews = await getRestaurantReviews(restaurantData.id);
+
+      // Recalculate average rating
+      let totalRating = 0;
+      updatedReviews.forEach((review) => {
+        totalRating += review.rating || 0;
+      });
+      const newAverageRating =
+        updatedReviews.length > 0 ? totalRating / updatedReviews.length : 0;
+
+      // Update state
+      setRestaurantData((prevData) => ({
+        ...prevData,
+        reviews: updatedReviews,
+        rating: newAverageRating,
+      }));
+
+      // Reset review form
+      setUserReview(null);
+      setSelectedRating(0);
+      setReviewText("");
+      setIsEditingReview(false);
+
+      alert("Your review has been deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      alert("Failed to delete review. Please try again.");
     }
   };
 
@@ -450,9 +498,20 @@ const RestaurantPage = () => {
               onChange={handleReviewTextChange}
               value={reviewText}
             ></textarea>
-            <button className="submit-review-btn" type="submit">
-              {isEditingReview ? "Update Review" : "Submit Review"}
-            </button>
+            <div className="review-buttons">
+              <button className="submit-review-btn" type="submit">
+                {isEditingReview ? "Update Review" : "Submit Review"}
+              </button>
+              {isEditingReview && (
+                <button
+                  className="delete-review-btn"
+                  type="button"
+                  onClick={handleDeleteReview}
+                >
+                  Delete Review
+                </button>
+              )}
+            </div>
           </form>
         ) : (
           <div className="login-to-review">
