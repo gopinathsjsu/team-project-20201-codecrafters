@@ -2,7 +2,7 @@ import axios from "axios";
 import { BASE_URL } from "../config/api.js";
 import { useState, useEffect } from "react";
 
-const getAuthToken = () => {
+export const getAuthToken = () => {
   try {
     const user = JSON.parse(sessionStorage.getItem("user") || "{}");
     if (!user.accessToken) {
@@ -16,7 +16,7 @@ const getAuthToken = () => {
 };
 
 // Consider a more centralized auth check
-const checkAuthentication = () => {
+export const checkAuthentication = () => {
   const token = getAuthToken();
   if (!token) {
     throw new Error("Authentication required for this operation");
@@ -24,7 +24,7 @@ const checkAuthentication = () => {
   return token;
 };
 
-const getRestaurants = async () => {
+export const getRestaurants = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/api/restaurants`);
     console.log("Raw API response:", response.data);
@@ -52,7 +52,7 @@ const getRestaurants = async () => {
   }
 };
 
-const getRestaurantById = async (id) => {
+export const getRestaurantById = async (id) => {
   try {
     const response = await axios.get(`${BASE_URL}/api/restaurants/${id}`);
     console.log(`Raw restaurant data for ID ${id}:`, response.data);
@@ -132,7 +132,7 @@ const getRestaurantById = async (id) => {
   }
 };
 
-const reviewRestaurant = async (id, reviewData) => {
+export const reviewRestaurant = async (id, reviewData) => {
   try {
     // Validate rating
     if (reviewData.rating < 1 || reviewData.rating > 5) {
@@ -173,7 +173,7 @@ const reviewRestaurant = async (id, reviewData) => {
   }
 };
 
-const getRestaurantReviews = async (id) => {
+export const getRestaurantReviews = async (id) => {
   try {
     const response = await axios.get(
       `${BASE_URL}/api/restaurants/${id}/reviews`
@@ -188,7 +188,7 @@ const getRestaurantReviews = async (id) => {
   }
 };
 
-const confirmReservation = async (id, reservationData) => {
+export const confirmReservation = async (id, reservationData) => {
   try {
     const token = checkAuthentication();
     if (!token) {
@@ -240,8 +240,35 @@ export const deleteReview = async (restaurantId, reviewId) => {
   }
 };
 
+export const updateReview = async (restaurantId, reviewId, reviewData) => {
+  try {
+    const token = checkAuthentication();
+
+    const formattedReviewData = {
+      rating: reviewData.rating,
+      comment: reviewData.comment || "",
+    };
+
+    const response = await axios.put(
+      `${BASE_URL}/api/restaurants/${restaurantId}/reviews/${reviewId}`,
+      formattedReviewData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating review:", error);
+    throw error;
+  }
+};
+
 // Custom hook for API calls with loading state
-const useApiCall = (apiFunction, ...args) => {
+export const useApiCall = (apiFunction, ...args) => {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -277,13 +304,4 @@ const useApiCall = (apiFunction, ...args) => {
   }, [apiFunction, ...args]);
 
   return { data, isLoading, error, refetch: () => setIsLoading(true) };
-};
-
-export {
-  getRestaurants,
-  getRestaurantById,
-  reviewRestaurant,
-  confirmReservation,
-  getRestaurantReviews,
-  useApiCall,
 };
