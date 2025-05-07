@@ -219,6 +219,27 @@ const confirmReservation = async (id, reservationData) => {
   }
 };
 
+export const deleteReview = async (restaurantId, reviewId) => {
+  try {
+    const token = checkAuthentication();
+
+    const response = await axios.delete(
+      `${BASE_URL}/api/restaurants/${restaurantId}/reviews/${reviewId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    throw error;
+  }
+};
+
 // Custom hook for API calls with loading state
 const useApiCall = (apiFunction, ...args) => {
   const [data, setData] = useState(null);
