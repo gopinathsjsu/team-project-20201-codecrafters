@@ -52,7 +52,8 @@ const ReservationsPage = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log("Fetched reservations:", response.data);
+
+        console.log("Raw API response:", response.data);
 
         if (!Array.isArray(response.data)) {
           throw new Error("Unexpected API response format");
@@ -105,12 +106,13 @@ const ReservationsPage = () => {
           };
 
           formattedReservations.push({
-            id: `${reservation.restaurantId}-${pacificDate}-${pacificTime}`,
+            id: reservation.id,
             restaurantId: reservation.restaurantId,
             restaurantName: restaurant.name,
             restaurantAddress: restaurant.address,
             date: pacificDate,
             time: pacificTime,
+            rawDateTime: reservation.dateTime,
             // Store the full date object for easier comparison
             fullDateTime: pacificDateTime,
             partySize: reservation.partySize,
@@ -133,36 +135,45 @@ const ReservationsPage = () => {
 
   const cancelReservation = async (reservation) => {
     console.log("Canceling reservation with ID:", reservation);
-    // Extract restaurant ID, date, and time from the composite ID
-    // const [restaurantId, date, time] = compositeId.split("-");
 
-    // if (!restaurantId || !date || !time) {
-    //   alert("Invalid reservation information");
-    //   return;
-    // }
+    if (window.confirm("Are you sure you want to cancel this reservation?")) {
+      try {
+        const token = sessionStorage.getItem("authToken");
+        console.log("Canceling reservation with token:", token);
 
-    // if (window.confirm("Are you sure you want to cancel this reservation?")) {
-    //   try {
-    //     const token = sessionStorage.getItem("authToken");
+        if (token) {
+          const response = await axios.put(
+            `${BASE_URL}/api/restaurants/${reservation.restaurantId}/reservations/${reservation.id}`,
+            {
+              dateTime: reservation.rawDateTime,
+              email: reservation.email,
+              id: reservation.id,
+              partySize: reservation.partySize,
+              restaurantId: reservation.restaurantId,
+              status: "CANCELLED",
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          console.log("Cancellation response:", response.data);
 
-    //     await axios.delete(`${BASE_URL}/api/reservations`, {
-    //       headers: {
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //       data: {
-    //         restaurantId: restaurantId,
-    //         date: date,
-    //         time: time,
-    //       },
-    //     });
-
-    //     // Update the list after cancellation
-    //     setReservations(reservations.filter((res) => res.id !== compositeId));
-    //   } catch (err) {
-    //     console.error("Error canceling reservation:", err);
-    //     alert("Failed to cancel reservation. Please try again.");
-    //   }
-    // }
+          setReservations((prev) =>
+            prev.filter((res) => res.id !== reservation.id)
+          );
+        } else {
+          alert("You must be logged in to cancel a reservation.");
+          navigate("/login", { state: { from: "/reservations" } });
+          return;
+        }
+      } catch (err) {
+        console.error("Error canceling reservation:", err);
+        alert("Failed to cancel reservation. Please try again.");
+      }
+    }
   };
 
   // Filter reservations based on active tab
@@ -273,7 +284,13 @@ const ReservationsPage = () => {
         <div className="reservations-list">
           {filteredReservations.map((reservation) => (
             <div key={reservation.id} className="reservation-card">
-              <div className="restaurant-info">
+              <div
+                className="restaurant-info"
+                title="Click to view restaurant details"
+                onClick={() =>
+                  navigate(`/restaurant/${reservation.restaurantId}`)
+                }
+              >
                 <h2>{reservation.restaurantName}</h2>
                 <p className="address">{reservation.restaurantAddress}</p>
               </div>
@@ -288,21 +305,18 @@ const ReservationsPage = () => {
                 <p className="party-size">
                   <strong>Party Size:</strong> {reservation.partySize} people
                 </p>
-                <p className="confirmation">
-                  <strong>Confirmation #:</strong> {reservation.id}
-                </p>
               </div>
 
               {activeTab === "upcoming" && (
                 <div className="reservation-actions">
-                  <button
+                  {/* <button
                     className="modify-btn"
                     onClick={() =>
                       navigate(`/reservation/${reservation.id}/edit`)
                     }
                   >
                     Modify
-                  </button>
+                  </button> */}
                   <button
                     className="cancel-btn"
                     onClick={() => cancelReservation(reservation)}
