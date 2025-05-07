@@ -1,128 +1,255 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import styles from "../styles/Dashboard.module.css";
-import { BASE_URL } from "../config/api"; // Adjust the import path as necessary
+import { BASE_URL } from "../config/api";
 
 function ReservationTable() {
-  const [restaurants, setRestaurants] = useState([]);
+  const [allReservations, setAllReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  
+  // Calculate date range for last month
+  const getLastMonthRange = () => {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    return { start: firstDayOfMonth, end: lastDayOfMonth };
+  };
+  
+  // Filter reservations from last month
+  const filterLastMonthReservations = (reservations) => {
+    const { start, end } = getLastMonthRange();
+    return reservations.filter(reservation => {
+      const reservationDate = new Date(reservation.dateTime);
+      return reservationDate >= start && reservationDate <= end;
+    });
+  };
+  
+  const lastMonthReservations = filterLastMonthReservations(allReservations);
+  
   useEffect(() => {
-    const fetchRestaurants = async () => {
+    const fetchReservations = async () => {
       try {
-        const response = await fetch(
-          `${BASE_URL}/api/restaurants`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch restaurants");
+        setLoading(true);
+        setError(null);
+        
+        const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+        
+        if (!token) {
+          throw new Error("Authorization token not found");
         }
-        const data = await response.json();
-        setRestaurants(data);
+        
+        const response = await axios.get(
+          `${BASE_URL}/api/admin/restaurants/reservations`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        
+        setAllReservations(response.data);
       } catch (err) {
-        setError(err.message);
+        if (err.response) {
+          switch (err.response.status) {
+            case 401:
+              setError("Session expired. Please log in again.");
+              break;
+            case 403:
+              setError("You don't have permission to view reservations.");
+              break;
+            default:
+              setError(`Server error: ${err.response.status}`);
+          }
+        } else {
+          setError(err.message);
+        }
       } finally {
         setLoading(false);
       }
     };
-
-    fetchRestaurants();
+    
+    fetchReservations();
   }, []);
-
+  
+  // Calculate statistics for last month only
+  const totalReservations = lastMonthReservations.length;
+  const cancelledReservations = lastMonthReservations.filter(
+    res => res.status === "CANCELLED"
+  ).length;
+  const completedReservations = lastMonthReservations.filter(
+    res => res.status === "COMPLETED"
+  ).length;
+  
+  const refreshData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      
+      if (!token) {
+        throw new Error("Authorization token not found");
+      }
+      
+      const response = await axios.get(
+        `${BASE_URL}/api/admin/restaurants/reservations`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+      setAllReservations(response.data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   if (loading) {
-    return <div>Loading restaurants...</div>;
+    return <div className={styles.loading}>Loading reservation data...</div>;
   }
-
+  
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className={styles.error}>Error: {error}</div>;
   }
-
+  
   return (
-    <article className={styles.topStore}>
-      <div className={styles.div11}>
-        {/* Table Header */}
-        <div className={styles.div}>
-          <div className={styles.column3}>
-            <div className={styles.div12}>
-              <h2 className={styles.reservation}>Restaurants</h2>
-              <p className={styles.restaurantname}>Restaurant name</p>
-            </div>
-          </div>
-          <div className={styles.column4}>
-            <h3 className={styles.address}>Address</h3>
-          </div>
-          <div className={styles.column5}>
-            <div className={styles.div13}>
-              <h3 className={styles.customer}>Cuisine Type</h3>
-              <div className={styles.div14}>
-                <button className={styles.share}>Share</button>
-                <time className={styles.date}>Phone Number</time>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Restaurant Data Rows */}
-        {restaurants.map((restaurant) => (
-          <div
-            key={restaurant.id}
-            className={styles.div}
-            style={{ marginTop: "20px" }}
-          >
-            <div className={styles.column3}>
-              <div className={styles.div12}>
-                <p
-                  className={styles.restaurantname}
-                  style={{ marginTop: "0", fontWeight: "normal" }}
-                >
-                  {restaurant.name}
-                </p>
-              </div>
-            </div>
-            <div className={styles.column4}>
-              <p
-                style={{
-                  color: "#000",
-                  textAlign: "center",
-                  fontFamily:
-                    "Inter, -apple-system, Roboto, Helvetica, sans-serif",
-                  fontSize: "14px",
-                  fontWeight: "normal",
-                }}
-              >
-                {restaurant.address}
-              </p>
-            </div>
-            <div className={styles.column5}>
-              <div
-                className={styles.div13}
-                style={{ justifyContent: "space-between" }}
-              >
-                <p
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "normal",
-                    marginTop: "0",
-                  }}
-                >
-                  {restaurant.cuisine || "N/A"}
-                </p>
-                <div className={styles.div14}>
-                  <time
-                    style={{
-                      alignSelf: "center",
-                      fontSize: "14px",
-                      color: "#666",
-                    }}
-                  >
-                    {restaurant.phone || "N/A"}
-                  </time>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+    <div className={styles.topStore}>
+    <div className={styles.headerRow}>
+    <h2 style={{ color: "#000000" }}>Reservation Overview (Last Month)</h2>
+    <button 
+    className={styles.refreshButton}
+    onClick={refreshData}
+    disabled={loading}
+    >
+    {loading ? 'Refreshing...' : 'Refresh Data'}
+    </button>
+    </div>
+    
+    <div className={styles.statsContainer} style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+    <div className={styles.statCard}>
+    <h3 style={{ color: "#000000" }}>Total Reservations</h3>
+    <p className={styles.statNumber} style={{ color: "#000000" }}>
+    {totalReservations}
+    </p>
+    </div>
+    
+    <div className={styles.statCard}>
+    <h3 style={{ color: "#2196F3" }}>Completed</h3>
+    <p className={styles.statNumber} style={{ color: "#2196F3" }}>
+    {completedReservations}
+    </p>
+    </div>
+    
+    <div className={styles.statCard}>
+    <h3 style={{ color: "#F44336" }}>Cancelled</h3>
+    <p className={styles.statNumber} style={{ color: "#F44336" }}>
+    {cancelledReservations}
+    </p>
+    {totalReservations > 0 && (
+      <p className={styles.statSubtext}>
+      ({((cancelledReservations / totalReservations) * 100).toFixed(1)}% cancellation rate)
+      </p>
+    )}
+    </div>
+    </div>
+    
+    <div className={styles.tableHeaderRow}>
+    <h3 style={{ color: "#000000" }}>Recent Reservations (Last Month)</h3>
+    <div className={styles.resultsCount}>
+    Showing {Math.min(lastMonthReservations.length, 10)} of {lastMonthReservations.length} reservations
+    </div>
+    </div>
+    
+    <div className={styles.tableWrapper}>
+    <div className={styles.reservationsTable} style={{ minWidth: '1000px' }}>
+    <div className={styles.tableHeader}>
+    <div className={styles.tableCell} style={{ width: '150px', color: "#000000", fontWeight: "600" }}>Restaurant</div>
+    <div className={styles.tableCell} style={{ width: '180px', color: "#000000", fontWeight: "600" }}>Customer</div>
+    <div className={styles.tableCell} style={{ width: '160px', color: "#000000", fontWeight: "600" }}>Date/Time</div>
+    <div className={styles.tableCell} style={{ width: '90px', color: "#000000", fontWeight: "600" }}>Party Size</div>
+    <div className={styles.tableCell} style={{ width: '110px', color: "#000000", fontWeight: "600" }}>Status</div>
+    <div className={styles.tableCell} style={{ width: '130px', color: "#000000", fontWeight: "600" }}>Contact</div>
+    <div className={styles.tableCell} style={{ width: '180px', color: "#000000", fontWeight: "600" }}>Special Requests</div>
+    </div>
+    
+    {lastMonthReservations.slice(0, 10).map(reservation => (
+      <div key={reservation.id} className={styles.tableRow}>
+      <div className={styles.tableCell} style={{ width: '150px' }}>
+      <div className={styles.restaurantCell}>
+      {reservation.restaurant?.name || (
+        <span className={styles.restaurantId}>ID: {reservation.restaurantId}</span>
+      )}
       </div>
-    </article>
+      </div>
+      
+      <div className={styles.tableCell} style={{ width: '180px', color: "#000000" }}>
+      <div className={styles.customerCell}>
+      {reservation.customer?.name || 'Guest'}
+      {reservation.customerEmail && (
+        <div className={styles.customerEmail}>{reservation.customerEmail}</div>
+      )}
+      </div>
+      </div>
+      
+      <div className={styles.tableCell} style={{ width: '160px', color: "#000000" }}>
+      <div className={styles.dateTimeCell}>
+      <div className={styles.datePart}>
+      {new Date(reservation.dateTime).toLocaleDateString([], {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })}
+      </div>
+      <div className={styles.timePart}>
+      {new Date(reservation.dateTime).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })}
+      </div>
+      </div>
+      </div>
+      
+      <div className={styles.tableCell} style={{ width: '90px', color: "#000000" }}>
+      {reservation.partySize}
+      </div>
+      
+      <div className={styles.tableCell} style={{ width: '110px' }}>
+      <span 
+      className={styles.statusBadge}
+      style={{
+        backgroundColor:
+        reservation.status === "CANCELLED" ? '#FFEBEE' :
+        reservation.status === "COMPLETED" ? '#E8F5E9' : '#F5F5F5',
+        color:
+        reservation.status === "CANCELLED" ? '#F44336' :
+        reservation.status === "COMPLETED" ? '#4CAF50' : '#9E9E9E'
+      }}
+      >
+      {reservation.status}
+      </span>
+      </div>
+      
+      <div className={styles.tableCell} style={{ width: '130px', color: "#000000" }}>
+      {reservation.phoneNumber || 'N/A'}
+      </div>
+      
+      <div className={styles.tableCell} style={{ width: '180px', color: "#000000" }}>
+      <div className={styles.specialRequests}>
+      {reservation.specialRequests || 'None'}
+      </div>
+      </div>
+      </div>
+    ))}
+    </div>
+    </div>
+    </div>
   );
 }
 
