@@ -7,6 +7,8 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState(0);
 
   // Load user from storage on initial render
   useEffect(() => {
@@ -29,20 +31,28 @@ export const AuthProvider = ({ children }) => {
 
   // Setup axios interceptor for token refresh
   useEffect(() => {
+    // Skip interceptor setup if no user
+    if (!user) return;
+
     const interceptor = axios.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
 
-        // If error is 401 (Unauthorized) and we haven't tried to refresh the token yet
+        // Check if error is 401, we're not already refreshing, and we haven't tried refreshing this request
         if (
           error.response?.status === 401 &&
           !originalRequest._retry &&
-          user?.refreshToken
+          user?.refreshToken &&
+          !isRefreshing &&
+          // Add a cooling period - no more than one refresh every 5 seconds
+          Date.now() - lastRefreshTime > 5000
         ) {
           originalRequest._retry = true;
+          setIsRefreshing(true);
 
           try {
+            console.log("Attempting to refresh token...");
             const response = await axios.post(`${BASE_URL}/refreshToken`, {
               refreshToken: user.refreshToken,
             });
@@ -52,10 +62,14 @@ export const AuthProvider = ({ children }) => {
             if (!accessToken) {
               console.error("Invalid refresh response:", response.data);
               logout();
+              setIsRefreshing(false);
               return Promise.reject(
                 new Error("Invalid token refresh response")
               );
             }
+
+            // Update timestamps and state
+            setLastRefreshTime(Date.now());
 
             const newUser = { ...user, accessToken };
             const storage = localStorage.getItem("user")
@@ -72,16 +86,23 @@ export const AuthProvider = ({ children }) => {
             // Update user in state
             setUser(newUser);
 
-            // Retry the original request with new token
+            // Update the authorization header for the original request
             originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+
+            // Reset refreshing flag
+            setIsRefreshing(false);
+
+            // Retry the original request
             return axios(originalRequest);
           } catch (refreshError) {
             console.error("Token refresh failed:", refreshError);
+            setIsRefreshing(false);
             logout();
             return Promise.reject(refreshError);
           }
         }
 
+        // If we already tried refreshing or there's another issue, reject the promise
         return Promise.reject(error);
       }
     );
@@ -90,7 +111,7 @@ export const AuthProvider = ({ children }) => {
       // Clean up interceptor when component unmounts
       axios.interceptors.response.eject(interceptor);
     };
-  }, [user]);
+  }, [user, isRefreshing, lastRefreshTime]);
 
   const login = async (email, password, rememberMe) => {
     const response = await axios.post(
