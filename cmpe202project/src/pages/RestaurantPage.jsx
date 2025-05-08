@@ -173,6 +173,18 @@ const RestaurantPage = () => {
     }
 
     try {
+      // Check if there are actual changes when editing
+      if (isEditingReview && userReview) {
+        const hasRatingChanged = selectedRating !== userReview.rating;
+        const hasCommentChanged =
+          reviewText.trim() !== (userReview.comment || "").trim();
+
+        if (!hasRatingChanged && !hasCommentChanged) {
+          alert("No changes were made to your review.");
+          return;
+        }
+      }
+
       let response;
 
       // Review data to send
