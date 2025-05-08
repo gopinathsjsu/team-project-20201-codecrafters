@@ -317,6 +317,12 @@
     border: none;
 }
 
+.review-buttons{
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
 .submit-review-btn{
     background-color: #D33223;
     font-weight: bold;
@@ -330,10 +336,27 @@
     font-size: larger;
 }
 
+.delete-review-btn{
+    font-weight: bold;
+    width: fit-content;
+    align-self: center;
+    background-color: gray;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: larger;
+}
+
 .leave-review-form .star {
     font-size: 2.3rem;
     cursor: pointer;
     transition: color 0.2s ease-in-out;
+}
+
+.leave-review-form .editing-message{
+    text-align: left;
 }
   
 .leave-review-form .star.filled {
