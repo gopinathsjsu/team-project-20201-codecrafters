@@ -32,6 +32,7 @@ const RestaurantProfile = () => {
     phone: "",
     email: "",
     cuisine: "",
+    costRating: 1,
     capacity: 0,
     hours: {},
     images: [],
@@ -265,6 +266,7 @@ const RestaurantProfile = () => {
               phone: "",
               email: "",
               cuisine: "",
+              costRating: 1,
               capacity: 1,
               hours: {},
               images: [],
@@ -332,6 +334,12 @@ const RestaurantProfile = () => {
               <p>
                 <strong>Cuisine:</strong> {restaurant.cuisine}
               </p>
+
+              <p>
+                <strong>Cost Rating (1-4):</strong> {restaurant.costRating}
+              </p>
+
+
               <p>
                 <strong>Capacity:</strong> {restaurant.capacity}
               </p>
@@ -396,6 +404,7 @@ const RestaurantProfile = () => {
                 "phone",
                 "email",
                 "cuisine",
+                "costRating",
               ].map((field) => (
                 <div className="form-group" key={field}>
                   <label className="form-label">
