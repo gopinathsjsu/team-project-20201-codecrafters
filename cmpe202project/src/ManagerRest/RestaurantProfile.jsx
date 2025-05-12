@@ -100,24 +100,51 @@ const RestaurantProfile = () => {
     }
   };
 
-  useEffect(() => {
-    const loadRestaurants = async () => {
-      setLoading(true);
-      try {
-        const token =
-          localStorage.getItem("authToken") ||
-          sessionStorage.getItem("authToken");
-        const data = await fetchRestaurants(token);
-        setRestaurants(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const loadRestaurants = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const token =
+  //         localStorage.getItem("authToken") ||
+  //         sessionStorage.getItem("authToken");
+  //       const data = await fetchRestaurants(token);
+  //       setRestaurants(data);
+  //     } catch (err) {
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    loadRestaurants();
-  }, []);
+  //   loadRestaurants();
+  // }, []);
+
+  useEffect(() => {
+  const loadRestaurants = async () => {
+    const token =
+      localStorage.getItem("authToken") ||
+      sessionStorage.getItem("authToken");
+
+    if (!token) {
+      setError("You must be logged in to view restaurant listings.");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await fetchRestaurants(token);
+      setRestaurants(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadRestaurants();
+}, []);
+
 
   const handleNewChange = (e) => {
     const { name, value } = e.target;
@@ -369,6 +396,7 @@ const RestaurantProfile = () => {
                     phone: restaurant.phone,
                     email: restaurant.email,
                     cuisine: restaurant.cuisine,
+                    costRating: restaurant.costRating,
                     capacity: restaurant.capacity,
                     hours: restaurant.hours || {},
                     images: restaurant.images || [],
