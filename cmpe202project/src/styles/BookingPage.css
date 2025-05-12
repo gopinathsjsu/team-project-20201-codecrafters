@@ -1,0 +1,131 @@
+.booking-page{
+    color: black;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    font-family: Inter, "times new roman", sans-serif;
+}
+
+.booking-page h1{
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.booking-details{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    gap: 30px;
+    height: max-content;
+}
+
+.booking-details .details-container{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-around;
+    align-items: left;
+    font-size: larger;
+    gap: 10px;
+}
+
+.booking-details .details-container h2{
+    margin: 0;
+    font-size: xx-large;
+}
+
+.restaurant-img-container{
+    height: 100%;
+    width: auto;
+}
+
+.restaurant-img-container img{
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.time-guests-container{
+    display: flex;
+    gap: 20px;
+}
+
+.email-phone-container {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    align-self: center;
+    gap: 20px; /* Space between email and phone containers */
+    margin: 20px 0;
+    justify-content: space-between; /* Aligns items with space between */
+  }
+  
+  .email-container,
+  .phone-container {
+    flex: 1; /* Makes both containers take equal width */
+    min-width: 200px; /* Ensures a minimum width for smaller screens */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  label {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  input {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  input:focus {
+    border-color: #d33223; /* Highlight border on focus */
+  }
+  
+  .confirm-booking-btn {
+    margin-top: 20px;
+    width: fit-content;
+    align-self: center;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #d33223;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .confirm-booking-btn:hover {
+    background-color: #a0261a; /* Darker red on hover */
+  }
+
+.icon {
+  margin-right: 8px;
+  color: #d33223; /* Adjust color as needed */
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+.date-container,
+.time-container,
+.guests-container {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.guests-container .icon{
+    transform: translate(0px, -2px);
+}
