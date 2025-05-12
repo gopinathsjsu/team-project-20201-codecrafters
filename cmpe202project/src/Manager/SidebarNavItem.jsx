@@ -1,0 +1,20 @@
+"use client";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "../styles/SidebarNavItem.module.css";
+
+function SidebarNavItem({ icon, text, isActive, path }) {
+  const navigate = useNavigate();
+
+  return (
+    <li
+      className={`${styles.navItem} ${isActive ? styles.active : ""}`}
+      onClick={() => navigate(path)}
+    >
+      <div className={styles.icon}>{icon}</div>
+      <span className={styles.text}>{text}</span>
+    </li>
+  );
+}
+
+export default SidebarNavItem;

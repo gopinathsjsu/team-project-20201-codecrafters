@@ -1,0 +1,163 @@
+.homePage{
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  justify-content: center;
+  font-family: inter, sans-serif;
+  margin-bottom: 20px;
+}
+
+.reservation-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 95%;
+    min-height: 280px;
+    border-radius: 20px;
+    margin: 3rem 0 3rem 0;
+    background-image: url(../assets/make-a-reservation-bg.png);
+    background-position: center;
+}
+
+.reservation-form{
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.reservation-form-horizontal{
+    flex-direction: row;
+    /* justify-content: space-between; */
+    justify-content: flex-start;
+}
+
+.reservation-input-group{
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}
+
+.reservation-input{
+    font-size: large;
+    height: 35px;
+    width: 170px;
+    border-radius: 5px;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+.search-and-submit{
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.search-and-submit img{
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 4px;
+    z-index: 0;
+}
+
+.search-and-submit input, .search-and-submit button{
+    height: 35px;
+    border-radius: 5px;
+    border: none;
+}
+
+.search-and-submit input{
+    padding: 0 10px;
+    padding-left: 25px;
+}
+
+.reservation-button{
+    margin: auto;
+    background-color: #D33223;
+    color: white;
+    padding: 10px 20px;
+    align-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+}
+
+.reservation-button:hover{
+    background-color: white;
+    color: #D33223;
+}
+
+.top-rated-restaurants{
+    position: relative;
+    padding: 20px; /* Add padding to ensure content is not cut off */
+    text-align: center; /* Center-align the heading */
+    width: 100%; /* Ensure it doesn't exceed the viewport width */
+    box-sizing: border-box; /* Include padding in the width calculation */
+}
+
+.top-rated-restaurants h1{
+    color: black;
+    font-weight: bold;
+}
+
+.restaurant-carousel {
+    display: flex;
+    align-items: center;
+    overflow: hidden; /* Hide overflowing content */
+    padding: 10px 0;
+    position: relative;
+    width: 100%; /* Ensure it fits within the parent container */
+    box-sizing: border-box;
+}
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: x-large;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.carousel-button.left {
+    left: 10px;
+}
+
+.carousel-button.right {
+    right: 10px;
+}
+
+.carousel-button:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.restaurant-list {
+    display: flex;
+    gap: 2.5rem; /* Space between items */
+    overflow: hidden; /* Hide items that don't fit in the visible area */
+    scroll-behavior: smooth; /* Smooth scrolling for better UX */
+    padding: 10px 0;
+    width: 100%; /* Ensure it fits within the carousel */
+    box-sizing: border-box;
+}
+
+.restaurant-list > * {
+    flex: 0 0 auto; /* Prevent shrinking and ensure items stay inline */
+    width: 310px; /* Match the width defined in RestaurantBox.css */
+    height: 400px; /* Match the height defined in RestaurantBox.css */
+    box-sizing: border-box;
+}
