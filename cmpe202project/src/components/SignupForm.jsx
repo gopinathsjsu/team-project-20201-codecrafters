@@ -30,7 +30,7 @@ function SignupForm() {
 
     try {
       const res = await axios.post(
-        "https://team-project-20201-codecrafters-production.up.railway.app/signUp",
+        "http://34.27.137.104/signUp",
         payload,
         {
           headers: {
