@@ -38,35 +38,38 @@ const RestaurantProfile = () => {
     images: [],
     deletedImages: [],
   });
-  console.log("Initial newRestaurant state:", newRestaurant);
+
+  // Axios interceptor to add token to requests
+  useEffect(() => {
+    const requestInterceptor = axios.interceptors.request.use(config => {
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+    };
+  }, []);
+
+  const getAuthToken = () => {
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    return token;
+  };
 
   const createRestaurant = async (formData) => {
-    console.log("===== FormData content =====");
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(`${key}: [File] ${value.name} (${value.type})`);
-      } else {
-        console.log(`${key}: ${value}`);
-      }
-    }
-    console.log("===== End of FormData =====");
-    const token =
-      localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-    if (!token) throw new Error("No authentication token found");
-
     try {
-      console.log("Making POST request to create restaurant...");
-      const response = await axios.post(
-        `${BASE_URL}/api/restaurants`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log("Restaurant created successfully:", response.data);
+      const token = getAuthToken();
+      const response = await axios.post(`${BASE_URL}/api/restaurants`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       return response.data;
     } catch (error) {
       console.error("Error creating restaurant:", error);
@@ -75,80 +78,44 @@ const RestaurantProfile = () => {
   };
 
   const updateRestaurant = async (restaurantId, formData) => {
-    console.log("Updating restaurant ${restaurantId} with data:", formData);
-    const token =
-      localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-    if (!token) throw new Error("No authentication token found");
-
     try {
-      console.log("Making PUT request to update restaurant...");
+      const token = getAuthToken();
       const response = await axios.put(
         `${BASE_URL}/api/restaurants/${restaurantId}`,
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
         }
       );
-      console.log("Restaurant updated successfully:", response.data);
       return response.data;
     } catch (error) {
-      //console.error("Error updating restaurant:", error);
+      console.error("Error updating restaurant:", error);
       throw error;
     }
   };
 
-  // useEffect(() => {
-  //   const loadRestaurants = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const token =
-  //         localStorage.getItem("authToken") ||
-  //         sessionStorage.getItem("authToken");
-  //       const data = await fetchRestaurants(token);
-  //       setRestaurants(data);
-  //     } catch (err) {
-  //       setError(err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   loadRestaurants();
-  // }, []);
-
   useEffect(() => {
-  const loadRestaurants = async () => {
-    const token =
-      localStorage.getItem("authToken") ||
-      sessionStorage.getItem("authToken");
+    const loadRestaurants = async () => {
+      setLoading(true);
+      try {
+        const token = getAuthToken();
+        const data = await fetchRestaurants(token);
+        setRestaurants(data);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (!token) {
-      setError("You must be logged in to view restaurant listings.");
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const data = await fetchRestaurants(token);
-      setRestaurants(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  loadRestaurants();
-}, []);
-
+    loadRestaurants();
+  }, []);
 
   const handleNewChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Handling change for ${name}: ${value}`);
     setNewRestaurant((prev) => ({
       ...prev,
       [name]: name === "capacity" ? Number(value) : value,
@@ -157,14 +124,12 @@ const RestaurantProfile = () => {
 
   const handleNewPhotoChange = (e) => {
     const file = e.target.files[0];
-    console.log("New photo selected:", file);
     if (file) {
       setNewPhoto(file);
     }
   };
 
   const handleRemoveImage = () => {
-    console.log("Removing image - current images:", newRestaurant.images);
     setNewRestaurant((prev) => ({
       ...prev,
       deletedImages: [
@@ -178,18 +143,10 @@ const RestaurantProfile = () => {
 
   const handleNewSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submission started");
     try {
-      const token =
-        localStorage.getItem("authToken") ||
-        sessionStorage.getItem("authToken");
-      if (!token) throw new Error("No authentication token found");
-
       const formData = new FormData();
 
-      console.log("Building form data...");
-      // Append all basic fields
-      // Append tất cả fields thông thường (trừ những field đặc biệt)
+      // Append basic fields
       Object.keys(newRestaurant).forEach((key) => {
         if (
           key !== "images" &&
@@ -201,15 +158,15 @@ const RestaurantProfile = () => {
         }
       });
 
+      // Append hours
       daysOfWeek.forEach((day) => {
         const times = newRestaurant.hours[day];
         if (times?.start) formData.append(`hours[${day}].start`, times.start);
         if (times?.end) formData.append(`hours[${day}].end`, times.end);
       });
 
-      // Append new photo if available
+      // Append images
       if (newPhoto) {
-        console.log("Adding new photo to form data");
         formData.append("images", newPhoto);
       }
 
@@ -220,42 +177,30 @@ const RestaurantProfile = () => {
       }
 
       if (editingIndex !== null) {
-        // Update existing restaurant
         const restaurantId = newRestaurant.id || restaurants[editingIndex].id;
-        console.log(`Updating restaurant with ID: ${restaurantId}`);
-        console.log("newRestaurant.id:", newRestaurant.id);
-        console.log(
-          "restaurants[editingIndex].id:",
-          restaurants[editingIndex].id
-        );
-        console.log(
-          "Complete restaurant being edited:",
-          restaurants[editingIndex]
-        );
         await updateRestaurant(restaurantId, formData);
       } else {
-        // Create new restaurant
-        // console.log("Creating new restaurant");
         await createRestaurant(formData);
       }
 
-      console.log("Operation successful, refreshing data...");
-      await fetchRestaurants();
+      // Refresh data
+      const token = getAuthToken();
+      const data = await fetchRestaurants(token);
+      setRestaurants(data);
+      
       setShowModal(false);
       setEditingIndex(null);
       setNewPhoto(null);
     } catch (err) {
-      //console.error("Error saving restaurant:", err);
       setError(err.message);
     }
   };
 
   if (loading) {
-    console.log("Rendering loading state");
     return <div className="restaurant-card-wrapper">Loading...</div>;
   }
+
   if (error) {
-    console.log("Rendering error state:", error);
     return (
       <div className="restaurant-card-wrapper" style={{ color: "black" }}>
         Error: {error}
@@ -263,18 +208,9 @@ const RestaurantProfile = () => {
     );
   }
 
-  console.log("Rendering component with restaurants:", restaurants);
   return (
     <div className="restaurant-card-wrapper">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "20px",
-          marginBottom: "20px",
-        }}
-      >
+      <div className="restaurant-header">
         <h2 className="restaurant-title">
           {restaurants.length > 0
             ? "Your Restaurant Listings"
@@ -282,7 +218,6 @@ const RestaurantProfile = () => {
         </h2>
         <button
           onClick={() => {
-            console.log("Add new listing button clicked");
             setNewRestaurant({
               name: "",
               description: "",
@@ -318,10 +253,7 @@ const RestaurantProfile = () => {
               attract customers
             </p>
             <button
-              onClick={() => {
-                console.log("Create first restaurant button clicked");
-                setShowModal(true);
-              }}
+              onClick={() => setShowModal(true)}
               className="edit-btn"
               style={{ padding: "10px 20px", fontSize: "1.1rem" }}
             >
@@ -335,38 +267,20 @@ const RestaurantProfile = () => {
             <div className="restaurant-card" key={restaurant.id}>
               <h3>{restaurant.name}</h3>
               <p>
-                <strong>ID:</strong> {restaurant.id}
-              </p>
-              <p>
                 <strong>Description:</strong> {restaurant.description}
               </p>
               <p>
                 <strong>Address:</strong> {restaurant.address}
               </p>
               <p>
-                <strong>City:</strong> {restaurant.city}
-              </p>
-              <p>
-                <strong>State:</strong> {restaurant.state}
-              </p>
-              <p>
-                <strong>ZIP:</strong> {restaurant.zip}
-              </p>
-              <p>
                 <strong>Phone:</strong> {restaurant.phone}
-              </p>
-              <p>
-                <strong>Email:</strong> {restaurant.email}
               </p>
               <p>
                 <strong>Cuisine:</strong> {restaurant.cuisine}
               </p>
-
               <p>
-                <strong>Cost Rating (1-4):</strong> {restaurant.costRating}
+                <strong>Cost Rating:</strong> {restaurant.costRating}
               </p>
-
-
               <p>
                 <strong>Capacity:</strong> {restaurant.capacity}
               </p>
@@ -380,10 +294,6 @@ const RestaurantProfile = () => {
               <button
                 className="edit-btn"
                 onClick={() => {
-                  console.log(
-                    `Edit button clicked for restaurant at index ${index}`
-                  );
-                  console.log("Restaurant being edited:", restaurant);
                   setEditingIndex(index);
                   setNewRestaurant({
                     id: restaurant.id,
@@ -463,14 +373,11 @@ const RestaurantProfile = () => {
               {daysOfWeek.map((day) => (
                 <div key={day} className="form-group">
                   <label className="form-label">{day}</label>
-                  <div style={{ display: "flex", gap: "10px" }}>
+                  <div className="time-inputs">
                     <input
                       type="time"
                       value={newRestaurant.hours?.[day]?.start || ""}
-                      onChange={(e) => {
-                        console.log(
-                          `Setting ${day} start time: ${e.target.value}`
-                        );
+                      onChange={(e) =>
                         setNewRestaurant((prev) => ({
                           ...prev,
                           hours: {
@@ -480,16 +387,13 @@ const RestaurantProfile = () => {
                               start: e.target.value,
                             },
                           },
-                        }));
-                      }}
+                        }))
+                      }
                     />
                     <input
                       type="time"
                       value={newRestaurant.hours?.[day]?.end || ""}
-                      onChange={(e) => {
-                        console.log(
-                          `Setting ${day} end time: ${e.target.value}`
-                        );
+                      onChange={(e) =>
                         setNewRestaurant((prev) => ({
                           ...prev,
                           hours: {
@@ -499,8 +403,8 @@ const RestaurantProfile = () => {
                               end: e.target.value,
                             },
                           },
-                        }));
-                      }}
+                        }))
+                      }
                     />
                   </div>
                 </div>
@@ -515,9 +419,7 @@ const RestaurantProfile = () => {
                   className="form-input"
                 />
                 {(newPhoto || newRestaurant.images?.[0]) && (
-                  <div
-                    style={{ position: "relative", display: "inline-block" }}
-                  >
+                  <div className="image-preview-container">
                     <img
                       src={
                         newPhoto
@@ -530,18 +432,7 @@ const RestaurantProfile = () => {
                     <button
                       type="button"
                       onClick={handleRemoveImage}
-                      style={{
-                        position: "absolute",
-                        top: "5px",
-                        right: "5px",
-                        background: "red",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "50%",
-                        width: "25px",
-                        height: "25px",
-                        cursor: "pointer",
-                      }}
+                      className="remove-image-btn"
                     >
                       ×
                     </button>
@@ -549,14 +440,13 @@ const RestaurantProfile = () => {
                 )}
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className="form-actions">
                 <button type="submit" className="save-btn">
                   {editingIndex !== null ? "Update" : "Add"}
                 </button>
                 <button
                   type="button"
                   onClick={() => {
-                    console.log("Cancel button clicked");
                     setShowModal(false);
                     setEditingIndex(null);
                     setNewPhoto(null);
