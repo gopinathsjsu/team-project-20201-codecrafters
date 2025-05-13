@@ -20,7 +20,7 @@ const RestaurantProfile = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
-  const [newPhoto, setNewPhoto] = useState(null);
+  const [newPhotos, setNewPhotos] = useState([]);
 
   const [newRestaurant, setNewRestaurant] = useState({
     name: "",
@@ -34,15 +34,19 @@ const RestaurantProfile = () => {
     cuisine: "",
     costRating: 1,
     capacity: 0,
+    averageRating: 0,
+    totalReviews: 0,
     hours: {},
-    images: [],
+    imageUrls: [],
     deletedImages: [],
   });
 
   // Axios interceptor to add token to requests
   useEffect(() => {
-    const requestInterceptor = axios.interceptors.request.use(config => {
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    const requestInterceptor = axios.interceptors.request.use((config) => {
+      const token =
+        localStorage.getItem("authToken") ||
+        sessionStorage.getItem("authToken");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -55,7 +59,8 @@ const RestaurantProfile = () => {
   }, []);
 
   const getAuthToken = () => {
-    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    const token =
+      localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
     if (!token) {
       throw new Error("No authentication token found");
     }
@@ -65,11 +70,15 @@ const RestaurantProfile = () => {
   const createRestaurant = async (formData) => {
     try {
       const token = getAuthToken();
-      const response = await axios.post(`${BASE_URL}/api/restaurants`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        `${BASE_URL}/api/restaurants`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error("Error creating restaurant:", error);
@@ -102,6 +111,7 @@ const RestaurantProfile = () => {
       try {
         const token = getAuthToken();
         const data = await fetchRestaurants(token);
+        console.log("Fetched restaurants:", data);
         setRestaurants(data);
         setError(null);
       } catch (err) {
@@ -123,22 +133,16 @@ const RestaurantProfile = () => {
   };
 
   const handleNewPhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setNewPhoto(file);
-    }
+    const files = Array.from(e.target.files);
+    setNewPhotos(files);
   };
 
-  const handleRemoveImage = () => {
+  const handleRemoveExistingImage = (urlToRemove) => {
     setNewRestaurant((prev) => ({
       ...prev,
-      deletedImages: [
-        ...prev.deletedImages,
-        ...prev.images.filter((img) => typeof img === "string"),
-      ],
-      images: [],
+      imageUrls: prev.imageUrls.filter((url) => url !== urlToRemove),
+      deletedImages: [...prev.deletedImages, urlToRemove],
     }));
-    setNewPhoto(null);
   };
 
   const handleNewSubmit = async (e) => {
@@ -157,6 +161,8 @@ const RestaurantProfile = () => {
           formData.append(key, newRestaurant[key]);
         }
       });
+      formData.append("totalReviews", Number(newRestaurant.totalReviews));
+      formData.append("averageRating", Number(newRestaurant.averageRating));
 
       // Append hours
       daysOfWeek.forEach((day) => {
@@ -166,9 +172,9 @@ const RestaurantProfile = () => {
       });
 
       // Append images
-      if (newPhoto) {
-        formData.append("images", newPhoto);
-      }
+      newPhotos.forEach((photo) => {
+        formData.append("images", photo);
+      });
 
       if (newRestaurant.deletedImages.length > 0) {
         newRestaurant.deletedImages.forEach((img) => {
@@ -187,10 +193,10 @@ const RestaurantProfile = () => {
       const token = getAuthToken();
       const data = await fetchRestaurants(token);
       setRestaurants(data);
-      
+
       setShowModal(false);
       setEditingIndex(null);
-      setNewPhoto(null);
+      setNewPhotos([]);
     } catch (err) {
       setError(err.message);
     }
@@ -231,10 +237,10 @@ const RestaurantProfile = () => {
               costRating: 1,
               capacity: 1,
               hours: {},
-              images: [],
+              imageUrls: [],
               deletedImages: [],
             });
-            setNewPhoto(null);
+            setNewPhotos([]);
             setEditingIndex(null);
             setShowModal(true);
           }}
@@ -284,9 +290,9 @@ const RestaurantProfile = () => {
               <p>
                 <strong>Capacity:</strong> {restaurant.capacity}
               </p>
-              {restaurant.images?.[0] && (
+              {restaurant.imageUrls?.[0] && (
                 <img
-                  src={restaurant.images[0]}
+                  src={restaurant.imageUrls[0]}
                   alt="Preview"
                   className="photo-preview"
                 />
@@ -306,13 +312,15 @@ const RestaurantProfile = () => {
                     phone: restaurant.phone,
                     email: restaurant.email,
                     cuisine: restaurant.cuisine,
-                    costRating: restaurant.costRating,
+                    costRating: restaurant.costRating || 1,
+                    averageRating: restaurant.averageRating || 0,
+                    totalReviews: restaurant.totalReviews || 0,
                     capacity: restaurant.capacity,
                     hours: restaurant.hours || {},
-                    images: restaurant.images || [],
+                    imageUrls: restaurant.imageUrls || [],
                     deletedImages: [],
                   });
-                  setNewPhoto(null);
+                  setNewPhotos([]);
                   setShowModal(true);
                 }}
               >
@@ -418,24 +426,35 @@ const RestaurantProfile = () => {
                   onChange={handleNewPhotoChange}
                   className="form-input"
                 />
-                {(newPhoto || newRestaurant.images?.[0]) && (
+                {(newPhotos.length > 0 ||
+                  newRestaurant.imageUrls?.length > 0) && (
                   <div className="image-preview-container">
-                    <img
-                      src={
-                        newPhoto
-                          ? URL.createObjectURL(newPhoto)
-                          : newRestaurant.images[0]
-                      }
-                      alt="Preview"
-                      className="photo-preview"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="remove-image-btn"
-                    >
-                      ×
-                    </button>
+                    {newPhotos.map((photo, idx) => (
+                      <div key={idx} className="image-preview-box">
+                        <img
+                          src={URL.createObjectURL(photo)}
+                          alt={`New Upload ${idx + 1}`}
+                          className="photo-preview"
+                        />
+                      </div>
+                    ))}
+
+                    {newRestaurant.imageUrls.map((url, idx) => (
+                      <div key={idx} className="image-preview-box">
+                        <img
+                          src={url}
+                          alt={`Existing ${idx + 1}`}
+                          className="photo-preview"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExistingImage(url)}
+                          className="remove-image-btn"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -449,7 +468,7 @@ const RestaurantProfile = () => {
                   onClick={() => {
                     setShowModal(false);
                     setEditingIndex(null);
-                    setNewPhoto(null);
+                    setNewPhotos([]);
                   }}
                   className="edit-btn"
                 >
