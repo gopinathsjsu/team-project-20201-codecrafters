@@ -139,7 +139,9 @@ const RestaurantMap = ({
             const infoContent = `
               <div class="map-info-window">
                 <h2>${restaurant.name}</h2>
-                <p>${restaurant.cuisine} · ${restaurant.priceRange}</p>
+                <p>${restaurant.cuisine} · ${"$".repeat(
+              Math.max(1, restaurant.costRating)
+            )}</p>
                 <p>${restaurant.address}, ${restaurant.city}</p>
                 <p>${
                   isRestaurantOpen(restaurant)
