@@ -4,7 +4,11 @@ import SearchComponent from "../components/SearchComponent";
 import RestaurantBox from "../components/RestaurantBox";
 import RestaurantMap from "../components/RestaurantMap";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { getRestaurants, useApiCall } from "../utils/apiCalls";
+import {
+  getRestaurants,
+  useApiCall,
+  getReservationsInRange,
+} from "../utils/apiCalls";
 import "../styles/SearchResultsPage.css";
 
 const SearchResultsPage = () => {
@@ -72,74 +76,76 @@ const SearchResultsPage = () => {
     );
   };
 
-  // Process restaurant data when API response is received
   // Update the sorting logic in the allRestaurants useEffect
   useEffect(() => {
-    if (allRestaurants && Array.isArray(allRestaurants)) {
-      const validRestaurants = allRestaurants.filter((r) => r && r.id);
+    const processRestaurantsWithBookings = async () => {
+      if (allRestaurants && Array.isArray(allRestaurants)) {
+        const validRestaurants = allRestaurants.filter((r) => r && r.id);
 
-      // Skip sorting if no search term
-      if (!searchTerm || searchTerm.trim() === "") {
-        setRestaurants(validRestaurants);
-        setFilteredRestaurants(validRestaurants);
-        return;
-      }
+        const now = new Date();
+        const startOfDay = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+        const endOfDay = new Date(now.setHours(24, 0, 0, 0)).toISOString();
 
-      const searchTermLower = searchTerm.toLowerCase();
-
-      const sortedRestaurants = validRestaurants.sort((a, b) => {
-        let aScore = 0;
-        const aNameLower = a.name?.toLowerCase() || "";
-        const aCuisineLower = a.cuisine?.toLowerCase() || "";
-
-        // Exact name match (highest priority)
-        if (aNameLower === searchTermLower) aScore = 100;
-        // Name starts with search term (high priority)
-        else if (aNameLower.startsWith(searchTermLower)) aScore = 75;
-        // Name contains search term (medium priority)
-        else if (aNameLower.includes(searchTermLower)) aScore = 50;
-        // Cuisine contains search term (low priority)
-        else if (aCuisineLower.includes(searchTermLower)) aScore = 25;
-
-        // Calculate match score for restaurant B
-        let bScore = 0;
-        const bNameLower = b.name?.toLowerCase() || "";
-        const bCuisineLower = b.cuisine?.toLowerCase() || "";
-
-        // Exact name match (highest priority)
-        if (bNameLower === searchTermLower) bScore = 100;
-        // Name starts with search term (high priority)
-        else if (bNameLower.startsWith(searchTermLower)) bScore = 75;
-        // Name contains search term (medium priority)
-        else if (bNameLower.includes(searchTermLower)) bScore = 50;
-        // Cuisine contains search term (low priority)
-        else if (bCuisineLower.includes(searchTermLower)) bScore = 25;
-
-        // Sort by score (higher score first)
-        if (aScore !== bScore) {
-          return bScore - aScore;
+        let reservationsToday = [];
+        try {
+          reservationsToday = await getReservationsInRange(
+            startOfDay,
+            endOfDay
+          );
+        } catch (e) {
+          console.error("Failed to fetch today's reservations", e);
         }
 
-        // If scores are the same, sort alphabetically by name
-        return aNameLower.localeCompare(bNameLower);
-      });
+        const bookedCountMap = {};
+        reservationsToday.forEach((res) => {
+          const resId = res.restaurantId;
+          bookedCountMap[resId] = (bookedCountMap[resId] || 0) + 1;
+        });
 
-      console.log("Sorted restaurants based on search term:", searchTerm);
+        const restaurantsWithBookings = validRestaurants.map((restaurant) => ({
+          ...restaurant,
+          bookedTimes: bookedCountMap[restaurant.id] || 0,
+        }));
 
-      // Add debug info about the first few sorted restaurants
-      const debugInfo = sortedRestaurants.slice(0, 5).map((r) => ({
-        name: r.name,
-        match: r.name?.toLowerCase().includes(searchTermLower) ? "Yes" : "No",
-        exactMatch: r.name?.toLowerCase() === searchTermLower ? "Yes" : "No",
-        startsWithMatch: r.name?.toLowerCase().startsWith(searchTermLower)
-          ? "Yes"
-          : "No",
-      }));
-      console.table(debugInfo);
+        if (!searchTerm || searchTerm.trim() === "") {
+          setRestaurants(restaurantsWithBookings);
+          setFilteredRestaurants(restaurantsWithBookings);
+          return;
+        }
 
-      setRestaurants(sortedRestaurants);
-      setFilteredRestaurants(sortedRestaurants);
-    }
+        const searchTermLower = searchTerm.toLowerCase();
+
+        const sortedRestaurants = restaurantsWithBookings.sort((a, b) => {
+          let aScore = 0;
+          const aNameLower = a.name?.toLowerCase() || "";
+          const aCuisineLower = a.cuisine?.toLowerCase() || "";
+
+          if (aNameLower === searchTermLower) aScore = 100;
+          else if (aNameLower.startsWith(searchTermLower)) aScore = 75;
+          else if (aNameLower.includes(searchTermLower)) aScore = 50;
+          else if (aCuisineLower.includes(searchTermLower)) aScore = 25;
+
+          let bScore = 0;
+          const bNameLower = b.name?.toLowerCase() || "";
+          const bCuisineLower = b.cuisine?.toLowerCase() || "";
+
+          if (bNameLower === searchTermLower) bScore = 100;
+          else if (bNameLower.startsWith(searchTermLower)) bScore = 75;
+          else if (bNameLower.includes(searchTermLower)) bScore = 50;
+          else if (bCuisineLower.includes(searchTermLower)) bScore = 25;
+
+          if (aScore !== bScore) {
+            return bScore - aScore;
+          }
+          return aNameLower.localeCompare(bNameLower);
+        });
+
+        setRestaurants(sortedRestaurants);
+        setFilteredRestaurants(sortedRestaurants);
+      }
+    };
+
+    processRestaurantsWithBookings();
   }, [allRestaurants, searchTerm]);
 
   // Apply filters function
@@ -153,9 +159,13 @@ const SearchResultsPage = () => {
     }
 
     if (selectedPrices.length > 0) {
-      filtered = filtered.filter((restaurant) =>
-        selectedPrices.includes(restaurant.priceRange)
-      );
+      filtered = filtered.filter((restaurant) => {
+        const cost =
+          restaurant.costRating && restaurant.costRating > 0
+            ? restaurant.costRating
+            : 1;
+        return selectedPrices.includes("$".repeat(cost));
+      });
     }
 
     if (selectedRatings.length > 0) {
@@ -192,6 +202,8 @@ const SearchResultsPage = () => {
 
   const handlePriceChange = (e) => {
     const { value, checked } = e.target;
+    console.log("Price filter changed:", value, checked);
+    console.log("Selected prices before change:", selectedPrices);
     if (checked) {
       setSelectedPrices([...selectedPrices, value]);
     } else {
