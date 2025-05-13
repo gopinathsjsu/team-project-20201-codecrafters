@@ -31,6 +31,7 @@ const RestaurantPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const { reservationDate } = useContext(ReservationContext);
+  const [showPhotosModal, setShowPhotosModal] = useState(false);
 
   // Create state for restaurant data
   const [restaurantData, setRestaurantData] = useState({
@@ -319,7 +320,12 @@ const RestaurantPage = () => {
           }
           alt="Restaurant"
         />
-        <button className="see-all-photos-btn">See all photos</button>
+        <button
+          onClick={() => setShowPhotosModal(true)}
+          className="see-all-photos-btn"
+        >
+          See all photos
+        </button>
       </div>
       {/* Restaurant info */}
       <div className="restaurant-info">
@@ -381,7 +387,7 @@ const RestaurantPage = () => {
                 id={restaurantData.id}
                 address={`${restaurantData?.address}, ${restaurantData?.city}, ${restaurantData?.state} ${restaurantData?.zip}`}
                 hours={restaurantData.hours}
-                reservationDate={reservationDate} 
+                reservationDate={reservationDate}
               />
             </div>
             <div className="booked-times">
@@ -399,41 +405,179 @@ const RestaurantPage = () => {
             : ""}
           Photos
         </h2>
-        <div className="photos-grid">
-          <div className="photo-thumbnail">
-            <img
-              src={
-                restaurantData?.imageUrls.length > 0
-                  ? restaurantData?.imageUrls[0]
-                  : RestaurantImage
-              }
-              alt="Photo 1"
-            />
-          </div>
-          <div className="right-photos">
+        {restaurantData?.imageUrls.length > 0 ? (
+          <div className="photos-grid">
             <div className="photo-thumbnail">
-              <img
-                src={
-                  restaurantData?.imageUrls.length > 0
-                    ? restaurantData?.imageUrls[1]
-                    : RestaurantImage
-                }
-                alt="Photo 2"
-              />
+              <img src={restaurantData.imageUrls[0]} alt="Photo 1" />
             </div>
-            <div className="photo-thumbnail">
-              <img
-                src={
-                  restaurantData?.imageUrls[2]
-                    ? restaurantData?.imageUrls[2]
-                    : RestaurantImage
-                }
-                alt="Photo 3"
-              />
-              <button className="see-all-photos-btn">See all photos</button>
+            <div className="right-photos">
+              {restaurantData.imageUrls.length > 1 && (
+                <div className="photo-thumbnail">
+                  <img src={restaurantData.imageUrls[1]} alt="Photo 2" />
+                </div>
+              )}
+              {restaurantData.imageUrls.length > 2 && (
+                <div
+                  className="photo-thumbnail"
+                  style={{ position: "relative" }}
+                >
+                  <img src={restaurantData.imageUrls[2]} alt="Photo 3" />
+                  {restaurantData.imageUrls.length > 3 && (
+                    <button
+                      className="see-all-photos-btn"
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        right: 0,
+                        left: 0,
+                        top: 0,
+                        borderRadius: "25px",
+                        fontSize: "x-large",
+                        background: "rgba(0,0,0,0.5)",
+                        color: "#fff",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setShowPhotosModal(true)}
+                    >
+                      See all photos
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="photos-grid">
+            <div
+              className="photo-thumbnail"
+              style={{
+                width: "100%",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <img
+                src={RestaurantImage}
+                alt="No photos available"
+                style={{
+                  objectFit: "cover",
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "25px",
+                  filter: "brightness(0.7)",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  color: "#fff",
+                  fontWeight: "normal",
+                  fontSize: "2rem",
+                  textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+                  width: "100%",
+                  textAlign: "center",
+                  pointerEvents: "none",
+                }}
+              >
+                No photos available.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal for all photos */}
+        {showPhotosModal && (
+          <div
+            className="photos-modal-overlay"
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              background: "rgba(0,0,0,0.8)",
+              zIndex: 1000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onClick={() => setShowPhotosModal(false)}
+          >
+            <div
+              className="photos-modal-content"
+              style={{
+                background: "#fff",
+                borderRadius: "20px",
+                padding: "30px",
+                maxWidth: "90vw",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                position: "relative",
+                boxShadow: "0 4px 32px rgba(0,0,0,0.3)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                style={{
+                  position: "absolute",
+                  top: 20,
+                  right: 30,
+                  background: "#D33223",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "40px",
+                  height: "40px",
+                  fontSize: "1.5rem",
+                  cursor: "pointer",
+                  zIndex: 10,
+                }}
+                onClick={() => setShowPhotosModal(false)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+              <h2 style={{ marginBottom: "20px" }}>All Photos</h2>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                  gap: "20px",
+                }}
+              >
+                {restaurantData.imageUrls.map((url, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      width: "100%",
+                      height: "250px",
+                      overflow: "hidden",
+                      borderRadius: "15px",
+                    }}
+                  >
+                    <img
+                      src={url}
+                      alt={`Photo ${idx + 1}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        borderRadius: "15px",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       {/* Reviews */}
       <div className="reviews-container">
