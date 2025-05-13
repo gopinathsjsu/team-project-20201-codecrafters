@@ -2,7 +2,11 @@ import React, { useEffect, useState, useRef } from "react";
 import RestaurantBox from "../components/RestaurantBox";
 import SearchComponent from "../components/SearchComponent";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { getRestaurants, useApiCall } from "../utils/apiCalls";
+import {
+  getRestaurants,
+  useApiCall,
+  getReservationsInRange,
+} from "../utils/apiCalls";
 import "../styles/HomePage.css";
 
 const HomePage = () => {
@@ -14,40 +18,54 @@ const HomePage = () => {
 
   // Process and sort restaurants when the data changes
   useEffect(() => {
-    if (allRestaurants && allRestaurants.length > 0) {
-      // Process restaurants to ensure bookedTimes is a number
-      const processedRestaurants = allRestaurants
-        .filter((restaurant) => restaurant && restaurant.id) // Filter out invalid restaurants
-        .map((restaurant) => ({
-          ...restaurant,
-          // Convert bookedTimes to a number if it's not already
-          bookedTimes:
-            typeof restaurant.bookedTimes === "number"
-              ? restaurant.bookedTimes
-              : 0,
-          timeSlots: restaurant.timeSlots || [],
-          // Ensure we have a valid rating
-          averageRating: parseFloat(restaurant.averageRating || 0),
+    const fetchData = async () => {
+      if (allRestaurants && allRestaurants.length > 0) {
+        const processedRestaurants = allRestaurants
+          .filter((restaurant) => restaurant && restaurant.id)
+          .map((restaurant) => ({
+            ...restaurant,
+            bookedTimes: 0, // Default
+            averageRating: parseFloat(restaurant.averageRating || 0),
+          }));
+
+        // Get time range for today
+        const now = new Date();
+        const startOfDay = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+        const endOfDay = new Date(now.setHours(24, 0, 0, 0)).toISOString();
+
+        // Fetch today's reservations
+        const reservationsToday = await getReservationsInRange(
+          startOfDay,
+          endOfDay
+        );
+
+        // Count bookedTimes per restaurant
+        const bookedCountMap = {};
+        reservationsToday.forEach((res) => {
+          const resId = res.restaurantId;
+          bookedCountMap[resId] = (bookedCountMap[resId] || 0) + 1;
+        });
+
+        const withBookings = processedRestaurants.map((rest) => ({
+          ...rest,
+          bookedTimes: bookedCountMap[rest.id] || 0,
         }));
 
-      // Sort first by rating, then by bookedTimes
-      const sortedRestaurants = processedRestaurants
-        .sort((a, b) => {
-          // First sort by rating (descending)
-          if (a.averageRating !== b.averageRating) {
-            return b.averageRating - a.averageRating;
-          }
-          // If ratings are equal, sort by bookedTimes (descending)
-          return b.bookedTimes - a.bookedTimes;
-        })
-        .slice(0, 10);
+        // Sort and save
+        const sorted = withBookings
+          .sort((a, b) =>
+            b.averageRating !== a.averageRating
+              ? b.averageRating - a.averageRating
+              : b.bookedTimes - a.bookedTimes
+          )
+          .slice(0, 10);
 
-      setTopRatedRestaurants(sortedRestaurants);
-      sessionStorage.setItem(
-        "topRatedRestaurants",
-        JSON.stringify(sortedRestaurants)
-      );
-    }
+        setTopRatedRestaurants(sorted);
+        sessionStorage.setItem("topRatedRestaurants", JSON.stringify(sorted));
+      }
+    };
+
+    fetchData();
   }, [allRestaurants]);
 
   const scrollLeft = () => {

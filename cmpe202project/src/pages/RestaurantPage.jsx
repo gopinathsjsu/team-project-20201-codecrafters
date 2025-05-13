@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import RestaurantImage from "../assets/make-a-reservation-bg.png";
 import SearchComponent from "../components/SearchComponent";
@@ -15,6 +15,7 @@ import {
 } from "../utils/apiCalls";
 import HoursOfOperation from "../components/HoursOfOperation";
 import { useAuth } from "../context/AuthContext";
+import { ReservationContext } from "../context/ReservationContext";
 
 const RestaurantPage = () => {
   const location = useLocation();
@@ -29,6 +30,7 @@ const RestaurantPage = () => {
   const [imageUrls, setImageUrls] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { reservationDate } = useContext(ReservationContext);
 
   // Create state for restaurant data
   const [restaurantData, setRestaurantData] = useState({
@@ -379,6 +381,7 @@ const RestaurantPage = () => {
                 id={restaurantData.id}
                 address={`${restaurantData?.address}, ${restaurantData?.city}, ${restaurantData?.state} ${restaurantData?.zip}`}
                 hours={restaurantData.hours}
+                reservationDate={reservationDate} 
               />
             </div>
             <div className="booked-times">

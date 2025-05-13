@@ -13,7 +13,6 @@ const ReservationsPage = () => {
   const [activeTab, setActiveTab] = useState("upcoming");
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-
   // Fetch restaurant details
   const fetchRestaurantDetails = async (restaurantId) => {
     try {
@@ -117,6 +116,7 @@ const ReservationsPage = () => {
             fullDateTime: pacificDateTime,
             partySize: reservation.partySize,
             email: reservation.email,
+            status: reservation.status,
           });
         }
 
@@ -179,7 +179,10 @@ const ReservationsPage = () => {
   // Filter reservations based on active tab
   const filteredReservations = Array.isArray(reservations)
     ? reservations.filter((res) => {
-        // Get the current time in Pacific Time
+      if(res.status === "CANCELLED") {
+        return false;
+      }
+      // Get the current time in Pacific Time
         const nowUTC = new Date();
         const now = new Date(
           nowUTC.toLocaleString("en-US", {

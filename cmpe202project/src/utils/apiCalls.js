@@ -305,3 +305,12 @@ export const useApiCall = (apiFunction, ...args) => {
 
   return { data, isLoading, error, refetch: () => setIsLoading(true) };
 };
+
+
+export const getReservationsInRange = async (start, end) => {
+  const response = await axios.post(`${BASE_URL}/api/reservations/time-range`, {
+    timeStart: start,
+    timeEnd: end,
+  });
+  return response.data;
+};
