@@ -270,26 +270,48 @@ const RestaurantProfile = () => {
       ) : (
         <div className="restaurant-grid">
           {restaurants.map((restaurant, index) => (
-            <div className="restaurant-card" key={restaurant.id}>
-              <h3>{restaurant.name}</h3>
-              <p>
-                <strong>Description:</strong> {restaurant.description}
-              </p>
-              <p>
-                <strong>Address:</strong> {restaurant.address}
-              </p>
-              <p>
-                <strong>Phone:</strong> {restaurant.phone}
-              </p>
-              <p>
-                <strong>Cuisine:</strong> {restaurant.cuisine}
-              </p>
-              <p>
-                <strong>Cost Rating:</strong> {restaurant.costRating}
-              </p>
-              <p>
-                <strong>Capacity:</strong> {restaurant.capacity}
-              </p>
+            <div
+              className="restaurant-card"
+              key={restaurant.id}
+              style={{
+                display: 'flex',
+                flexDirection: 'column', // or 'column'
+                alignItems: 'flex-start', // vertical alignment
+                justifyContent: 'flex-start' // horizontal alignment
+              }}
+            >
+              <h3 style={{ textAlign: 'center', alignSelf: 'center' }}>
+                {restaurant.name}
+                <div style={{ color: 'red' }}>{!restaurant.approved && 'In Review'}</div>
+              </h3>
+              <table style={{ borderSpacing: '0 10px' }}>
+                <tbody>
+                  <tr style={{ verticalAlign: 'top' }}>
+                    <td><strong>Description:</strong></td>
+                    <td>{restaurant.description}</td>
+                  </tr>
+                  <tr style={{ verticalAlign: 'top' }}>
+                    <td><strong>Address:</strong></td>
+                    <td>{restaurant.address}</td>
+                  </tr>
+                  <tr style={{ verticalAlign: 'top' }}>
+                    <td><strong>Phone:</strong></td>
+                    <td>{restaurant.phone}</td>
+                  </tr>
+                  <tr style={{ verticalAlign: 'top' }}>
+                    <td><strong>Cuisine:</strong></td>
+                    <td>{restaurant.cuisine}</td>
+                  </tr>
+                  <tr style={{ verticalAlign: 'top' }}>
+                    <td><strong>Cost Rating:</strong></td>
+                    <td>{restaurant.costRating}</td>
+                  </tr>
+                  <tr style={{ verticalAlign: 'top' }}>
+                    <td><strong>Capacity:</strong></td>
+                    <td>{restaurant.capacity}</td>
+                  </tr>
+                </tbody>
+              </table>
               {restaurant.imageUrls?.[0] && (
                 <img
                   src={restaurant.imageUrls[0]}
@@ -299,9 +321,10 @@ const RestaurantProfile = () => {
               )}
               <button
                 className="edit-btn"
+                style={{ width: '100%' }}
                 onClick={() => {
-                  setEditingIndex(index);
-                  setNewRestaurant({
+                setEditingIndex(index);
+                setNewRestaurant({
                     id: restaurant.id,
                     name: restaurant.name,
                     description: restaurant.description,
