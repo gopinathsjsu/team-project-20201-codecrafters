@@ -38,8 +38,9 @@ const SearchComponent = ({ horizontal = false, showSearch = true }) => {
     setReservationTime(localTime);
   }, []);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  const handleSubmit = (e) => {
+  e.preventDefault();
+  if (showSearch) {
     setSearchTerm(currentTerm);
     navigate("/search", {
       state: {
@@ -48,14 +49,16 @@ const SearchComponent = ({ horizontal = false, showSearch = true }) => {
         numberOfGuests,
       },
     });
-  };
+  }
+};
+
 
   return (
     <form
       className={`reservation-form ${
         horizontal ? "reservation-form-horizontal" : ""
       }`}
-      onSubmit={handleSearch}
+      onSubmit={handleSubmit}
     >
       <div className="reservation-input-group">
         <input

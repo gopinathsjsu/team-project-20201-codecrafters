@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { ReservationContext } from "../context/ReservationContext";
+import { ReservationContext } from "../context/ReservationContext"; 
 
 const TimeSlotsComponent = ({
   timeSlots = [],
@@ -8,46 +8,26 @@ const TimeSlotsComponent = ({
   address = "",
   id = "",
   hours = {},
+  reservationDate,
 }) => {
   const navigate = useNavigate();
-  const { setReservationTime } = useContext(ReservationContext);
+  const { setReservationTime, reservationTime } =
+    useContext(ReservationContext);
 
-  // Helper function to convert any date to Pacific Time
   const toPacificTime = (date) => {
     return new Date(
       date.toLocaleString("en-US", { timeZone: "America/Los_Angeles" })
     );
   };
 
-  // Check if restaurant is open today
-  const isRestaurantOpen = () => {
-    const pacificNow = toPacificTime(new Date());
-
-    const days = [
-      "SUNDAY",
-      "MONDAY",
-      "TUESDAY",
-      "WEDNESDAY",
-      "THURSDAY",
-      "FRIDAY",
-      "SATURDAY",
-    ];
-    const today = days[pacificNow.getDay()];
-
-    // Check if hours exist for today
-    if (!hours || !hours[today] || !hours[today].start || !hours[today].end) {
-      return false; // Closed if no hours defined
-    }
-
-    return true;
+  const getPacificDate = () => {
+    if (!reservationDate) return toPacificTime(new Date());
+    const localDate = new Date(reservationDate + "T00:00:00");
+    return toPacificTime(localDate);
   };
 
-  // Check if a time slot is within operating hours
-  const isTimeSlotAvailable = (timeSlot) => {
-    // Get current date in Pacific time
-    const pacificNow = toPacificTime(new Date());
-
-    // Get day of week as string (e.g., "MONDAY")
+  const isRestaurantOpen = () => {
+    const pacificDate = getPacificDate();
     const days = [
       "SUNDAY",
       "MONDAY",
@@ -57,48 +37,57 @@ const TimeSlotsComponent = ({
       "FRIDAY",
       "SATURDAY",
     ];
-    const today = days[pacificNow.getDay()];
+    const today = days[pacificDate.getDay()];
 
-    // Check if hours exist for today
+    return !!(hours && hours[today] && hours[today].start && hours[today].end);
+  };
+
+  const isTimeSlotAvailable = (timeSlot) => {
+    const pacificDate = getPacificDate();
+    const now = toPacificTime(new Date());
+
+    const days = [
+      "SUNDAY",
+      "MONDAY",
+      "TUESDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "FRIDAY",
+      "SATURDAY",
+    ];
+    const today = days[pacificDate.getDay()];
+
     if (!hours || !hours[today] || !hours[today].start || !hours[today].end) {
-      return false; // Closed if no hours defined
+      return false;
     }
 
-    // Parse time slot (e.g., "7:30 PM")
-    const [time, period] = timeSlot.split(" ");
-    let [slotHours, slotMinutes] = time.split(":").map(Number);
-
-    // Convert to 24-hour format
-    if (period === "PM" && slotHours !== 12) {
-      slotHours += 12;
-    } else if (period === "AM" && slotHours === 12) {
-      slotHours = 0;
-    }
-
-    // Parse operating hours
     const [openHours, openMinutes] = hours[today].start.split(":").map(Number);
     const [closeHours, closeMinutes] = hours[today].end.split(":").map(Number);
 
-    // Convert all to minutes for comparison
-    const slotTimeInMinutes = slotHours * 60 + slotMinutes;
-    const openTimeInMinutes = openHours * 60 + openMinutes;
-    const closeTimeInMinutes = closeHours * 60 + closeMinutes;
+    const [time, period] = timeSlot.split(" ");
+    let [slotHours, slotMinutes] = time.split(":").map(Number);
+    if (period === "PM" && slotHours !== 12) slotHours += 12;
+    else if (period === "AM" && slotHours === 12) slotHours = 0;
 
-    // Check if time slot is within operating hours
-    // Allow slots up to 1 hour before closing
+    const slotTime = new Date(pacificDate);
+    slotTime.setHours(slotHours, slotMinutes, 0, 0);
+
+    const openTime = new Date(pacificDate);
+    openTime.setHours(openHours, openMinutes, 0, 0);
+
+    const closeTime = new Date(pacificDate);
+    closeTime.setHours(closeHours, closeMinutes, 0, 0);
+
     return (
-      slotTimeInMinutes >= openTimeInMinutes &&
-      slotTimeInMinutes <= closeTimeInMinutes - 60
+      slotTime >= openTime &&
+      slotTime <= new Date(closeTime.getTime() - 60 * 60 * 1000) &&
+      slotTime >= now
     );
   };
 
   const handleReservation = (timeString, event) => {
-    // Stop event propagation to prevent parent onClick handlers from firing
-    if (event) {
-      event.stopPropagation();
-    }
+    if (event) event.stopPropagation();
 
-    // Parse the time string into 24-hour format
     const [time, modifier] = timeString.split(" ");
     let [hours, minutes] = time.split(":");
 
@@ -108,12 +97,10 @@ const TimeSlotsComponent = ({
       hours = "00";
     }
 
-    // Ensure hours and minutes are properly formatted
     hours = String(hours).padStart(2, "0");
-
     const formattedTime = `${hours}:${minutes}`;
 
-    setReservationTime(formattedTime); // Set the time in 24-hour format
+    setReservationTime(formattedTime);
     navigate("/booking", {
       state: {
         name,
@@ -124,28 +111,32 @@ const TimeSlotsComponent = ({
     });
   };
 
-  // Generate default time slots when none are provided
   const generateDefaultTimeSlots = () => {
-    // Get current time in Pacific Time
-    const now = new Date();
-    const pacificNow = toPacificTime(now);
+    const pacificDate = getPacificDate();
+    const now = toPacificTime(new Date());
 
-    const currentHour = pacificNow.getHours();
-    const currentMinute = pacificNow.getMinutes();
+    let [hour, minute] = reservationTime
+      ? reservationTime.split(":").map(Number)
+      : [pacificDate.getHours(), pacificDate.getMinutes()];
 
-    // Round up to next 30-minute interval
-    const minutesToAdd = (30 - (currentMinute % 30)) % 30;
-    const baseTime = new Date(pacificNow);
-    baseTime.setMinutes(currentMinute + minutesToAdd);
-    if (minutesToAdd === 0) {
-      // If we're exactly on a 30-minute mark, add 30 minutes
-      baseTime.setMinutes(baseTime.getMinutes() + 30);
+    const baseTime = new Date(pacificDate);
+    baseTime.setHours(hour, minute, 0, 0);
+
+    const roundedTime = new Date(baseTime);
+    const remainder = roundedTime.getMinutes() % 30;
+    if (remainder !== 0) {
+      roundedTime.setMinutes(roundedTime.getMinutes() + (30 - remainder));
     }
 
-    const timeSlots = [];
-    for (let i = 0; i < 3; i++) {
-      const slotTime = new Date(baseTime);
-      slotTime.setMinutes(baseTime.getMinutes() + i * 30);
+    const slots = [];
+    let count = 0;
+    let i = 0;
+
+    while (count < 3 && i < 20) {
+      const slotTime = new Date(roundedTime.getTime() + i * 30 * 60000);
+      i++;
+
+      if (slotTime < now) continue;
 
       const formattedTime = slotTime.toLocaleTimeString("en-US", {
         hour: "numeric",
@@ -154,20 +145,21 @@ const TimeSlotsComponent = ({
         timeZone: "America/Los_Angeles",
       });
 
-      timeSlots.push(formattedTime);
+      if (isTimeSlotAvailable(formattedTime)) {
+        slots.push(formattedTime);
+        count++;
+      }
     }
 
-    return timeSlots;
+    return slots;
   };
 
-  // Get all available time slots
   const availableTimeSlots = isRestaurantOpen()
-    ? (timeSlots.length > 0 ? timeSlots : generateDefaultTimeSlots()).filter(
-        isTimeSlotAvailable
-      )
+    ? (timeSlots.length > 0 ? timeSlots : generateDefaultTimeSlots())
+        .filter(isTimeSlotAvailable)
+        .slice(0, 3)
     : [];
 
-  // Check if restaurant is closed (no available time slots)
   const isClosed = availableTimeSlots.length === 0;
 
   return (
