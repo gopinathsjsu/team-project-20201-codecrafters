@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/Sidebar.module.css";
 import SidebarNavItem from "./SidebarNavItem";
+import { useAuth } from "../context/AuthContext";
 
 
 
