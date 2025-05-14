@@ -107,50 +107,77 @@ const SearchResultsPage = () => {
           bookedTimes: bookedCountMap[restaurant.id] || 0,
         }));
 
-        if (!searchTerm || searchTerm.trim() === "") {
-          setRestaurants(restaurantsWithBookings);
-          setFilteredRestaurants(restaurantsWithBookings);
-          return;
-        }
-
-        const searchTermLower = searchTerm.toLowerCase();
-
-        const sortedRestaurants = restaurantsWithBookings.sort((a, b) => {
-          let aScore = 0;
-          const aNameLower = a.name?.toLowerCase() || "";
-          const aCuisineLower = a.cuisine?.toLowerCase() || "";
-
-          if (aNameLower === searchTermLower) aScore = 100;
-          else if (aNameLower.startsWith(searchTermLower)) aScore = 75;
-          else if (aNameLower.includes(searchTermLower)) aScore = 50;
-          else if (aCuisineLower.includes(searchTermLower)) aScore = 25;
-
-          let bScore = 0;
-          const bNameLower = b.name?.toLowerCase() || "";
-          const bCuisineLower = b.cuisine?.toLowerCase() || "";
-
-          if (bNameLower === searchTermLower) bScore = 100;
-          else if (bNameLower.startsWith(searchTermLower)) bScore = 75;
-          else if (bNameLower.includes(searchTermLower)) bScore = 50;
-          else if (bCuisineLower.includes(searchTermLower)) bScore = 25;
-
-          if (aScore !== bScore) {
-            return bScore - aScore;
-          }
-          return aNameLower.localeCompare(bNameLower);
-        });
-
-        setRestaurants(sortedRestaurants);
-        setFilteredRestaurants(sortedRestaurants);
+        setRestaurants(restaurantsWithBookings);
+        setFilteredRestaurants(restaurantsWithBookings);
       }
     };
 
     processRestaurantsWithBookings();
-  }, [allRestaurants, searchTerm]);
+  }, [allRestaurants]);
 
   // Apply filters function
   const applyFilters = () => {
     let filtered = [...restaurants];
+
+    if (searchTerm && searchTerm.trim() !== "") {
+      const searchTermLower = searchTerm.toLowerCase();
+      filtered = filtered.filter((restaurant) => {
+        const name = restaurant.name?.toLowerCase() || "";
+        const cuisine = restaurant.cuisine?.toLowerCase() || "";
+        const address = restaurant.address?.toLowerCase() || "";
+        const city = restaurant.city?.toLowerCase() || "";
+        const state = restaurant.state?.toLowerCase() || "";
+        const zip = restaurant.zip?.toLowerCase() || "";
+        const description = restaurant.description?.toLowerCase() || "";
+
+        return (
+          name.includes(searchTermLower) ||
+          cuisine.includes(searchTermLower) ||
+          address.includes(searchTermLower) ||
+          city.includes(searchTermLower) ||
+          state.includes(searchTermLower) ||
+          zip.includes(searchTermLower) ||
+          description.includes(searchTermLower)
+        );
+      });
+
+      // Sort strictly by: name > cuisine > other fields
+      filtered = filtered.sort((a, b) => {
+        const aName = a.name?.toLowerCase() || "";
+        const aCuisine = a.cuisine?.toLowerCase() || "";
+        const bName = b.name?.toLowerCase() || "";
+        const bCuisine = b.cuisine?.toLowerCase() || "";
+
+        // Helper to get match priority
+        function getPriority(r) {
+          const name = r.name?.toLowerCase() || "";
+          const cuisine = r.cuisine?.toLowerCase() || "";
+          const address = r.address?.toLowerCase() || "";
+          const city = r.city?.toLowerCase() || "";
+          const state = r.state?.toLowerCase() || "";
+          const zip = r.zip?.toLowerCase() || "";
+          const description = r.description?.toLowerCase() || "";
+          if (name.includes(searchTermLower)) return 3;
+          if (cuisine.includes(searchTermLower)) return 2;
+          if (
+            address.includes(searchTermLower) ||
+            city.includes(searchTermLower) ||
+            state.includes(searchTermLower) ||
+            zip.includes(searchTermLower) ||
+            description.includes(searchTermLower)
+          )
+            return 1;
+          return 0;
+        }
+        const aPriority = getPriority(a);
+        const bPriority = getPriority(b);
+        if (aPriority !== bPriority) {
+          return bPriority - aPriority;
+        }
+        // If same priority, sort alphabetically by name
+        return aName.localeCompare(bName);
+      });
+    }
 
     if (selectedCuisines.length > 0) {
       filtered = filtered.filter((restaurant) =>
