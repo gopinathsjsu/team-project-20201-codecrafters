@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import "../styles/LoginSignup.css";
 import { BASE_URL } from "../config/api";
+import { useAuth } from "../context/AuthContext";
 
 function LoginForm() {
   const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [previousPage, setPreviousPage] = useState("/");
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,6 +61,7 @@ function LoginForm() {
     setError("");
 
     try {
+      /*
       const response = await axios.post(
         `${BASE_URL}/login`,
         {
@@ -80,21 +83,9 @@ function LoginForm() {
         refreshToken,
         role,
       };
-      console.log("Login response:", response.data);
-      console.log("User object:", user);
-      // Store token and user info based on rememberMe preference
-      const storage = rememberMe ? localStorage : sessionStorage;
-      storage.setItem("authToken", user.accessToken);
-      storage.setItem("user", JSON.stringify(user));
-      const token =
-        localStorage.getItem("authToken") ||
-        sessionStorage.getItem("authToken");
-      console.log("Retrieved token:", token);
-      // Set default authorization header for future requests
-      axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-
-      // Add this after setting the user in storage
-      console.log("User role type:", typeof user.role, "Value:", user.role);
+      */
+      
+      const user = await login(formData.email, formData.password, rememberMe)
 
       // More detailed inspection to understand the role format
       console.log("Role inspection:", {
@@ -171,6 +162,7 @@ function LoginForm() {
       }
 
       // Force navigation if react-router navigate doesn't work
+      /*
       setTimeout(() => {
         console.log("Checking if navigation occurred...");
 
@@ -183,7 +175,9 @@ function LoginForm() {
           window.location.href = "/manager/dashboard";
         }
       }, 1000);
+      */
     } catch (err) {
+      console.log('error', err)
       let errorMessage = "Login failed. Please check your credentials.";
 
       if (err.response) {

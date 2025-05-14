@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 const ProtectedRoute = ({ children, role }) => {
   const { isAuthenticated, hasRole, loading } = useAuth();
 
+  console.log('useAuth', useAuth())
+
   // Show loading state while checking authentication
   if (loading) {
     return <div>Loading...</div>;
@@ -16,6 +18,7 @@ const ProtectedRoute = ({ children, role }) => {
 
   // If role is specified and user doesn't have that role, redirect to home
   if (role && !hasRole(role)) {
+    console.log('no role?')
     return <Navigate to="/" />;
   }
 
